@@ -2,31 +2,32 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { faker } from "@faker-js/faker";
 import "react-calendar/dist/Calendar.css";
-
-const generateFakeJobs = () => {
-  return Array.from({ length: 50 }, () => ({
-    id: faker.string.uuid(),
-    date: faker.date.between({ from: "2024-01-01", to: "2024-12-31" }).toISOString().split("T")[0],
-    status: faker.helpers.arrayElement(["Completed", "Ongoing", "Pending"]),
-  }));
-};
 
 export default function TimeSheetJob() {
   const [date, setDate] = useState(new Date());
-  const [jobData, setJobData] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
 
   useEffect(() => {
-    setJobData(generateFakeJobs());
-  }, []);
+    const fetchJobs = async () => {
+      try {
+        const selectedDate = date.toISOString().split("T")[0];
+        const response = await fetch(`/api/timeSheetJob?date=${selectedDate}`);
+        const data = await response.json();
 
-  useEffect(() => {
-    const selectedDate = date.toISOString().split("T")[0];
-    const jobsForSelectedDate = jobData.filter((job) => job.date === selectedDate);
-    setFilteredJobs(jobsForSelectedDate);
-  }, [date, jobData]);
+        if (!response.ok) {
+          console.error("Failed to fetch jobs:", data.error);
+          return;
+        }
+
+        setFilteredJobs(data);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+
+    fetchJobs();
+  }, [date]);
 
   const statusCounts = {
     Completed: filteredJobs.filter((job) => job.status === "Completed").length,
@@ -75,8 +76,8 @@ export default function TimeSheetJob() {
         {filteredJobs.length > 0 ? (
           <ul className="space-y-3">
             {filteredJobs.map((job) => (
-              <li key={job.id} className="bg-white p-3 rounded-lg shadow text-gray-700">
-                <span className="font-semibold">{job.status}</span> - Job ID: {job.id}
+              <li key={job._id} className="bg-white p-3 rounded-lg shadow text-gray-700">
+                <span className="font-semibold">{job.status}</span> - Job ID: {job._id}
               </li>
             ))}
           </ul>
