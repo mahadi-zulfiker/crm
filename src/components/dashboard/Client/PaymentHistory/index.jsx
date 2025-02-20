@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+'use client';
 
-const paymentHistoryData = [
-    { id: 1, date: '2025-01-15', description: 'Subscription Renewal', amount: '$50.00', status: 'Completed' },
-    { id: 2, date: '2025-01-10', description: 'Purchase: Office Supplies', amount: '$150.75', status: 'Completed' },
-    { id: 3, date: '2025-01-05', description: 'Refund: Product A', amount: '-$25.00', status: 'Refunded' },
-];
+import React, { useState, useEffect } from 'react';
 
 function PaymentHistory() {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [payments, setPayments] = useState([]);
     const paymentsPerPage = 5;
 
-    const filteredPayments = paymentHistoryData.filter(payment =>
-        payment.description.toLowerCase().includes(searchTerm.toLowerCase())
+    useEffect(() => {
+        const fetchPayments = async () => {
+            try {
+                const response = await fetch('/api/paymentHistoryClient');
+                const data = await response.json();
+                setPayments(data);
+            } catch (error) {
+                console.error("Failed to fetch payment history", error);
+            }
+        };
+        fetchPayments();
+    }, []);
+
+    const filteredPayments = payments.filter(payment =>
+        payment.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const indexOfLastPayment = currentPage * paymentsPerPage;
@@ -46,19 +56,19 @@ function PaymentHistory() {
                 <table className="w-full border border-gray-300 shadow-lg rounded-lg">
                     <thead>
                         <tr className="bg-orange-800 text-white">
-                            <th className="p-3 text-left">Date</th>
-                            <th className="p-3 text-left">Description</th>
-                            <th className="p-3 text-left">Amount</th>
-                            <th className="p-3 text-left">Status</th>
+                            <th className="p-3 text-left">Job Title</th>
+                            <th className="p-3 text-left">Company</th>
+                            <th className="p-3 text-left">Payment</th>
+                            <th className="p-3 text-left">Deadline</th>
                         </tr>
                     </thead>
                     <tbody>
                         {currentPayments.map((payment) => (
-                            <tr key={payment.id} className="border-b border-gray-300 hover:bg-gray-100">
-                                <td className="p-3">{payment.date}</td>
-                                <td className="p-3">{payment.description}</td>
-                                <td className="p-3">{payment.amount}</td>
-                                <td className="p-3 font-semibold text-green-600">{payment.status}</td>
+                            <tr key={payment._id} className="border-b border-gray-300 hover:bg-gray-100">
+                                <td className="p-3">{payment.title}</td>
+                                <td className="p-3">{payment.company}</td>
+                                <td className="p-3">${payment.payment}</td>
+                                <td className="p-3">{payment.deadline}</td>
                             </tr>
                         ))}
                     </tbody>
