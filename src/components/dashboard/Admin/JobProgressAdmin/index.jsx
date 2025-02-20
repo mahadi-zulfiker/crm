@@ -11,7 +11,7 @@ function JobProgressAdmin() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch("/api/jobProgressAdmin");
+        const response = await fetch("/api/jobProgress");
         const data = await response.json();
         setJobs(data);
       } catch (error) {
