@@ -70,7 +70,7 @@ export default function JobApplyManagement() {
           <tbody>
             {appliedJobs.map((job) => (
               <tr key={job._id} className="border-b border-gray-200 text-center hover:bg-gray-100">
-                <td className="border border-gray-300 p-3">{job.jobReference}</td>
+                <td className="border border-gray-300 p-3">{job.title}</td>
                 <td className={`border border-gray-300 p-3 font-semibold ${job.status === "Approved" ? "text-green-600" : "text-yellow-600"}`}>
                   {job.status}
                 </td>
