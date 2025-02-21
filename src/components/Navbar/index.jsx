@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FaEnvelope, FaPhoneAlt, FaBars, FaTimes } from "react-icons/fa";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
-import logo from "../../../public/drWhiteLogo.png"
+import logo from "../../../public/drWhiteLogo.png";
 
 const Navbar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -97,6 +97,8 @@ const Navbar = () => {
                         <a href="/projects" className="hover:text-gray-400 transition">Projects</a>
                         <a href="/FAQ" className="hover:text-gray-400 transition">FAQ</a>
                         <a href="/scheduleMeet" className="hover:text-gray-400 transition">Schedule A Meeting</a>
+                        {userType === "vendor" && <a href="/accountApprovalVendor" className="hover:text-gray-400 transition">Approval Vendor</a>}
+                        {userType === "employee" && <a href="/accountApprovalEmployee" className="hover:text-gray-400 transition">Approval Employee</a>}
                         <a href="/aboutUs" className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">About us</a>
                     </div>
 
@@ -126,12 +128,9 @@ const Navbar = () => {
                                 <a href="/projects" className="text-lg hover:text-gray-400 transition">Projects</a>
                                 <a href="/FAQ" className="text-lg hover:text-gray-400 transition">FAQ</a>
                                 <a href="/scheduleMeet" className="text-lg hover:text-gray-400 transition">Schedule A Meeting</a>
+                                {userType === "vendor" && <a href="/accountApprovalVendor" className="text-lg hover:text-gray-400 transition">Approval Vendor</a>}
+                                {userType === "employee" && <a href="/accountApprovalEmployee" className="text-lg hover:text-gray-400 transition">Approval Employee</a>}
                                 <a href="/aboutUs" className="bg-orange-500 hover:bg-orange-600 text-white text-center px-6 py-2 rounded-lg transition">About us</a>
-                                {status === "authenticated" && (
-                                    <button onClick={goToDashboard} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition text-center">
-                                        Dashboard
-                                    </button>
-                                )}
                             </div>
                         </div>
                     </>
