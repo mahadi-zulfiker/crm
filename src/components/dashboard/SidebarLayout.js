@@ -56,6 +56,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           icon: <MdLibraryBooks className="text-2xl mr-2" />, 
           label: "View Resume",
         },
+        {
+          href: "/dashboard/vendor/vendorProfileManagement",
+          icon: <MdPerson className="text-2xl mr-2" />, 
+          label: "Profile Management",
+        },
       ];
     } else if (pathname.startsWith("/dashboard/client")) {
       return [
@@ -89,6 +94,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           href: "/dashboard/client/jobHistoryReports",
           icon: <MdHistory className="text-2xl mr-2" />, 
           label: "Job History & Reports",
+        },
+        {
+          href: "/dashboard/client/clientProfileManagement",
+          icon: <MdPerson className="text-2xl mr-2" />, 
+          label: "Profile Management",
         },
       ];
     } else if (pathname.startsWith("/dashboard/admin")) {
@@ -143,6 +153,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           href: "/dashboard/admin/timeSheetJob",
           icon: <AiOutlineFieldTime className="text-2xl mr-2" />, 
           label: "Time Sheet Jobs",
+        },
+        {
+          href: "/dashboard/admin/adminProfileManagement",
+          icon: <MdPerson className="text-2xl mr-2" />, 
+          label: "Profile Management",
         },
       ];
     } else if (pathname.startsWith("/dashboard/employee")) {

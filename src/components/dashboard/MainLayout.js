@@ -36,6 +36,9 @@ import JobProgressAdmin from "./Admin/JobProgressAdmin";
 import CreateJobCategory from "./Admin/CreateJobCategory";
 import ApplicationManagementE from "./Admin/ApplicationManagementE";
 import TimeSheetJob from "./Admin/TimeSheetJob";
+import AdminProfileManagement from "./Admin/AdminProfileManagement";
+import VendorProfileManagement from "./Vendor/VendorProfileManagement";
+import ClientProfileManagement from "./Client/ClientProfileManagement";
 
 
 const MainLayout = () => {
@@ -77,6 +80,7 @@ const MainLayout = () => {
             {pathname === "/dashboard/client/jobManagementClient" && <JobManagementClient />}
             {pathname === "/dashboard/client/vendorInteraction" && <VendorInteraction />}
             {pathname === "/dashboard/client/jobHistoryReports" && <JobHistoryReports />}
+            {pathname === "/dashboard/client/clientProfileManagement" && <ClientProfileManagement />}
 
             {pathname === "/dashboard/vendor" && <Vendor />}
             {pathname === "/dashboard/vendor/jobManagementVendor" && <JobManagementVendor />}
@@ -85,6 +89,7 @@ const MainLayout = () => {
             {pathname === "/dashboard/vendor/meeting" && <Meeting />}
             {pathname === "/dashboard/vendor/jobProgressVendor" && <JobProgressVendor />}
             {pathname === "/dashboard/vendor/viewResumeVendor" && <ViewResumeVendor />}
+            {pathname === "/dashboard/vendor/vendorProfileManagement" && <VendorProfileManagement />}
 
             {pathname === "/dashboard/admin" && <Admin />}
             {pathname === "/dashboard/admin/userManagement" && <UserManagement />}
@@ -97,6 +102,7 @@ const MainLayout = () => {
             {pathname === "/dashboard/admin/createJobCategory" && <CreateJobCategory />}
             {pathname === "/dashboard/admin/applicationManagementE" && <ApplicationManagementE />}
             {pathname === "/dashboard/admin/timeSheetJob" && <TimeSheetJob />}
+            {pathname === "/dashboard/admin/adminProfileManagement" && <AdminProfileManagement />}
 
             {pathname === "/dashboard/employee" && <Employee />}
             {pathname === "/dashboard/employee/appliedJobs" && <AppliedJobs />}
