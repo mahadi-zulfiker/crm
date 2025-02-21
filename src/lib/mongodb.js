@@ -21,7 +21,7 @@ clientPromise = global._mongoClientPromise;
 export async function connectMongoDB() {
   try {
     const client = await clientPromise;
-    const db = client.db("test");  // ⚠️ Add the correct database name
+    const db = client.db("test");
     return db;
   } catch (error) {
     console.error("MongoDB Connection Error:", error);
