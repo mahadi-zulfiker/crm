@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 
 const AccountApprovalEmployee = () => {
-    const { data: session } = useSession(); // Get user session
+    const { data: session } = useSession();
     const [formData, setFormData] = useState({
         email: "",
         certification: "",
@@ -15,7 +15,6 @@ const AccountApprovalEmployee = () => {
     });
     const [message, setMessage] = useState("");
 
-    // Set the email from the session when it loads
     useEffect(() => {
         if (session?.user?.email) {
             setFormData((prevData) => ({ ...prevData, email: session.user.email }));

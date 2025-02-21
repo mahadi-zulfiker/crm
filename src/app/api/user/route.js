@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 
 export async function PUT(req) {
   try {
-    const { email, certification, skills, lastCompany, status } = await req.json();
+    const { email, status, ...rest } = await req.json();
+    
     if (!email || !status) {
       return NextResponse.json({ success: false, message: "Email and status are required" }, { status: 400 });
     }
@@ -15,10 +16,10 @@ export async function PUT(req) {
       return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
     }
 
-    const result = await db.collection("users").updateOne(
-      { email },
-      { $set: { certification, skills, lastCompany, status: "approved" } }
-    );
+    // Merge updated fields dynamically (handles both employee & vendor)
+    const updateFields = { status: "approved", ...rest };
+
+    const result = await db.collection("users").updateOne({ email }, { $set: updateFields });
 
     if (result.modifiedCount === 0) {
       return NextResponse.json({ success: false, message: "Data unchanged" }, { status: 400 });
