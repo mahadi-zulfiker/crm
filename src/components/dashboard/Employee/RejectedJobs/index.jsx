@@ -48,7 +48,6 @@ function RejectedJobs() {
                             <th className="p-3 text-left">Full Name</th>
                             <th className="p-3 text-left">Email</th>
                             <th className="p-3 text-left">Phone</th>
-                            <th className="p-3 text-left">Resume</th>
                             <th className="p-3 text-left">Cover Letter</th>
                             <th className="p-3 text-left">Applied At</th>
                             <th className="p-3 text-left">Reason</th>
@@ -61,11 +60,6 @@ function RejectedJobs() {
                                     <td className="p-3">{job.fullName}</td>
                                     <td className="p-3">{job.email}</td>
                                     <td className="p-3">{job.phone}</td>
-                                    <td className="p-3">
-                                        <a href={`/uploads/${job.resume}`} target="_blank" className="text-blue-500 underline">
-                                            View Resume
-                                        </a>
-                                    </td>
                                     <td className="p-3">{job.coverLetter}</td>
                                     <td className="p-3">{new Date(job.appliedAt).toLocaleDateString()}</td>
                                     <td className="p-3">{job.reason || "N/A"}</td>
@@ -73,7 +67,7 @@ function RejectedJobs() {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="7" className="p-3 text-center text-gray-500">No rejected jobs found</td>
+                                <td colSpan="6" className="p-3 text-center text-gray-500">No rejected jobs found</td>
                             </tr>
                         )}
                     </tbody>

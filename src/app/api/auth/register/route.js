@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 export async function POST(req) {
   try {
-    console.log("➡️ Register API Called"); // Debugging log
+    console.log("➡️ Register API Called");
 
     const body = await req.json();
     console.log("📩 Received data:", body);
