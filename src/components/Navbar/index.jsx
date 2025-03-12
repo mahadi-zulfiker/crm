@@ -272,7 +272,7 @@ const Navbar = () => {
                                     </div>
                                 </div>
 
-                                <Link href="/jobSearch" className="text-lg hover:text-gray-400 transition">Job Search</Link>
+                                <Link href="/allJobs" className="text-lg hover:text-gray-400 transition">Job Search</Link>
                                 <Link href="/aboutUs" className="bg-orange-500 hover:bg-orange-600 text-white text-center px-6 py-2 rounded-lg transition">About Us</Link>
                                 <Link href="/contactUs" className="text-lg hover:text-gray-400 transition">Contact Us</Link>
                             </div>
