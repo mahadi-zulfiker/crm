@@ -114,7 +114,7 @@ const Navbar = () => {
                                 Our Services ▼
                             </button>
                         </div>
-                        <Link href="/alljobs" className="hover:text-gray-400 transition">Job Search</Link>
+                        <Link href="/allJobs" className="hover:text-gray-400 transition">Job Search</Link>
                         <Link href="/contactUs" className="hover:text-gray-400 transition">Contact Us</Link>
                         <Link href="/aboutUs" className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">About Us</Link>
                     </div>
@@ -238,7 +238,7 @@ const Navbar = () => {
                     <i className="fas fa-building mr-2"></i> <span className="text-gray-900 font-bold">Workplace & Office Support</span>
                     <ul className="ml-4 mt-2 space-y-2">
                         <li><Link href="/officeSpacePlanning"><i className="fas fa-check-circle mr-2"></i> Office Space Planning & Setup</Link></li>
-                        <li><Link href="/cleaningServices"><i className="fas fa-check-circle mr-2"></i> Cleaning & Sanitization Services</Link></li>
+                        <li><Link href="/cleaningServices"><i className="fas fa-check-circle mr-2"></i> Cleaning & Sanitization Services</Link></li>    
                     </ul>
                 </li>
             </ul>
