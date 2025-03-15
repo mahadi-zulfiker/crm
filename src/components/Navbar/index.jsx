@@ -65,7 +65,7 @@ const Navbar = () => {
         <div>
             {/* Top Navbar */}
             <div className="bg-gray-700 text-white text-sm py-3 px-6 flex flex-col md:flex-row items-center justify-between">
-                <div className="flex items-center space-x-4 mb-2 md:mb-0">
+                <div className="flex flex-col md:flex-row items-center space-x-4 mb-2 md:mb-0">
                     <div className="flex items-center space-x-1">
                         <FaEnvelope className="text-yellow-400" />
                         <span>info@demandrecruitmentservices.co.uk</span>
@@ -78,6 +78,8 @@ const Navbar = () => {
                 <div className="flex space-x-6">
                     {status === "authenticated" ? (
                         <>
+                            <Link href="/ourSupport">Our Support</Link>
+                            <Link href="/socialValue">Social Value</Link>
                             <button onClick={goToDashboard} className="hover:text-yellow-400 transition">
                                 Dashboard
                             </button>
@@ -87,14 +89,13 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
+                            <Link href="/ourSupport">Our Support</Link>
+                            <Link href="/socialValue">Social Value</Link>
                             <Link href="/signUp" className="hover:text-yellow-400 transition">
                                 Become a vendor
                             </Link>
                             <Link href="/signIn" className="hover:text-yellow-400 transition">
                                 Login
-                            </Link>
-                            <Link href="/signUp" className="hover:text-yellow-400 transition">
-                                Register
                             </Link>
                         </>
                     )}
@@ -177,20 +178,37 @@ const Navbar = () => {
                                 <Link href="/" className="text-lg hover:text-gray-400 transition">Home</Link>
 
                                 {/* Services Dropdown */}
-                                <div className="relative">
-                                    <button className="text-lg hover:text-gray-400 transition flex items-center">
-                                        Our Services ▼
+                                <div>
+                                    <button className="text-lg flex justify-between w-full hover:text-gray-400 transition" onClick={() => setIsServicesMenuOpen(!isServicesMenuOpen)}>
+                                        Our Services {isServicesMenuOpen ? "▲" : "▼"}
                                     </button>
-                                    <div className="ml-4 mt-2 space-y-2">
-                                        <Link href="/services/recruitment" className="block text-gray-300 hover:text-[#EA580C]">Recruitment Service</Link>
-                                        <Link href="/services/community" className="block text-gray-300 hover:text-[#EA580C]">Community Services</Link>
-                                        <Link href="/services/facility" className="block text-gray-300 hover:text-[#EA580C]">Facility Management</Link>
-                                    </div>
+                                    {isServicesMenuOpen && (
+                                        <div className="ml-4 mt-2 space-y-2">
+                                            <Link href="/recruitment" className="block text-gray-300 hover:text-[#EA580C]">Recruitment Services</Link>
+                                            <Link href="/communityService" className="block text-gray-300 hover:text-[#EA580C]">Community Services</Link>
+                                            <Link href="/facilityService" className="block text-gray-300 hover:text-[#EA580C]">Facility Management</Link>
+                                        </div>
+                                    )}
                                 </div>
 
-                                <Link href="/jobSearch" className="text-lg hover:text-gray-400 transition">Job Search</Link>
-                                <Link href="/aboutUs" className="bg-orange-500 hover:bg-orange-600 text-white text-center px-6 py-2 rounded-lg transition">About Us</Link>
+                                {/* Insights Dropdown */}
+                                <div>
+                                    <button className="text-lg flex justify-between w-full hover:text-gray-400 transition" onClick={() => setIsInsightsMenuOpen(!isInsightsMenuOpen)}>
+                                        Insights {isInsightsMenuOpen ? "▲" : "▼"}
+                                    </button>
+                                    {isInsightsMenuOpen && (
+                                        <div className="ml-4 mt-2 space-y-2">
+                                            <Link href="/employerResource" className="block text-gray-300 hover:text-[#EA580C]">Employer Resource</Link>
+                                            <Link href="/jobSeekerResource" className="block text-gray-300 hover:text-[#EA580C]">Job Seeker Resource</Link>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <Link href="/allJobs" className="text-lg hover:text-gray-400 transition">Find a Job</Link>
                                 <Link href="/contactUs" className="text-lg hover:text-gray-400 transition">Contact Us</Link>
+                                <Link href="/aboutUs" className="text-lg hover:text-gray-400 transition">About Us</Link>
+                                <Link href="/employer" className="text-lg hover:text-gray-400 transition">Employer</Link>
+                                <Link href="/employees" className="text-lg hover:text-gray-400 transition">Employee</Link>
                             </div>
                         </div>
                     </>
