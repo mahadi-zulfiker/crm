@@ -96,17 +96,17 @@ function ContactUs() {
                                         info@demandrecruitmentservices.co.uk
                                     </a>
                                 </div>
-                                <div className="flex items-center space-x-4">
+                                <div className="flex flex-col">
                                     <p className="text-orange-500 text-xl font-bold">Operating Address:</p>
                                     <p className="text-lg">Demand Recruitment Services Ltd, First Floor Office 3, Ealing House, 33 Hanger Lane, London - W5 3HJ</p>
                                 </div>
-                                <div className="flex items-center space-x-4">
+                                <div className="flex flex-col">
                                     <p className="text-orange-500 text-xl font-bold">Registered Office Address:</p>
                                     <p className="text-lg">Demand Recruitment Services Ltd
                                         20-22 Wenlock Road ,  London England - N1 7GU
                                     </p>
                                 </div>
-                                <div className="flex items-center space-x-4">
+                                <div className="flex flex-col">
                                     <p className="text-orange-500 text-xl font-bold">Business Hours:</p>
                                     <p className="text-lg">123 Main Street, City, Country</p>
                                 </div>
