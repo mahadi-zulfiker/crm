@@ -1,4 +1,5 @@
-import React from 'react'
+"use client"
+import React, { useState } from 'react'
 import AboutUs from "@/components/About_Us";
 import Banner from "@/components/Banner";
 import Services from "@/components/Services";
@@ -14,24 +15,33 @@ import Achievements from '@/components/Achievements';
 import SmallMighty from '@/components/SmallMighty';
 import JobSchedule from '@/components/JobSchedule';
 import Chat from '@/components/Chat';
+import Brief from '@/components/Brief';
+import WhatWeOfferSection from '@/components/HomeS';
+import StickyHeader from '@/components/StickyHeader';
+import Clients from '@/components/Clients';
+
 
 function HomePage() {
+  const [headerHeight, setHeaderHeight] = useState(0);
   return (
     <div>
-      <Navbar />
+      <Navbar setHeaderHeight={setHeaderHeight} />
+      <StickyHeader thresholdHeight={headerHeight} />
       <Banner />
-      <AllJobsHomePage />
-      <AboutUs />
-      <BlogsHomePage />
-      <Benefits />
-      <Services />
-      <JobSchedule />
+      <Brief />
+      <Clients />
+      <WhatWeOfferSection />
+      {/* <Services /> */}
+      {/* <BlogsHomePage /> */}
+      {/* <Benefits /> */}
+      {/* <JobSchedule /> */}
+      
       <Achievements />
       <Testimonials />
-      <SmallMighty />
+      {/* <SmallMighty /> */}
       <ContactUsHomePage />
-      <Vendors />
-      <Chat />
+      {/* <Vendors /> */}
+      {/* <Chat /> */}
       <Footer />
     </div>
   )

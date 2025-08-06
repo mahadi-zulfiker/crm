@@ -1,66 +1,108 @@
-import React from "react";
-import "animate.css";
+"use client";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
-const Banner = () => {
+const slides = [
+  {
+    title: "SMARTER STAFFING. BETTER CARE.",
+    subtitle:
+      "Connecting people to purpose-driven careers across healthcare, hospitality, and beyond.",
+    image: "/meddd111.jpg",
+  },
+  {
+    title: "Streamline Recruitment",
+    subtitle: "Simplify your hiring process with ease and efficiency",
+    image: "/services/2.jpg",
+  },
+  {
+    title: "Fuel Your Growth with the Right Talent",
+    subtitle:
+      "Unlock your business potential by connecting with top-tier professionals",
+    image: "/services/3.jpg",
+  },
+];
+
+const BannerSlider = () => {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handlePrev = () => {
+    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const handleNext = () => {
+    setCurrent((prev) => (prev + 1) % slides.length);
+  };
+
   return (
-    <div className="relative w-full h-[100vh]">
-      {/* Background Video */}
-      <video
-        src="/hero.mp4"
-        type="video/mp4"
-        autoPlay
-        loop
-        muted
-        className="absolute inset-0 w-full h-full object-cover opacity-70"
-      />
-      <div className="absolute inset-0 bg-black opacity-60"></div>
-
-      {/* Overlay Content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6 sm:px-8 md:px-12">
-        {/* Title */}
-        <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold animate__animated animate__fadeInDown leading-tight">
-          Find Your Dream Job with Demand Recruitment Services
-        </h1>
-
-        {/* Subtitle */}
-        <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg animate__animated animate__fadeInUp animate__delay-1s">
-          Connecting top talent with the best opportunities. Your next big break starts here.
-        </p>
-
-        {/* Search Bar */}
-        <div className="flex flex-col sm:flex-row items-center w-full max-w-xl mt-6 space-y-3 sm:space-y-0 sm:space-x-4">
-          <input
-            type="text"
-            placeholder="Search for jobs"
-            className="w-full sm:flex-grow px-4 py-3 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+    <div className="relative w-full h-[90vh] overflow-hidden">
+      <AnimatePresence>
+        <motion.div
+          key={current}
+          className="absolute inset-0 w-full h-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <Image
+            src={slides[current].image}
+            alt={slides[current].title}
+            layout="fill"
+            objectFit="cover"
+            priority
           />
-          <button className="w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-md transition duration-300">
-            Search
-          </button>
-        </div>
+          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white px-6 text-center space-y-4 z-10">
+            <h1 className="text-4xl md:text-6xl font-bold">
+              {slides[current].title}
+            </h1>
+            <p className="text-lg md:text-2xl font-medium text-gray-200 max-w-2xl">
+              {slides[current].subtitle}
+            </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-4">
+              <Link href="/allJobs">
+                <button className="bg-teal-700 hover:bg-teal-800 px-6 py-3 rounded-md font-semibold transition">
+                  Search Jobs
+                </button>
+              </Link>
+              <Link href="/requestEmployee">
+                <button className="bg-white text-teal-700 hover:bg-gray-100 px-6 py-3 rounded-md font-semibold transition">
+                  Request Staff
+                </button>
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
-        {/* Categories */}
-        <div className="flex flex-wrap justify-center mt-6 sm:mt-8 gap-3 sm:gap-4">
-          {[
-            "Healthcare",
-            "Construction",
-            "Hospitality",
-            "IT & Legal",
-            "Admin & HR",
-            "Security",
-            "Haulage & Driving",
-          ].map((category, index) => (
-            <button
-              key={category}
-              className="px-4 py-2 bg-gray-800 hover:bg-orange-500 text-white rounded-md transition duration-300 animate__animated animate__fadeInUp"
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+      {/* Navigation Buttons */}
+      <div className="absolute inset-y-0 left-0 flex items-center pl-4 z-20">
+        <button
+          onClick={handlePrev}
+          className="bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition"
+        >
+          <ChevronLeft size={28} />
+        </button>
+      </div>
+      <div className="absolute inset-y-0 right-0 flex items-center pr-4 z-20">
+        <button
+          onClick={handleNext}
+          className="bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition"
+        >
+          <ChevronRight size={28} />
+        </button>
       </div>
     </div>
   );
 };
 
-export default Banner;
+export default BannerSlider;

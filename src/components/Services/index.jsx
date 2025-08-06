@@ -1,75 +1,53 @@
 "use client";
 import React, { useEffect, useRef } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import "animate.css";
 import img1 from "../../../public/about-us-wte/1.jpg";
 import img2 from "../../../public/about-us-wte/2.jpg";
 import img3 from "../../../public/about-us-wte/3.jpg";
+import img4 from "../../../public/about-us-wte/4.jpg";
+import img5 from "../../../public/services/1.jpg";
+import img6 from "../../../public/services/2.jpg";
+
+// Optional: Expand image list if you want more unique backgrounds
+const images = [img1, img2, img3, img4, img5, img6];
 
 const services = [
   {
-    title: "Recruitment Services ",
+    title: "Staff Bank Solution",
     description:
-      "Providing permanent, temporary, and contract staffing solutions tailored to your business needs.",
-    icon: "✅",
+      "Demand Recruitment Services Ltd – Your Partner in Smarter Healthcare Staffing",
+    link: "/staffBankSolution",
   },
   {
-    title: "Managed Service Provider (MSP)",
-    description:
-      "Streamlining your hiring processes with centralized workforce management solutions.",
-    icon: "📋",
+    title: "Managed Services",
+    description: "Smarter Staffing, Better Care",
+    link: "/managedService",
   },
   {
-    title: "Staffing Bank Solutions",
-    description:
-      "A flexible, on-demand staffing pool to ensure seamless business operations.",
-    icon: "🎯",
+    title: "Recruitment Process Outsourcing",
+    description: "Smarter, Faster, Cost-Effective Hiring",
+    link: "/rpo",
   },
   {
-    title: "Recruitment Process Outsourcing (RPO)",
-    description:
-      "Handling your recruitment processes from sourcing to onboarding, improving efficiency and cost-effectiveness.",
-    icon: "✅",
+    title: "Direct Engagement",
+    description: "Cut Temporary Staffing Costs Quickly & Effectively",
+    link: "/directEngagement",
   },
   {
-    title: "Facility Management",
-    description:
-      "Offering specialized workforce solutions for maintenance, security, and operational support.",
-    icon: "📋",
+    title: "Workforce Consulting",
+    description: "Smarter Staffing, Greater Efficiency",
+    link: "/workforceConsulting",
   },
   {
-    title: "Community Services Staffing ",
-    description:
-      "Supporting organizations with qualified professionals to enhance community well-being.",
-    icon: "🎯",
+    title: "Vendor Management",
+    description: "Take Control of Temporary Staffing",
+    link: "/vendorManagement",
   },
 ];
 
-const advancedServices = [
-  {
-    title: "Enhance Your Skills",
-    description:
-      "We understand your unique skills and career goals. Let us help you find a position that aligns with your aspirations.",
-    buttonText: "Check Opportunities",
-    image: img1,
-  },
-  {
-    title: "Tailored Job Matches",
-    description:
-      "Our comprehensive recruitment services ensure you find the perfect fit for your company quickly and efficiently.",
-    buttonText: "Learn More",
-    image: img2,
-  },
-  {
-    title: "Seamless Options",
-    description:
-      "Take advantage of training resources and career advice to unlock your full potential in the job market.",
-    buttonText: "Discover",
-    image: img3,
-  },
-];
-
-export default function Services() {
+export default function ServicesComponent() {
   const sectionsRef = useRef([]);
 
   useEffect(() => {
@@ -96,65 +74,52 @@ export default function Services() {
   }, []);
 
   return (
-    <section className="py-16 bg-gray-100">
-      {/* Main Services Section */}
-      <div className="container mx-auto px-6 text-center">
+    <section className="py-20 bg-gray-100">
+      <div className="container mx-auto px-6">
         <h2
           ref={(el) => sectionsRef.current.push(el)}
-          className="text-4xl font-bold text-gray-900"
+          className="text-4xl font-bold text-center text-gray-900"
         >
           Our Services
         </h2>
         <p
           ref={(el) => sectionsRef.current.push(el)}
-          className="mt-4 text-orange-500 max-w-2xl mx-auto font-bold"
+          className="mt-4 text-center text-orange-500 max-w-2xl mx-auto font-semibold"
         >
           At Demand Recruitment Services Ltd, we offer a comprehensive range of
           staffing and workforce management services to meet the demands of
-          various industries. Our key services include:
+          various industries.
         </p>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {services.map((service, index) => (
-            <div
-              key={index}
-              ref={(el) => sectionsRef.current.push(el)}
-              className="bg-gray-200 p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
-            >
-              <h3 className="text-xl font-semibold text-gray-900">
-                {service.title}
-              </h3>
-              <p className="mt-2 text-gray-700">{service.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Advanced Services Section */}
-      <div className="mt-16 container mx-auto px-6">
-        <div className="grid gap-8 md:grid-cols-3">
-          {advancedServices.map((item, index) => (
-            <div
+        <div className="mt-14 grid gap-8 md:grid-cols-3 sm:grid-cols-2">
+          {services.map((service, index) => (
+            <Link
               key={index}
+              href={service.link}
+              className="group relative block rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300"
               ref={(el) => sectionsRef.current.push(el)}
-              className="relative rounded-lg overflow-hidden shadow-md group"
             >
-              {/* Background Image */}
-              <Image
-                src={item.image}
-                alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              {/* Overlay Content */}
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-center px-6">
-                <h3 className="text-2xl font-bold text-white">{item.title}</h3>
-                <p className="mt-4 text-gray-200">{item.description}</p>
-                <a href="/services">
-                  <button className="mt-6 px-4 py-2 border border-orange-500 text-orange-500 rounded-lg hover:bg-orange-500 hover:text-white transition duration-300">
-                    {item.buttonText}
-                  </button>
-                </a>
+              {/* Background image */}
+              <div className="absolute inset-0">
+                <Image
+                  src={images[index % images.length]}
+                  alt={service.title}
+                  layout="fill"
+                  objectFit="cover"
+                  className="transition-transform group-hover:scale-105 duration-500"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-60 group-hover:bg-opacity-60 transition duration-300" />
               </div>
-            </div>
+
+              {/* Content Overlay */}
+              <div className="relative z-10 p-6 h-full flex flex-col justify-end text-white">
+                <h3 className="text-2xl font-semibold mb-2">{service.title}</h3>
+                <p className="text-sm text-gray-200">{service.description}</p>
+                <span className="mt-4 inline-block text-sm text-orange-300 font-medium group-hover:underline">
+                  Learn More →
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

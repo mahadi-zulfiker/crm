@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useRef } from "react";
 import "animate.css";
 
@@ -24,46 +24,54 @@ function SmallMighty() {
   }, []);
 
   return (
-    <div
+    <section
       ref={sectionRef}
-      className="bg-gradient-to-b from-white to-gray-100 text-gray-800 py-20 px-10 text-center"
+      className="bg-gradient-to-b from-white to-gray-100 py-16 md:py-24"
     >
-      <h2 className="text-4xl font-extrabold mb-8 text-gray-800 animate-on-scroll">
-        Small but Mighty
-      </h2>
-      <span className="font-lg animate-on-scroll">
-        At Demand Recruitment Services Ltd, we provide end-to-end staffing solutions tailored to your business needs.
-        Whether you're looking for permanent hires, temporary staff, or managed service solutions, we connect businesses
-        with the right talent to drive success. We specialize in Managed Service Provision, Facility Management, and
-        Community Services, ensuring seamless workforce management across multiple industries.
-      </span>
+      <div className="max-w-6xl mx-auto px-6 md:px-8 text-center">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6 animate-on-scroll">
+          The Power of Precision Staffing
+        </h2>
+        <p className="text-lg text-gray-700 mb-8 animate-on-scroll">
+          Demand Recruitment Services Ltd delivers comprehensive staffing solutions designed to empower your business.
+          From permanent placements to flexible temporary staff and strategic managed service provisions, we connect
+          you with the exceptional talent needed to achieve your organizational goals. Our expertise spans Managed
+          Service Provision (MSP), Facility Management, and Community Services, ensuring efficient and effective
+          workforce management across diverse industries.
+        </p>
 
-      <p className="text-gray-700 font-semibold text-2xl mb-12 animate-on-scroll">
-        Take a look at these numbers to see what we’ve already achieved:
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-12 max-w-6xl mx-auto">
-        {[
-          { number: "14,569,103", text: "Shifts planned per year (*avg)" },
-          { number: "47,992", text: "Leave requests per year (*avg)" },
-          { number: "598,365", text: "Hours of overtime worked per year (*avg)" },
-          { number: "36", text: "Countries using Demand Recruitment" },
-          { number: "435", text: "Avg. size of company using Demand Recruitment" },
-          { number: "10", text: "Dedicated phone lines for support" },
-          { number: "146", text: "Hours of video recorded for help and support" },
-          { number: "10,452", text: "Hot drinks consumed in one year" },
-          { number: "1", text: "Minutes of un-scheduled downtime since inception" },
-        ].map((item, index) => (
-          <div
-            key={index}
-            className="text-center bg-white p-8 rounded-xl shadow-lg transform hover:scale-105 transition duration-300 hover:shadow-xl animate-on-scroll"
-          >
-            <p className="text-4xl font-extrabold text-gray-800">{item.number}</p>
-            <p className="text-gray-600 mt-3 text-lg font-medium">{item.text}</p>
+        <div className="py-10">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-6 animate-on-scroll">
+            Tangible Results, Real Impact
+          </h3>
+          <p className="text-gray-600 mb-8 animate-on-scroll">
+            The numbers speak for themselves. Here's a glimpse into the scale and efficiency we bring to workforce
+            management:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8 md:gap-12">
+            {[
+              { number: "14,569,103", text: "Shifts planned annually (avg.)" },
+              { number: "47,992", text: "Annual leave requests (avg.)" },
+              { number: "598,365", text: "Annual overtime hours (avg.)" },
+              { number: "36", text: "Countries with our solutions" },
+              { number: "435+", text: "Average client company size" },
+              { number: "10", text: "Dedicated support phone lines" },
+              { number: "146+", text: "Hours of support video content" },
+              { number: "10,452", text: "Annual hot beverage consumption" },
+              { number: "< 1", text: "Minutes of unscheduled downtime (since inception)" },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="bg-white p-6 rounded-md shadow-md hover:shadow-lg transition duration-300 animate-on-scroll"
+              >
+                <p className="text-3xl font-bold text-teal-600">{item.number}</p>
+                <p className="text-gray-700 mt-2 text-md font-medium">{item.text}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
