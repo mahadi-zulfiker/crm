@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { FaQuoteLeft, FaUserCircle } from "react-icons/fa";
+import { FaQuoteLeft, FaUserCircle, FaStar } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -56,6 +56,15 @@ function Testimonials() {
               >
                 <FaQuoteLeft className="text-teal-600 text-5xl mb-4" />
                 <p className="text-xl italic mb-6">"{item.testimonial}"</p>
+
+                {/* Stars */}
+                <div className="flex gap-2 space-x-1 mb-4 text-teal-800">
+                  <div className="flex">{[...Array(5)].map((_, i) => (
+                    <FaStar key={i} />
+                  ))}</div>
+                  <p className="mt-[-3]">5 out of 5</p>
+                </div>
+
                 <FaUserCircle className="text-teal-600 text-6xl mb-3" />
                 <h3 className="text-2xl font-semibold">{item.name}</h3>
                 <p className="text-md text-gray-600">{item.position}</p>
