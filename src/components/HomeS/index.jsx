@@ -15,7 +15,7 @@ import {
 
 const WhatWeOfferSection = () => {
   useEffect(() => {
-    AOS.init({ duration: 800 });
+    AOS.init({ duration: 800, once: true });
   }, []);
 
   const services = [
@@ -58,33 +58,30 @@ const WhatWeOfferSection = () => {
   ];
 
   return (
-    <section className="bg-gray-100 text-gray-800 py-16 px-4 md:px-8">
-      <div className="max-w-5xl mx-auto text-center">
-        <h3 className="text-3xl font-semibold mb-12" data-aos="fade-up">
+    <section className="bg-gradient-to-br from-gray-50 to-white text-gray-800 py-20 px-4 md:px-8 font-sans antialiased">
+      <div className="max-w-7xl mx-auto text-center">
+        <h3 className="text-4xl md:text-5xl font-extrabold mb-16" data-aos="fade-up">
           What We Offer
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {services.map(({ icon: Icon, label, href, description }, index) => (
             <Link
               key={index}
               href={href}
-              className="group"
+              className="group cursor-pointer"
               data-aos="fade-up"
               data-aos-delay={index * 100}
-              title={description} // Tooltip on hover
             >
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full group-hover:scale-105">
-                <div className="flex justify-center mb-4 text-teal-700 hover:animate-pulse transition-all">
-                  <Icon size={40} strokeWidth={1.5} />
+              <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 transform transition-all duration-500 hover:shadow-2xl hover:border-teal-400 hover:scale-105 h-full flex flex-col items-center justify-center">
+                <div className="bg-teal-50 p-5 rounded-full mb-6 transition-all duration-500 group-hover:scale-110 group-hover:rotate-[360deg]">
+                  <Icon size={40} className="text-teal-600 transition-colors duration-300" />
                 </div>
-                <p className="font-bold text-lg group-hover:text-teal-700 transition">
+                <p className="font-bold text-2xl text-gray-900 group-hover:text-teal-600 transition-colors duration-300">
                   {label}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  <Link href={href} className="hover:underline">
-                    {description}
-                  </Link>
+                <p className="text-sm text-gray-500 mt-2">
+                  {description}
                 </p>
               </div>
             </Link>
@@ -92,18 +89,17 @@ const WhatWeOfferSection = () => {
         </div>
 
         <blockquote
-          className="text-lg italic text-gray-700 max-w-2xl mx-auto"
+          className="text-2xl italic text-gray-700 max-w-2xl mx-auto border-l-4 border-teal-500 pl-6 py-2"
           data-aos="fade-up"
         >
-          “Demand Recruitment Services helped us reduce costs and improve staff
-          fill rates dramatically.”
+          “Demand Recruitment Services helped us reduce costs and improve staff fill rates dramatically.”
         </blockquote>
         <p
-          className="mt-2 text-sm text-gray-500"
+          className="mt-4 text-md font-medium text-gray-500"
           data-aos="fade-up"
           data-aos-delay="200"
         >
-          Senior Workforce Manager, NHS Trust
+          – Senior Workforce Manager, NHS Trust
         </p>
       </div>
     </section>

@@ -1,31 +1,38 @@
-"use client"
+'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Trophy, Users, Briefcase, LineChart } from 'lucide-react'; 
+import { Trophy, Users, Briefcase, LineChart } from 'lucide-react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 function Achievements() {
   const originalAchievements = [
     {
-      icon: <Trophy size={48} className="text-teal-600 mx-auto" />,
+      icon: <Trophy size={48} className="text-teal-500 mx-auto" />,
       title: 'Award-Winning Service',
       description: 'Recognized for excellence in recruitment services.',
     },
     {
-      icon: <Users size={48} className="text-teal-600 mx-auto" />,
-      title: '10,000+ Happy Clients',
+      icon: <Users size={48} className="text-teal-500 mx-auto" />,
+      title: 'Happy Clients',
       description: 'Successfully matched thousands of candidates with top companies.',
+      countTarget: 10000,
+      countPrefix: '+',
     },
     {
-      icon: <Briefcase size={48} className="text-teal-600 mx-auto" />,
+      icon: <Briefcase size={48} className="text-teal-500 mx-auto" />,
       title: 'Diverse Job Placements',
       description: 'Placed candidates in various industries worldwide.',
     },
     {
-      icon: <LineChart size={48} className="text-teal-600 mx-auto" />,
+      icon: <LineChart size={48} className="text-teal-500 mx-auto" />,
       title: 'Consistent Growth',
       description: 'Achieved a 50% growth rate year over year.',
+      countTarget: 50,
+      countSuffix: '%',
     },
   ];
-  const numClonesEachSide = 2; 
+
+  const numClonesEachSide = 2;
   const achievements = [
     ...originalAchievements.slice(-numClonesEachSide),
     ...originalAchievements,
@@ -38,12 +45,59 @@ function Achievements() {
   const slideIntervalRef = useRef(null);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
 
+  // State for the dynamic counters
+  const [counts, setCounts] = useState({
+    'Happy Clients': 0,
+    'Consistent Growth': 0,
+  });
+
+  const getTarget = (title) => {
+    const achievement = originalAchievements.find(a => a.title === title);
+    return achievement ? achievement.countTarget : 0;
+  };
+  
+  // Counting animation effect
+  useEffect(() => {
+    let animationFrameId;
+    const targets = {
+      'Happy Clients': getTarget('Happy Clients'),
+      'Consistent Growth': getTarget('Consistent Growth')
+    };
+    const start = {
+      'Happy Clients': 0,
+      'Consistent Growth': 0,
+    };
+    const duration = 1000; // 1 second
+    let startTime = null;
+
+    const animateCount = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = timestamp - startTime;
+      const increment = Math.min(1, progress / duration);
+      
+      setCounts({
+        'Happy Clients': Math.floor(increment * targets['Happy Clients']),
+        'Consistent Growth': Math.floor(increment * targets['Consistent Growth']),
+      });
+
+      if (progress < duration) {
+        animationFrameId = requestAnimationFrame(animateCount);
+      } else {
+        setCounts(targets); // Ensure final value is accurate
+      }
+    };
+    
+    // Only start animation on component mount
+    animationFrameId = requestAnimationFrame(animateCount);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []);
+
   // For draggable functionality
   const isDragging = useRef(false);
   const startPos = useRef(0);
   const currentTranslate = useRef(0);
   const prevTranslate = useRef(0);
-  const animationFrameId = useRef(null);
 
   // Determine how many slides to show based on screen width
   useEffect(() => {
@@ -56,88 +110,55 @@ function Achievements() {
         setSlidesToShow(3);
       }
     };
-
     window.addEventListener('resize', handleResize);
     handleResize(); // Set initial value
-
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-
-  const getSlideWidthAndGap = useCallback(() => {
-    if (!carouselRef.current || !carouselRef.current.children[0]) return { itemWidthWithGap: 0 };
-    const slideElement = carouselRef.current.children[0];
-    const slideWidth = slideElement.offsetWidth;
-    // p-4 on the item means 16px padding left and right.
-    // If there's no margin/gap explicitly set, the 'gap' comes from this padding.
-    // When items are flexed, the total width consumed per item is its content width + its own padding.
-    // The "gap" between visible items is implicitly handled by `flex-shrink-0` and `width` on the container.
-    // When calculating total scroll distance, we need the actual width of the item plus its horizontal padding.
-    const gap = 32; // 16px left + 16px right padding from p-4
-    const itemWidthWithGap = slideWidth + gap; // slideWidth is content width + border if any
-    return { itemWidthWithGap };
-  }, []);
-
-
-  // Calculate transform style for carousel movement
+  // Calculate transform value for carousel movement
   const getTransformValue = useCallback(() => {
-    const { itemWidthWithGap } = getSlideWidthAndGap();
-    if (itemWidthWithGap === 0) return 'translateX(0px)';
-
-    let offset = -currentIndex * itemWidthWithGap;
+    if (!carouselRef.current) return 'translateX(0px)';
+    const itemWidth = carouselRef.current.children[0]?.offsetWidth || 0;
+    const offset = -currentIndex * itemWidth;
     return `translateX(${offset}px)`;
-  }, [currentIndex, getSlideWidthAndGap]);
-
+  }, [currentIndex]);
 
   // Logic for jumping to the real slides when entering clone zones
   const handleLoopJump = useCallback(() => {
     if (!carouselRef.current) return;
-
     setTransitionEnabled(false); // Disable transition for instant jump
-
     if (currentIndex >= originalAchievements.length + numClonesEachSide) {
-      // Jump from end clones to beginning of real slides
-      setCurrentIndex(numClonesEachSide + (currentIndex - (originalAchievements.length + numClonesEachSide)));
+      setCurrentIndex(numClonesEachSide + (currentIndex % originalAchievements.length));
     } else if (currentIndex < numClonesEachSide) {
-      // Jump from beginning clones to end of real slides
       setCurrentIndex(originalAchievements.length + currentIndex);
     }
-    // Re-enable transition after a very short delay to allow the DOM update to render
-    setTimeout(() => {
-      setTransitionEnabled(true);
-    }, 50); // A small delay is often needed for the browser to register the non-transitioned jump
+    setTimeout(() => setTransitionEnabled(true), 50); // A small delay is needed
   }, [currentIndex, originalAchievements.length, numClonesEachSide]);
 
   useEffect(() => {
-    // This effect runs when currentIndex changes, allowing us to perform the loop jump
     if (currentIndex >= originalAchievements.length + numClonesEachSide || currentIndex < numClonesEachSide) {
       handleLoopJump();
     }
   }, [currentIndex, originalAchievements.length, numClonesEachSide, handleLoopJump]);
 
-
   // Autoplay functionality
   useEffect(() => {
     const startAutoplay = () => {
       slideIntervalRef.current = setInterval(() => {
-        setCurrentIndex((prevIndex) => prevIndex + 1); // Just increment, loop jump handles bounds
-      }, 3000); // 3000ms = 3 seconds
+        setCurrentIndex((prevIndex) => prevIndex + 1);
+      }, 3000);
     };
-
     const stopAutoplay = () => {
       if (slideIntervalRef.current) {
         clearInterval(slideIntervalRef.current);
       }
     };
-
     startAutoplay();
-
     const carouselElement = carouselRef.current;
     if (carouselElement) {
       carouselElement.addEventListener('mouseenter', stopAutoplay);
       carouselElement.addEventListener('mouseleave', startAutoplay);
     }
-
     return () => {
       stopAutoplay();
       if (carouselElement) {
@@ -145,56 +166,42 @@ function Achievements() {
         carouselElement.removeEventListener('mouseleave', startAutoplay);
       }
     };
-  }, [originalAchievements.length, numClonesEachSide]); // Dependencies include cloning values for logic
+  }, [originalAchievements.length, numClonesEachSide]);
 
   // Draggable logic
   const handleMouseDown = useCallback((e) => {
     isDragging.current = true;
     startPos.current = e.pageX || e.touches[0].pageX;
     prevTranslate.current = parseFloat(getComputedStyle(carouselRef.current).transform.split(',')[4]) || 0;
-    setTransitionEnabled(false); // Disable transition during drag
-    cancelAnimationFrame(animationFrameId.current);
+    setTransitionEnabled(false);
   }, []);
 
   const handleMouseMove = useCallback((e) => {
     if (!isDragging.current) return;
-
     const currentPosition = e.pageX || e.touches[0].pageX;
     currentTranslate.current = prevTranslate.current + (currentPosition - startPos.current);
-
-    const carouselElement = carouselRef.current;
-    if (carouselElement) {
-      carouselElement.style.transform = `translateX(${currentTranslate.current}px)`;
+    if (carouselRef.current) {
+      carouselRef.current.style.transform = `translateX(${currentTranslate.current}px)`;
     }
   }, []);
 
   const handleMouseUp = useCallback(() => {
     if (!isDragging.current) return;
     isDragging.current = false;
-
-    const carouselElement = carouselRef.current;
-    if (!carouselElement || !carouselElement.children[0]) return;
-
-    setTransitionEnabled(true); // Re-enable transition
-
-    const { itemWidthWithGap } = getSlideWidthAndGap();
-    if (itemWidthWithGap === 0) return;
-
+    setTransitionEnabled(true);
+    const itemWidth = carouselRef.current?.children[0]?.offsetWidth || 0;
+    if (itemWidth === 0) return;
     const movedBy = currentTranslate.current - prevTranslate.current;
     let newIndex = currentIndex;
-
-    if (Math.abs(movedBy) > itemWidthWithGap / 4) { // Threshold for a "swipe"
-      if (movedBy < 0) { // Swiped left (towards higher index)
+    if (Math.abs(movedBy) > itemWidth / 4) {
+      if (movedBy < 0) {
         newIndex = currentIndex + 1;
-      } else { // Swiped right (towards lower index)
+      } else {
         newIndex = currentIndex - 1;
       }
     }
-
-    // Snap to the calculated new index, let the getTransformValue and loop jump handle the rest
     setCurrentIndex(newIndex);
-  }, [currentIndex, getSlideWidthAndGap]);
-
+  }, [currentIndex]);
 
   useEffect(() => {
     const carouselElement = carouselRef.current;
@@ -202,13 +209,11 @@ function Achievements() {
       carouselElement.addEventListener('mousedown', handleMouseDown);
       carouselElement.addEventListener('mousemove', handleMouseMove);
       carouselElement.addEventListener('mouseup', handleMouseUp);
-      carouselElement.addEventListener('mouseleave', handleMouseUp); // End drag if mouse leaves carousel
-      // For touch devices
+      carouselElement.addEventListener('mouseleave', handleMouseUp);
       carouselElement.addEventListener('touchstart', handleMouseDown);
       carouselElement.addEventListener('touchmove', handleMouseMove);
       carouselElement.addEventListener('touchend', handleMouseUp);
     }
-
     return () => {
       if (carouselElement) {
         carouselElement.removeEventListener('mousedown', handleMouseDown);
@@ -222,18 +227,13 @@ function Achievements() {
     };
   }, [handleMouseDown, handleMouseMove, handleMouseUp]);
 
-
-  // Adjust currentTranslate when currentIndex changes (e.g., after autoplay or dot click)
-  // This ensures the visual position aligns with the logical index
   useEffect(() => {
-    if (!isDragging.current) { // Only update if not currently dragging
-        currentTranslate.current = parseFloat(getTransformValue().replace('translateX(', '').replace('px)', ''));
-        prevTranslate.current = currentTranslate.current;
+    if (!isDragging.current) {
+      currentTranslate.current = parseFloat(getTransformValue().replace('translateX(', '').replace('px)', ''));
+      prevTranslate.current = currentTranslate.current;
     }
   }, [currentIndex, getTransformValue]);
 
-
-  // Calculate the "real" index for the dots
   const getRealIndex = (index) => {
     if (index < numClonesEachSide) {
       return originalAchievements.length - (numClonesEachSide - index);
@@ -243,41 +243,50 @@ function Achievements() {
     }
     return index - numClonesEachSide;
   };
-
   const activeDotIndex = getRealIndex(currentIndex);
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-gradient-to-br from-gray-50 to-teal-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-extrabold text-center text-gray-800 mb-12">
+        <h2 data-aos="fade-up" className="text-5xl font-extrabold text-center text-gray-800 mb-12">
           Our Achievements
         </h2>
 
-        <div className="relative select-none cursor-grab active:cursor-grabbing">
+        <div className="relative select-none">
           <div className="overflow-hidden">
             <div
               ref={carouselRef}
               className="flex"
-              // Apply transition only when not dragging, for instant jumps
               style={{
                 transform: getTransformValue(),
-                transition: transitionEnabled ? 'transform 0.5s ease-in-out' : 'none',
+                transition: transitionEnabled ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
               }}
             >
               {achievements.map((achievement, index) => (
                 <div
-                  key={index} // Use index, as keys need to be unique within the mapped array
-                  className="flex-shrink-0 p-4"
+                  key={index}
+                  className="flex-shrink-0 p-4 cursor-pointer"
                   style={{
-                    width: slidesToShow === 1 ? '100%' :
-                           slidesToShow === 2 ? '50%' :
-                           '33.3333%', // Tailwind's w-1/3 equivalent
+                    flexBasis: slidesToShow === 1 ? '100%' : slidesToShow === 2 ? '50%' : '33.3333%',
                   }}
+                  onMouseDown={handleMouseDown}
+                  onTouchStart={handleMouseDown}
                 >
-                  <div className="bg-white p-8 rounded-lg shadow-lg text-center flex flex-col items-center space-y-4 transform transition duration-500 hover:scale-105 h-full">
-                    {achievement.icon}
-                    <h3 className="text-xl font-semibold text-gray-800">{achievement.title}</h3>
-                    <p className="text-gray-600">{achievement.description}</p>
+                  <div className="bg-white p-8 rounded-3xl shadow-xl text-center flex flex-col items-center space-y-4 transform transition-all duration-500 hover:scale-105 h-full border border-gray-200 hover:border-teal-300">
+                    <div className="bg-teal-50 p-4 rounded-full transition-all duration-300 transform hover:scale-110">
+                      {achievement.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-800">
+                      {achievement.countTarget ? (
+                        <>
+                          {achievement.countPrefix}{counts[achievement.title].toLocaleString()}
+                          {achievement.countSuffix}
+                        </>
+                      ) : (
+                        achievement.title
+                      )}
+                    </h3>
+                    <p className="text-gray-600 font-medium">{achievement.description}</p>
                   </div>
                 </div>
               ))}
@@ -285,15 +294,14 @@ function Achievements() {
           </div>
 
           {/* Dots - based on original achievements */}
-          <div className="flex justify-center mt-4 space-x-2">
+          <div className="flex justify-center mt-8 space-x-2">
             {originalAchievements.map((_, dotIndex) => (
               <button
                 key={dotIndex}
-                // When clicking a dot, jump to the corresponding 'real' slide in the cloned array
                 onClick={() => setCurrentIndex(dotIndex + numClonesEachSide)}
-                className={`w-3 h-3 rounded-full ${
+                className={`w-3 h-3 rounded-full transition-colors duration-300 ${
                   dotIndex === activeDotIndex ? 'bg-teal-600' : 'bg-gray-300'
-                } hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600`}
+                } hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600 cursor-pointer`}
               ></button>
             ))}
           </div>

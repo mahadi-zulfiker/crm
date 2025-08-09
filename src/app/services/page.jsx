@@ -1,12 +1,16 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ContactSection from "@/components/ContactHomePage";
 import { Briefcase, Building2, Users } from "lucide-react";
+import ContactSection from "@/components/ContactHomePage";
+
+// Import CountUp for animated counters
+import CountUp from "react-countup";
 
 const recruitmentServices = [
   {
@@ -16,6 +20,7 @@ const recruitmentServices = [
     description:
       "Comprehensive staffing support across healthcare, cleaning, security, hospitality, and more.",
     cta: "View Staffing Options →",
+    icon: <Briefcase className="text-teal-600" size={24} />,
   },
   {
     name: "Workforce Management",
@@ -24,6 +29,7 @@ const recruitmentServices = [
     description:
       "Efficient solutions for scheduling, monitoring, and optimizing workforce productivity across sectors.",
     cta: "Optimize Workforce →",
+    icon: <Users className="text-teal-600" size={24} />,
   },
   {
     name: "Recruitment Solutions",
@@ -32,6 +38,7 @@ const recruitmentServices = [
     description:
       "Custom recruitment strategies to meet unique staffing demands for short- or long-term engagements.",
     cta: "Tailored Hiring Plans →",
+    icon: <Building2 className="text-teal-600" size={24} />,
   },
 ];
 
@@ -43,6 +50,7 @@ const facilityServices = [
     description:
       "Maintain a safe, sanitary, and welcoming environment for staff and visitors.",
     cta: "Explore Hygiene Services →",
+    icon: <Users className="text-teal-600" size={24} />,
   },
   {
     name: "Engineering & Maintenance",
@@ -51,6 +59,7 @@ const facilityServices = [
     description:
       "Ensure optimal operation of infrastructure with our expert engineering services.",
     cta: "View Engineering Plans →",
+    icon: <Building2 className="text-teal-600" size={24} />,
   },
   {
     name: "Integrated Facilities Management",
@@ -59,6 +68,7 @@ const facilityServices = [
     description:
       "Streamline operations with a holistic approach to facilities management.",
     cta: "Discover Facility Management →",
+    icon: <Briefcase className="text-teal-600" size={24} />,
   },
 ];
 
@@ -70,6 +80,7 @@ const communityServices = [
     description:
       "Providing compassionate and structured support for individuals in supported living environments.",
     cta: "Support Independent Living →",
+    icon: <Users className="text-teal-600" size={24} />,
   },
   {
     name: "Community Engagement & Events",
@@ -78,6 +89,7 @@ const communityServices = [
     description:
       "Building meaningful connections through local events, engagement strategies, and inclusive community experiences.",
     cta: "See Engagement Programs →",
+    icon: <Building2 className="text-teal-600" size={24} />,
   },
   {
     name: "Housing Management",
@@ -86,6 +98,7 @@ const communityServices = [
     description:
       "Professional management of residential properties ensuring tenant satisfaction, compliance, and efficiency.",
     cta: "Learn About Housing Plans →",
+    icon: <Briefcase className="text-teal-600" size={24} />,
   },
 ];
 
@@ -115,14 +128,15 @@ const Services = () => {
         <div className="absolute inset-0 bg-black bg-opacity-60"></div>
         <div className="relative z-10 h-full flex items-center">
           <div
-            className="max-w-4xl bg-white bg-opacity-90 p-10 ml-8 rounded-lg shadow-lg"
+            className="max-w-4xl bg-white bg-opacity-90 p-10 ml-8 rounded-xl shadow-2xl backdrop-blur-sm"
             data-aos="fade-right"
           >
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
               What We Offer
             </h1>
             <p className="mt-4 text-lg text-gray-700">
-              Discover a wide range of recruitment, facility, and community services tailored to meet your needs.
+              Discover a wide range of recruitment, facility, and community
+              services tailored to meet your needs.
             </p>
           </div>
         </div>
@@ -135,55 +149,43 @@ const Services = () => {
             className="flex justify-center gap-4 mb-10 flex-wrap"
             data-aos="fade-up"
           >
-            <button
-              onClick={() => setActiveTab("recruitment")}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm md:text-base transition ${
-                activeTab === "recruitment"
-                  ? "bg-teal-600 text-white"
-                  : "bg-white text-gray-800 border"
-              }`}
-            >
-              <Briefcase size={18} />
-              Recruitment Services
-            </button>
-            <button
-              onClick={() => setActiveTab("facility")}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm md:text-base transition ${
-                activeTab === "facility"
-                  ? "bg-teal-600 text-white"
-                  : "bg-white text-gray-800 border"
-              }`}
-            >
-              <Building2 size={18} />
-              Facility Management
-            </button>
-            <button
-              onClick={() => setActiveTab("community")}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm md:text-base transition ${
-                activeTab === "community"
-                  ? "bg-teal-600 text-white"
-                  : "bg-white text-gray-800 border"
-              }`}
-            >
-              <Users size={18} />
-              Community Services
-            </button>
+            {[
+              { id: "recruitment", label: "Recruitment Services", icon: Briefcase },
+              { id: "facility", label: "Facility Management", icon: Building2 },
+              { id: "community", label: "Community Services", icon: Users },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm md:text-base transition-all duration-300 shadow-sm hover:shadow-md ${
+                    activeTab === tab.id
+                      ? "bg-teal-600 text-white scale-105"
+                      : "bg-white text-gray-800 border hover:bg-gray-50"
+                  }`}
+                >
+                  <Icon size={18} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Highlights/Stats */}
+          {/* Highlights / Animated Counters */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center mb-12">
-            <div data-aos="fade-up">
-              <h2 className="text-3xl font-bold text-teal-600">500+</h2>
-              <p className="text-gray-600">Professionals Placed</p>
-            </div>
-            <div data-aos="fade-up" data-aos-delay="100">
-              <h2 className="text-3xl font-bold text-teal-600">98%</h2>
-              <p className="text-gray-600">Client Satisfaction</p>
-            </div>
-            <div data-aos="fade-up" data-aos-delay="200">
-              <h2 className="text-3xl font-bold text-teal-600">24/7</h2>
-              <p className="text-gray-600">Service Availability</p>
-            </div>
+            {[
+              { value: 500, suffix: "+", label: "Professionals Placed" },
+              { value: 98, suffix: "%", label: "Client Satisfaction" },
+              { value: 24, suffix: "/7", label: "Service Availability" },
+            ].map((stat, i) => (
+              <div key={i} data-aos="fade-up" data-aos-delay={i * 100}>
+                <h2 className="text-3xl font-bold text-teal-600">
+                  <CountUp end={stat.value} suffix={stat.suffix} duration={2} />
+                </h2>
+                <p className="text-gray-600">{stat.label}</p>
+              </div>
+            ))}
           </div>
 
           {/* Cards */}
@@ -191,7 +193,7 @@ const Services = () => {
             {getServices().map((service, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg shadow-md hover:shadow-xl hover:scale-105 transition duration-300 p-4 flex flex-col"
+                className="bg-white rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 transition-transform duration-300 p-4 flex flex-col"
                 data-aos="zoom-in-up"
                 data-aos-delay={index * 100}
               >
@@ -203,9 +205,12 @@ const Services = () => {
                   className="rounded-lg object-cover h-48 w-full"
                 />
                 <div className="mt-4 flex-1 flex flex-col">
-                  <h3 className="text-xl font-bold text-gray-800">
-                    {service.name}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    {service.icon}
+                    <h3 className="text-xl font-bold text-gray-800">
+                      {service.name}
+                    </h3>
+                  </div>
                   <p className="text-gray-600 mt-2 flex-grow">
                     {service.description}
                   </p>
@@ -220,7 +225,7 @@ const Services = () => {
             ))}
           </div>
 
-          {/* Optional: Case study download & video */}
+          {/* Case Study Link */}
           <div className="mt-16 text-center" data-aos="fade-up">
             <a
               href="/caseStudies"
@@ -229,7 +234,6 @@ const Services = () => {
             >
               📄 Download Full Case Study (PDF)
             </a>
-            {/* <ReactPlayer url="https://www.youtube.com/watch?v=..." /> */}
           </div>
         </div>
       </section>
