@@ -23,10 +23,7 @@ const Brief = () => {
           data-aos="fade-up"
         >
           <p className="text-lg text-gray-700 text-justify leading-relaxed">
-            Your trusted partner for flexible workforce solutions. We specialize
-            in delivering high-quality staffing across healthcare, hospitality,
-            and facilities management — empowering businesses and professionals
-            across the UK.
+            We connect top talent with life-changing roles across the UK. We specialize in delivering high-quality staffing across healthcare, hospitality,and facilities management — empowering businesses and professionals across the UK.
           </p>
         </div>
       </div>
