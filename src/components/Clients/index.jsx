@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import CountUp from 'react-countup';
+import { useInView } from 'react-intersection-observer';
 
 const Clients = () => {
   useEffect(() => {
@@ -22,24 +24,8 @@ const Clients = () => {
     { number: 10, label: "Years of Experience", suffix: "+" },
   ];
 
-  const [counters, setCounters] = useState(stats.map(() => 0));
-
-  useEffect(() => {
-    const intervals = stats.map((stat, index) => {
-      const stepTime = 1000 / stat.number;
-      return setInterval(() => {
-        setCounters((prev) => {
-          const updated = [...prev];
-          if (updated[index] < stat.number) {
-            updated[index] += 1;
-          }
-          return updated;
-        });
-      }, stepTime);
-    });
-
-    return () => intervals.forEach(clearInterval);
-  }, []);
+  // Detect when stats come into view
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.3 });
 
   return (
     <section className="bg-white py-10 px-4 rounded-xl shadow">
@@ -48,27 +34,41 @@ const Clients = () => {
         Trusted by Industry Leaders
       </h2>
 
-      {/* Client Logos */}
-      <div className="flex flex-wrap justify-center items-center gap-16 mb-12" data-aos="fade-up">
+      {/* Client Logos (clickable) */}
+      <div className="flex flex-wrap justify-around items-center mb-12" data-aos="fade-up">
         {logos.map((logo, index) => (
-          <Image
+          <a
             key={index}
-            src={logo}
-            alt={`Client ${index + 1}`}
-            width={100}
-            height={50}
-            className="object-contain grayscale hover:grayscale-0 transition duration-300"
-          />
+            href={`/case-studies/client${index + 1}`} // Replace with real URLs
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:scale-105 transition-transform duration-300"
+          >
+            <Image
+              src={logo}
+              alt={`Client ${index + 1}`}
+              width={100}
+              height={50}
+              className="object-contain grayscale hover:grayscale-0 transition duration-300"
+            />
+          </a>
         ))}
       </div>
 
-      {/* Animated Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-5xl mx-auto" data-aos="fade-up">
+      {/* Animated Stats (trigger on scroll) */}
+      <div
+        ref={ref}
+        className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-5xl mx-auto"
+        data-aos="fade-up"
+      >
         {stats.map((item, index) => (
           <div key={index} className="space-y-2">
-            <div className="text-3xl font-bold text-teal-600">
-              {counters[index]}
-              {item.suffix || ""}
+            <div className="text-4xl font-extrabold text-teal-600 drop-shadow-sm">
+              {inView ? (
+                <CountUp end={item.number} duration={2} suffix={item.suffix || ''} />
+              ) : (
+                0
+              )}
             </div>
             <div className="text-sm text-gray-600">{item.label}</div>
           </div>
