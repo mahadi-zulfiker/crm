@@ -89,8 +89,8 @@ export default function Brief() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-[#155e57] hover:shadow-lg transition">Staffing Services</button>
-              <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-[#155e57] hover:shadow-lg transition">SaaS Development</button>
-              <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-[#155e57] hover:shadow-lg transition">Custom Software</button>
+              <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-[#155e57] hover:shadow-lg transition">SaaS Product</button>
+              <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-[#155e57] hover:shadow-lg transition">Recruitment Platform</button>
             </div>
             <div className="mt-6 flex items-center justify-between">
               <div className="text-sm text-gray-600">Trusted by leading organisations</div>
