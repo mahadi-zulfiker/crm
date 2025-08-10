@@ -29,17 +29,17 @@ function SignIn() {
     if (res?.error) {
       toast.error(res.error, {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 2000,
       });
     } else {
       toast.success("Login Successful!", {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 2000,
       });
       // Delay the redirect to allow the toast to be visible
       setTimeout(() => {
         router.push("/");
-      }, 3000);
+      }, 2000);
     }
     setLoading(false);
   };

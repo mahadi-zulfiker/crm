@@ -42,18 +42,18 @@ const SignUp = () => {
       if (response.status === 201) {
         toast.success("Signup successful! You can now sign in.", {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2000,
         });
         reset();
         // Delay the redirect to allow the toast to be visible
         setTimeout(() => {
           router.push("/signIn");
-        }, 3000);
+        }, 2000);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong", {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 2000,
       });
     } finally {
       setIsLoading(false);
