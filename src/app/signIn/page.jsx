@@ -4,10 +4,8 @@ import { useForm } from "react-hook-form";
 import { AiOutlineArrowRight } from "react-icons/ai";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,7 +14,6 @@ function SignIn() {
   const router = useRouter();
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
-  const session = useSession();
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -39,7 +36,10 @@ function SignIn() {
         position: "top-right",
         autoClose: 3000,
       });
-      router.push("/");
+      // Delay the redirect to allow the toast to be visible
+      setTimeout(() => {
+        router.push("/");
+      }, 3000);
     }
     setLoading(false);
   };

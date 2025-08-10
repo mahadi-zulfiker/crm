@@ -45,7 +45,10 @@ const SignUp = () => {
           autoClose: 3000,
         });
         reset();
-        router.push("/signIn");
+        // Delay the redirect to allow the toast to be visible
+        setTimeout(() => {
+          router.push("/signIn");
+        }, 3000);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong", {
