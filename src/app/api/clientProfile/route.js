@@ -29,17 +29,19 @@ export async function GET(req) {
 // UPDATE Client Profile
 export async function PUT(req) {
   try {
-    const { _id, username, contactInfo, companyName, address } = await req.json();
+    const { _id, username, contactInfo, companyName, address , image } = await req.json();
 
     if (!_id) {
       return NextResponse.json({ error: "Client ID is required" }, { status: 400 });
     }
 
     const db = await connectMongoDB();
-    const updatedClient = await db.collection("users").updateOne(
-      { _id: new ObjectId(_id) },
-      { $set: { username, contactInfo, companyName, address } }
-    );
+    const updatedClient = await db
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectId(_id) },
+        { $set: { username, contactInfo, companyName, address, image } }
+      );
 
     if (!updatedClient.modifiedCount) {
       return NextResponse.json({ error: "Update failed" }, { status: 500 });
