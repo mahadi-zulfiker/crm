@@ -5,7 +5,6 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FAQImage from "../../../public/FAQ.jpg";
-import Chat from "@/components/Chat";
 
 function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -150,8 +149,6 @@ function FAQ() {
         Contact Us
       </a>
     </div>
-
-    <Chat />
     <Footer />
   </div>
 );

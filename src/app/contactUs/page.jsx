@@ -5,7 +5,6 @@ import Navbar from "@/components/Navbar";
 import React, { useState } from "react";
 import Image from "next/image";
 import Swal from "sweetalert2";
-import Chat from "@/components/Chat";
 import ContactUsHomePage from "@/components/ContactHomePage";
 
 function ContactUs() {
@@ -66,7 +65,6 @@ function ContactUs() {
                     ></iframe>
                 </div>
             </main>
-            <Chat />
             <Footer />
         </div>
     );

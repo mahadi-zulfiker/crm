@@ -8,6 +8,7 @@ import { AiOutlineArrowRight } from "react-icons/ai";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignUp = () => {
   const [userType, setUserType] = useState("Client");
@@ -36,7 +37,7 @@ const SignUp = () => {
         password: data.password,
         userType,
       });
-      console.log(response)
+      console.log(response);
 
       if (response.status === 201) {
         toast.success("Signup successful! You can now sign in.", {
@@ -44,6 +45,10 @@ const SignUp = () => {
           autoClose: 3000,
         });
         reset();
+        // Delay the redirect to allow the toast to be visible
+        setTimeout(() => {
+          router.push("/signIn");
+        }, 3000);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong", {
@@ -59,35 +64,35 @@ const SignUp = () => {
     <div>
       <ToastContainer />
       <Navbar />
-      <section className="relative flex items-center justify-center min-h-screen bg-gray-100 py-8">
+      <section className="relative flex items-center justify-center min-h-screen bg-slate-900 py-8 text-white">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-64 h-64 bg-orange-300 rounded-full top-10 left-10 opacity-30 blur-3xl animate-pulse"></div>
-          <div className="absolute w-80 h-80 bg-orange-400 rounded-full bottom-20 right-20 opacity-30 blur-3xl animate-pulse"></div>
+          <div className="absolute w-64 h-64 bg-teal-500 rounded-full top-10 left-10 opacity-30 blur-3xl animate-pulse"></div>
+          <div className="absolute w-80 h-80 bg-teal-400 rounded-full bottom-20 right-20 opacity-30 blur-3xl animate-pulse"></div>
         </div>
 
-        <div className="relative z-10 w-full max-w-md px-8 py-10 bg-white rounded-lg shadow-xl">
-          <h2 className="text-3xl font-extrabold text-center text-gray-900">Sign Up</h2>
-          <p className="text-sm text-center text-gray-600">
+        <div className="relative z-10 w-full max-w-md px-8 py-10 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
+          <h2 className="text-3xl font-extrabold text-center text-white">Sign Up</h2>
+          <p className="text-sm text-center text-gray-400">
             Create your account and join as {userType.toLowerCase()}!
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
             <div>
-              <label htmlFor="username" className="block text-sm text-gray-700">
+              <label htmlFor="username" className="block text-sm text-gray-300">
                 Username
               </label>
               <input
                 id="username"
                 type="text"
                 {...register("username", { required: "Username is required" })}
-                className="w-full px-4 py-2 mt-1 text-gray-900 bg-gray-200 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-4 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 placeholder="Choose a username"
               />
-              {errors.username && <p className="mt-1 text-sm text-red-500">{errors.username.message}</p>}
+              {errors.username && <p className="mt-1 text-sm text-red-400">{errors.username.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm text-gray-700">
+              <label htmlFor="email" className="block text-sm text-gray-300">
                 Email
               </label>
               <input
@@ -100,34 +105,34 @@ const SignUp = () => {
                     message: "Enter a valid email",
                   },
                 })}
-                className="w-full px-4 py-2 mt-1 text-gray-900 bg-gray-200 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-4 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 placeholder="Enter your email"
               />
-              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
+              {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm text-gray-700">
+              <label htmlFor="password" className="block text-sm text-gray-300">
                 Password
               </label>
               <input
                 id="password"
                 type="password"
                 {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })}
-                className="w-full px-4 py-2 mt-1 text-gray-900 bg-gray-200 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-4 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 placeholder="Enter your password"
               />
-              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>}
+              {errors.password && <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>}
             </div>
 
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-700">Register as:</p>
+              <p className="text-sm text-gray-300">Register as:</p>
               <div className="flex items-center space-x-4">
                 {["Client", "Vendor", "Employee"].map((type) => (
                   <button
                     key={type}
                     type="button"
-                    className={`px-3 py-2 rounded-md ${userType === type ? "bg-orange-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-orange-400 hover:text-white"}`}
+                    className={`px-3 py-2 rounded-md transition ${userType === type ? "bg-teal-500 text-white" : "bg-gray-700 text-gray-300 hover:bg-teal-400 hover:text-white"}`}
                     onClick={() => setUserType(type)}
                   >
                     <span className="text-sm">{type}</span>
@@ -136,14 +141,14 @@ const SignUp = () => {
               </div>
             </div>
 
-            <button type="submit" className="w-full py-2 text-white bg-orange-500 rounded-md shadow-md hover:bg-orange-600" disabled={isLoading}>
+            <button type="submit" className="w-full py-2 text-white bg-teal-500 rounded-md shadow-md hover:bg-teal-600 transition" disabled={isLoading}>
               {isLoading ? "Signing Up..." : "Sign Up"}
             </button>
           </form>
 
-          <p className="mt-4 text-sm text-center text-gray-700">
+          <p className="mt-4 text-sm text-center text-gray-400">
             Already have an account?{" "}
-            <Link href="/signIn" className="flex items-center justify-center gap-1 text-orange-500 hover:text-orange-700">
+            <Link href="/signIn" className="flex items-center justify-center gap-1 text-teal-500 hover:text-teal-400 transition">
               Sign In <AiOutlineArrowRight />
             </Link>
           </p>
