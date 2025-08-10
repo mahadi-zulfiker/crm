@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import CountUp from 'react-countup';
@@ -12,32 +12,22 @@ const Clients = () => {
     AOS.init({ duration: 800, once: true });
   }, []);
 
-  // Using real image paths and placeholder logo URLs as a fallback
+  // State to control logo scrolling
+  const [isPaused, setIsPaused] = useState(false);
+  const scrollerRef = useRef(null);
+
+  // Client logos (duplicated for seamless scrolling)
   const logos = [
-    {
-      src: "/clients/client1.png",
-      alt: "Client A"
-    },
-    {
-      src: "/clients/client2.png",
-      alt: "Client B"
-    },
-    {
-      src: "/clients/client3.png",
-      alt: "Client C"
-    },
-    {
-      src: "/clients/client4.png",
-      alt: "Client D"
-    },
-    {
-      src: "/clients/client1.png",
-      alt: "Client E"
-    },
-    {
-      src: "/clients/client2.png",
-      alt: "Client F"
-    },
+    { src: "/clients/client1.png", alt: "Client A" },
+    { src: "/clients/client2.png", alt: "Client B" },
+    { src: "/clients/client3.png", alt: "Client C" },
+    { src: "/clients/client4.png", alt: "Client D" },
+    { src: "/clients/client1.png", alt: "Client E" },
+    { src: "/clients/client2.png", alt: "Client F" },
+    { src: "/clients/client3.png", alt: "Client A" }, // Repeated for seamless scroll
+    { src: "/clients/client4.png", alt: "Client B" },
+    { src: "/clients/client1.png", alt: "Client C" },
+    { src: "/clients/client2.png", alt: "Client D" },
   ];
 
   const stats = [
@@ -54,7 +44,7 @@ const Clients = () => {
     threshold: 0.3,
   });
 
-  // Start the animation when the component comes into view
+  // Start the count animation when the component comes into view
   useEffect(() => {
     if (inView && !hasAnimated) {
       setHasAnimated(true);
@@ -62,44 +52,65 @@ const Clients = () => {
   }, [inView, hasAnimated]);
 
   return (
-    <section className="bg-white py-24 px-4 md:px-8 font-sans antialiased">
+    <section className="bg-gradient-to-b from-white to-gray-50 py-24 px-4 md:px-8 font-sans antialiased">
       <div className="max-w-7xl mx-auto">
         {/* Section Heading */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4" data-aos="fade-up">
+          <h2
+            className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4"
+            data-aos="fade-up"
+          >
             Trusted by Industry Leaders
           </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+          <p
+            className="text-lg text-gray-600 max-w-2xl mx-auto"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             Our commitment to excellence has earned the trust of companies worldwide.
           </p>
         </div>
 
-        {/* Client Logos with improved hover effects */}
-        <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8 mb-20" data-aos="fade-up" data-aos-delay="200">
-          {logos.map((logo, index) => (
-            <a
-              key={index}
-              href={`#`} // Placeholder link, replace with real URLs
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group cursor-pointer transition-transform duration-300 transform hover:scale-110"
-              title={`View case study for ${logo.alt}`}
-            >
-              <img
-                src={logo.src}
-                alt={logo.alt}
-                width={150}
-                height={70}
-                className="object-contain grayscale-0 transition duration-300"
-              />
-            </a>
-          ))}
+        {/* Client Logos Slider */}
+        <div
+          className="relative overflow-hidden py-8"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          data-aos="fade-up"
+          data-aos-delay="200"
+        >
+          <div
+            ref={scrollerRef}
+            className={`flex space-x-12 animate-scroll ${isPaused ? 'animate-none' : ''}`}
+          >
+            {logos.map((logo, index) => (
+              <a
+                key={index}
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-shrink-0 cursor-pointer transition-transform duration-300 transform"
+                title={`View case study for ${logo.alt}`}
+              >
+                <img
+                  src={logo.src}
+                  alt={logo.alt}
+                  width={140}
+                  height={70}
+                  className="transition duration-300 opacity-80 hover:opacity-100"
+                />
+              </a>
+            ))}
+          </div>
+          {/* Gradient overlays for smooth edges */}
+          <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none"></div>
+          <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none"></div>
         </div>
 
-        {/* Animated Stats Cards with a more polished design */}
+        {/* Animated Stats Cards */}
         <div
           ref={ref}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-6xl mx-auto"
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-6xl mx-auto mt-20"
           data-aos="fade-up"
           data-aos-delay="300"
         >
@@ -121,7 +132,6 @@ const Clients = () => {
                     scrollSpyOnce={true}
                   />
                 ) : (
-                  // Display a non-animated value before it's in view
                   `${item.prefix}${item.number}${item.suffix}`
                 )}
               </div>
@@ -132,16 +142,26 @@ const Clients = () => {
           ))}
         </div>
       </div>
+
+      {/* Inline CSS for the scrolling animation */}
+      <style jsx>{`
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-scroll {
+          animation: scroll 20s linear infinite;
+        }
+        .animate-none {
+          animation: none;
+        }
+      `}</style>
     </section>
   );
 };
 
 export default Clients;
-
-
-  // const logos = [
-  //   "/clients/client1.png",
-  //   "/clients/client2.png",
-  //   "/clients/client3.png",
-  //   "/clients/client4.png",
-  // ];
