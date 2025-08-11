@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { FaHeartbeat, FaConciergeBell, FaWrench } from 'react-icons/fa';
+import { FaHeartbeat, FaConciergeBell, FaWrench, FaHandshake, FaBullhorn, FaBriefcase } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+const services = [
+  { id: 'healthcare', name: 'Healthcare', icon: <FaHeartbeat className="text-4xl text-[#3b82f6]" /> },
+  { id: 'hospitality', name: 'Hospitality', icon: <FaConciergeBell className="text-4xl text-[#f472b6]" /> },
+  { id: 'fm', name: 'Facilities', icon: <FaWrench className="text-4xl text-[#10b981]" /> },
+];
+
 export default function Brief() {
   useEffect(() => {
-    AOS.init({ duration: 800, once: true });
+    AOS.init({ duration: 1000, once: true });
   }, []);
-
-  const services = [
-    { id: 'healthcare', name: 'Healthcare', icon: <FaHeartbeat /> },
-    { id: 'hospitality', name: 'Hospitality', icon: <FaConciergeBell /> },
-    { id: 'fm', name: 'Facilities Management', icon: <FaWrench /> },
-  ];
 
   const [index, setIndex] = useState(0);
   useEffect(() => {
@@ -24,77 +24,110 @@ export default function Brief() {
     return () => clearInterval(t);
   }, []);
 
-  return (
-    <section className="relative w-full min-h-[420px] font-sans">
-      <div className="absolute inset-0 -z-10">
-        <Image
-          src="/photo_2025-08-10_10-38-14.jpg"
-          alt="abstract background"
-          priority
-          fill
-          className="object-cover object-center grayscale contrast-90"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-white/80" />
-      </div>
+  const buttonVariants = {
+    initial: { scale: 1 },
+    hover: { scale: 1.05, boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)' },
+    tap: { scale: 0.95 }
+  };
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 lg:py-20">
-        <div className="flex flex-col lg:flex-row items-center gap-10">
-          <div className="w-full lg:w-1/2 flex flex-col justify-center" data-aos="fade-right">
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-snug text-[#155e57]">
-              We connect top talent <br /> with life-changing roles across the UK.
+  return (
+    <section className="relative w-full bg-white text-gray-800 font-sans overflow-hidden py-16 lg:py-24">
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-teal-50" />
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+          {/* Left Content Section */}
+          <div className="w-full lg:w-1/2 flex flex-col justify-center text-center lg:text-left" data-aos="fade-up">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-[#155e57] tracking-tight">
+              Connecting Exceptional <br className="hidden lg:inline" /> Talent with <span className="text-teal-500">Transformative Roles</span>
             </h1>
-            <p className="mt-5 text-gray-700 max-w-lg text-base md:text-lg leading-relaxed">
-              How can FM leaders face the challenging headwinds of today's business world head-on? Our white paper and expert services help organisations transform operations, reduce cost and improve experience across estates.
+            <p className="mt-6 text-base md:text-lg text-gray-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              We are a leading recruitment partner in the UK, specializing in sectors where talent makes the greatest impact. Our mission is to bridge ambitious professionals with organizations that are shaping the future.
             </p>
-            <div className="mt-6 flex items-center gap-4">
-              <a
-                className="inline-flex items-center px-5 py-2 rounded-full bg-[#155e57] text-white font-medium shadow-lg hover:shadow-xl focus:ring-4 focus:ring-[#155e57]/30 transition"
+            <div className="mt-8 flex flex-wrap justify-center lg:justify-start items-center gap-4">
+              <motion.a
+                className="inline-flex items-center px-6 py-2.5 md:px-8 md:py-3 rounded-full bg-[#155e57] text-white font-semibold text-sm md:text-base shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-teal-200 transition-all duration-300"
                 href="/insight"
+                variants={buttonVariants}
+                initial="initial"
+                whileHover="hover"
+                whileTap="tap"
               >
-                Read now
-              </a>
-              <a className="text-sm text-[#155e57] underline hover:text-[#0d3c36]" href="/caseStudies">
-                Check Case Studies
+                Explore Our Services
+              </motion.a>
+              <a className="text-sm md:text-base text-[#155e57] font-medium hover:text-teal-700 transition-colors duration-300" href="/caseStudies">
+                View Case Studies &rarr;
               </a>
             </div>
           </div>
 
+          {/* Right Card Section */}
           <motion.div
-            className="relative w-full lg:w-1/2 bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl p-8 shadow-2xl flex flex-col justify-between"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.15 }}
-            data-aos="fade-up"
+            className="relative w-full lg:w-1/2 mt-12 lg:mt-0 p-8 md:p-10 bg-white/50 backdrop-blur-3xl border border-white/80 rounded-3xl shadow-3xl overflow-hidden flex flex-col justify-between self-center"
+            initial={{ x: 50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4, type: "spring", stiffness: 100 }}
+            data-aos="fade-left"
           >
-            <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-[#d6f0ed] flex items-center justify-center shadow-inner overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-36 h-36 md:w-48 md:h-48 rounded-full bg-teal-100/50 flex items-center justify-center p-8 opacity-90 z-20">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={services[index].id}
-                  initial={{ opacity: 0, x: -10, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 10, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex flex-col items-center justify-center text-[#155e57]"
+                  initial={{ opacity: 0, rotate: -15, scale: 0.8 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotate: 15, scale: 0.8 }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  className="flex flex-col items-center justify-center text-teal-800"
                 >
-                  <div className="text-4xl">{services[index].icon}</div>
-                  <div className="mt-1 text-sm font-semibold">{services[index].name}</div>
+                  <div className="text-4xl md:text-5xl">{services[index].icon}</div>
+                  <div className="mt-2 text-sm md:text-lg font-bold text-gray-700 text-center">{services[index].name}</div>
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            <h3 className="text-2xl font-semibold text-[#155e57]">Our Expertise</h3>
-            <hr className="my-4 border-gray-200" />
-            <p className="text-gray-700 leading-relaxed max-w-prose">
-              At Demand Recruitment Services, we bridge ambitious professionals with leading organisations across the UK. Our deep industry expertise ensures the right placements that drive long-term value and innovation.
+            <h3 className="text-2xl md:text-3xl font-bold text-[#155e57] mb-2">Our Core Expertise</h3>
+            <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-prose">
+              We specialize in providing top-tier staffing solutions and recruitment technology for key sectors, ensuring every placement adds significant value and fuels growth.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-[#155e57] hover:shadow-lg transition">Staffing Services</button>
-              <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-[#155e57] hover:shadow-lg transition">SaaS Product</button>
-              <button className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-[#155e57] hover:shadow-lg transition">Recruitment Platform</button>
+            <hr className="my-6 border-gray-200" />
+            <div className="flex flex-wrap gap-3">
+              <motion.button
+                className="px-4 py-2 rounded-full text-xs md:text-sm bg-white/70 backdrop-blur-lg border border-white/90 text-[#155e57] font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                variants={buttonVariants}
+                initial="initial"
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <FaHandshake className="inline-block mr-2" />
+                Recruitment
+              </motion.button>
+              <motion.button
+                className="px-4 py-2 rounded-full text-xs md:text-sm bg-white/70 backdrop-blur-lg border border-white/90 text-[#155e57] font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                variants={buttonVariants}
+                initial="initial"
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <FaBullhorn className="inline-block mr-2" />
+                Consulting
+              </motion.button>
+              <motion.button
+                className="px-4 py-2 rounded-full text-xs md:text-sm bg-white/70 backdrop-blur-lg border border-white/90 text-[#155e57] font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                variants={buttonVariants}
+                initial="initial"
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <FaBriefcase className="inline-block mr-2" />
+                Platform
+              </motion.button>
             </div>
-            <div className="mt-6 flex items-center justify-between">
-              <div className="text-sm text-gray-600">Trusted by leading organisations</div>
-              <a className="text-sm font-medium text-[#155e57] underline" href="/services">See case studies</a>
+
+            <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-gray-500 font-light">Trusted by leading UK organisations</div>
+              <a className="text-sm font-semibold text-[#155e57] hover:text-teal-700 transition-colors duration-300" href="/services">
+                Our Sectors &rarr;
+              </a>
             </div>
           </motion.div>
         </div>
