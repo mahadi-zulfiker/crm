@@ -36,31 +36,31 @@ const FloatingButtons = () => {
       {/* Scroll to Top Button (Fixed on Left Side) */}
       <button
         onClick={scrollToTop}
-        className={`fixed left-4 top-1/2 transform -translate-y-1/2 z-50 flex items-center justify-center w-14 h-14 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-900 transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0 animate-bounce' : 'opacity-0 translate-y-10'} transition-opacity duration-300`}
+        className={`fixed left-4 top-1/2 transform -translate-y-1/2 z-50 flex items-center justify-center w-14 h-14 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-900 transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0 animate-float' : 'opacity-0 translate-y-10'} transition-opacity duration-500`}
         aria-label="Scroll to top"
       >
         <FaArrowAltCircleUp className="text-2xl" />
       </button>
+
+      {/* Inline CSS for animations */}
+      <style jsx>{`
+        @keyframes pulse-slow {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 2s infinite ease-in-out;
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+          animation: float 3s infinite ease-in-out;
+        }
+      `}</style>
     </>
   );
 };
 
 export default FloatingButtons;
-
-// Inline CSS for animations
-<style jsx>{`
-  @keyframes pulse-slow {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-  .animate-pulse-slow {
-    animation: pulse-slow 2s infinite ease-in-out;
-  }
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-  .animate-bounce {
-    animation: bounce 1.5s infinite;
-  }
-`}</style>
