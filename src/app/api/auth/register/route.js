@@ -12,7 +12,10 @@ export async function POST(req) {
 
     if (!username || !email || !password) {
       console.log("❌ Missing Fields");
-      return new Response(JSON.stringify({ message: "All fields are required" }), { status: 400 });
+      return new Response(
+        JSON.stringify({ message: "All fields are required" }),
+        { status: 400 }
+      );
     }
 
     const db = await connectMongoDB();
@@ -36,7 +39,9 @@ export async function POST(req) {
     const existingUser = await db.collection("users").findOne({ email });
     if (existingUser) {
       console.log("⚠️ User already exists");
-      return new Response(JSON.stringify({ message: "User already exists" }), { status: 400 });
+      return new Response(JSON.stringify({ message: "User already exists" }), {
+        status: 400,
+      });
     }
 
     // 🔹 Hash the password
@@ -49,6 +54,10 @@ export async function POST(req) {
       email,
       password: hashedPassword,
       userType: userType || "Client",
+      personalInfo: {
+        username: username,
+        email: email,
+      },
       createdAt: new Date(),
     });
 
@@ -58,9 +67,15 @@ export async function POST(req) {
       throw new Error("Failed to insert user");
     }
 
-    return new Response(JSON.stringify({ message: "User registered successfully" }), { status: 201 });
+    return new Response(
+      JSON.stringify({ message: "User registered successfully" }),
+      { status: 201 }
+    );
   } catch (error) {
     console.error("❌ Registration Error:", error);
-    return new Response(JSON.stringify({ message: "Something went wrong", error: error.message }), { status: 500 });
+    return new Response(
+      JSON.stringify({ message: "Something went wrong", error: error.message }),
+      { status: 500 }
+    );
   }
 }

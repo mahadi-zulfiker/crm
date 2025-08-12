@@ -29,25 +29,32 @@ export async function GET(req) {
 // UPDATE Client Profile
 export async function PUT(req) {
   try {
-    const { _id, username, contactInfo, companyName, address , image } = await req.json();
+    const body = await req.json();
+    const { _id, ...updateData } = body; // remove _id from fields to set
 
     if (!_id) {
-      return NextResponse.json({ error: "Client ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
     }
 
     const db = await connectMongoDB();
-    const updatedClient = await db
+    const result = await db
       .collection("users")
-      .updateOne(
-        { _id: new ObjectId(_id) },
-        { $set: { username, contactInfo, companyName, address, image } }
-      );
+      .updateOne({ _id: new ObjectId(_id) }, { $set: updateData });
 
-    if (!updatedClient.modifiedCount) {
-      return NextResponse.json({ error: "Update failed" }, { status: 500 });
+    if (!result.modifiedCount) {
+      return NextResponse.json(
+        { error: "No changes made or update failed" },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ message: "Profile updated successfully" });
+    return NextResponse.json(
+      { message: "Profile updated successfully" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error updating client profile:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
