@@ -5,51 +5,99 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import CountUp from 'react-countup';
 import { useInView } from 'react-intersection-observer';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'; // Adjust path as needed
+
+// A separate file for your testimonials data for better organization
+const testimonials = [
+  {
+    clientName: 'Client A',
+    title: 'Revolutionizing Our Workflow',
+    text: "Working with this team has completely transformed our operations. Their solutions are not only innovative but also incredibly reliable. We've seen a significant increase in efficiency and a decrease in operational costs since implementation.",
+    author: 'Jane Doe',
+    position: 'CEO of TechCorp',
+    image: '/clients/client1.png',
+  },
+  {
+    clientName: 'Client B',
+    title: 'Exceptional Service and Results',
+    text: "The level of support and expertise we received was outstanding. They took the time to understand our unique challenges and delivered a custom solution that exceeded all our expectations. We highly recommend them!",
+    author: 'John Smith',
+    position: 'CTO of Innovate Inc.',
+    image: '/clients/client2.png',
+  },
+  {
+    clientName: 'Client C',
+    title: 'Seamless Integration and Support',
+    text: "Their team made the entire process seamless, from initial consultation to final deployment. The ongoing support has been fantastic, and they're always there to help. Truly a partner we can count on.",
+    author: 'Sarah Chen',
+    position: 'Founder of Global Solutions',
+    image: '/clients/client3.png',
+  },
+  {
+    clientName: 'Client D',
+    title: 'A True Game Changer',
+    text: 'We were looking for a partner to help us scale, and we found the perfect fit. Their expertise and dedication are second to none. Our productivity has skyrocketed, and we are now able to focus on what matters most.',
+    author: 'Michael B.',
+    position: 'Operations Director at Future Labs',
+    image: '/clients/client4.png',
+  },
+];
+
+// Client logos with a link to their testimonials
+const logos = [
+  { src: '/clients/client1.png', alt: 'Client A' },
+  { src: '/clients/client2.png', alt: 'Client B' },
+  { src: '/clients/client3.png', alt: 'Client C' },
+  { src: '/clients/client4.png', alt: 'Client D' },
+];
 
 const Clients = () => {
-  // Initialize AOS for scroll animations
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
   }, []);
 
-  // State to control logo scrolling
   const [isPaused, setIsPaused] = useState(false);
   const scrollerRef = useRef(null);
 
-  // Client logos (duplicated for seamless scrolling)
-  const logos = [
-    { src: "/clients/client1.png", alt: "Client A" },
-    { src: "/clients/client2.png", alt: "Client B" },
-    { src: "/clients/client3.png", alt: "Client C" },
-    { src: "/clients/client4.png", alt: "Client D" },
-    { src: "/clients/client1.png", alt: "Client E" },
-    { src: "/clients/client2.png", alt: "Client F" },
-    { src: "/clients/client3.png", alt: "Client A" }, // Repeated for seamless scroll
-    { src: "/clients/client4.png", alt: "Client B" },
-    { src: "/clients/client1.png", alt: "Client C" },
-    { src: "/clients/client2.png", alt: "Client D" },
-  ];
+  // State for testimonials dialog
+  const [selectedTestimonial, setSelectedTestimonial] = useState(null);
 
+  // Stats data
   const stats = [
-    { number: 500, label: "Clients Served", prefix: "+", suffix: "" },
-    { number: 95, label: "Satisfaction Rate", prefix: "", suffix: "%" },
-    { number: 24, label: "Customer Support", prefix: "", suffix: "/7" },
-    { number: 10, label: "Years of Experience", prefix: "", suffix: "+" },
+    { number: 500, label: 'Clients Served', prefix: '+', suffix: '' },
+    { number: 95, label: 'Satisfaction Rate', prefix: '', suffix: '%' },
+    { number: 24, label: 'Customer Support', prefix: '', suffix: '/7' },
+    { number: 10, label: 'Years of Experience', prefix: '', suffix: '+' },
   ];
 
-  // Use a state to control the start of the count animation
   const [hasAnimated, setHasAnimated] = useState(false);
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.3,
   });
 
-  // Start the count animation when the component comes into view
   useEffect(() => {
     if (inView && !hasAnimated) {
       setHasAnimated(true);
     }
   }, [inView, hasAnimated]);
+
+  // Function to handle opening the dialog
+  const handleOpenDialog = (clientName) => {
+    const testimonial = testimonials.find(
+      (t) => t.clientName === clientName
+    );
+    setSelectedTestimonial(testimonial);
+  };
+
+  // Duplicate logos for seamless scrolling
+  const displayedLogos = [...logos, ...logos];
 
   return (
     <section className="bg-gradient-to-b from-white to-gray-50 py-24 px-4 md:px-8 font-sans antialiased">
@@ -67,7 +115,8 @@ const Clients = () => {
             data-aos="fade-up"
             data-aos-delay="100"
           >
-            Our commitment to excellence has earned the trust of companies worldwide.
+            Our commitment to excellence has earned the trust of companies
+            worldwide.
           </p>
         </div>
 
@@ -83,14 +132,12 @@ const Clients = () => {
             ref={scrollerRef}
             className={`flex space-x-12 animate-scroll ${isPaused ? 'animate-none' : ''}`}
           >
-            {logos.map((logo, index) => (
+            {displayedLogos.map((logo, index) => (
               <a
                 key={index}
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
+                onClick={() => handleOpenDialog(logo.alt)}
                 className="flex-shrink-0 cursor-pointer transition-transform duration-300 transform"
-                title={`View case study for ${logo.alt}`}
+                title={`View testimonial from ${logo.alt}`}
               >
                 <img
                   src={logo.src}
@@ -128,8 +175,6 @@ const Clients = () => {
                     duration={2.5}
                     prefix={item.prefix}
                     suffix={item.suffix}
-                    enableScrollSpy={true}
-                    scrollSpyOnce={true}
                   />
                 ) : (
                   `${item.prefix}${item.number}${item.suffix}`
@@ -142,6 +187,38 @@ const Clients = () => {
           ))}
         </div>
       </div>
+
+      {/* Testimonial Dialog */}
+      {selectedTestimonial && (
+        <Dialog
+          open={!!selectedTestimonial}
+          onOpenChange={() => setSelectedTestimonial(null)}
+        >
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader className="flex flex-col items-center text-center">
+              <img
+                src={selectedTestimonial.image}
+                alt={selectedTestimonial.clientName}
+                className="h-20 w-20 object-contain mb-4"
+              />
+              <DialogTitle className="text-xl font-bold">
+                "{selectedTestimonial.title}"
+              </DialogTitle>
+              <DialogDescription className="text-gray-500 mt-2">
+                {selectedTestimonial.text}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 text-center">
+              <p className="font-semibold text-gray-800">
+                - {selectedTestimonial.author}
+              </p>
+              <p className="text-sm text-gray-600">
+                {selectedTestimonial.position}
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Inline CSS for the scrolling animation */}
       <style jsx>{`
