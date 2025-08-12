@@ -40,7 +40,6 @@ import TimeSheetJob from "./Admin/TimeSheetJob";
 import AdminProfileManagement from "./Admin/AdminProfileManagement";
 import VendorProfileManagement from "./Vendor/VendorProfileManagement";
 import ClientProfileManagement from "./Client/ClientProfileManagement";
-import Link from "next/link";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,7 +51,11 @@ const MainLayout = () => {
   const pathname = usePathname();
 
   return (
-    <div className="relative bg-[#f7f6f9] w-full  h-screen font-[sans-serif]">
+    <div
+      className={`relative bg-[#f7f6f9] w-full  ${
+        isSidebarOpen ? "h-screen" : "h-[calc(113vh)]"
+      } font-[sans-serif]`}
+    >
       <div className="flex items-start">
         <Sidebar
           isSidebarOpen={isSidebarOpen}
@@ -60,14 +63,18 @@ const MainLayout = () => {
         />
 
         {/* Main Content */}
-        <section className="main-content w-full overflow-x-hidden h-screen overflow-scroll">
+        <section
+          className={`main-content w-full overflow-x-hidden ${
+            isSidebarOpen ? "h-screen" : "h-[calc(113vh)]"
+          }  overflow-scroll`}
+        >
           <Header
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
           />
 
           {/* Content based on route */}
-          <div className="mt-8 p-4">
+          <div className={`${isSidebarOpen ? "mt-8 p-4" : "mt-8 p-4"}`}>
             {pathname === "/dashboard/client" && <Client />}
             {pathname === "/dashboard/client/postedJobs" && <PostedJobs />}
             {pathname === "/dashboard/client/completedJobsClient" && (
