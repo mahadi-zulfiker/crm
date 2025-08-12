@@ -13,6 +13,8 @@ import {
   Calendar,
   DollarSign,
   CreditCard,
+  HomeIcon,
+  WalletCards,
 } from "lucide-react";
 
 export default function getALLRoles() {
@@ -28,7 +30,10 @@ export default function getALLRoles() {
         icon: Briefcase,
         items: [
           { name: "Browse Jobs", href: "/allJobs" },
-          { name: "Saved Jobs", href: "/dashboard/client/jobs/saved" },
+          {
+            name: "Manage Jobs",
+            href: "/dashboard/client/jobManagementClient",
+          },
           {
             name: "Completed Jobs",
             href: "/dashboard/client/completedJobsClient",
@@ -56,16 +61,29 @@ export default function getALLRoles() {
         ],
       },
       {
+        title: "Payment History",
+        icon: WalletCards,
+        href: "/dashboard/client/paymentHistory",
+      },
+      {
         title: "Profile",
         icon: User,
+        href: "/dashboard/client/clientProfileManagement",
       },
       {
         title: "Messages",
         icon: MessageSquare,
+        href: "/dashboard/client/vendorInteraction",
+      },
+      {
+        title: "Home",
+        icon: HomeIcon,
+        href: "/",
       },
       {
         title: "Settings",
         icon: Settings,
+        href: "/dashboard/client/settings",
       },
     ],
     employee: [
