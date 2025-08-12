@@ -10,9 +10,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobiles";
 import { ChevronLeft, Search, ChevronRight } from "lucide-react";
 import getALLRoles from "@/lib/getALLRoles";
+import { useSession } from "next-auth/react";
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
-  const role = "user";
+  const { data: session, status } = useSession();
+  const role = session?.user?.role || "user";
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedItems, setExpandedItems] = useState(["attendance"]);
   const isMobile = useIsMobile();

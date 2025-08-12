@@ -1,35 +1,65 @@
-import React, { useEffect, useState } from "react";
-import { io } from "socket.io-client";
-import { faker } from "@faker-js/faker";
+"use client";
 
+import { useState, useEffect, useRef } from "react";
+import { io } from "socket.io-client";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Send, Paperclip, MessageSquare, User } from "lucide-react";
+import { cn } from "@/lib/utils";
+import axios from "axios"; // Import axios for fetching vendor data
+
+// Initialize socket connection
 const socket = io("https://crm-lemon-eight.vercel.app");
 
-function VendorInteraction() {
+export default function UserMessagesPage() {
   const [vendors, setVendors] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [hasVendorResponded, setHasVendorResponded] = useState(false);
+  const messagesEndRef = useRef(null); // Ref for scrolling to the latest message
 
+  // Fetch vendor data from API
   useEffect(() => {
-    const vendorList = Array.from({ length: 5 }, () => ({
-      id: faker.string.uuid(),
-      name: faker.person.fullName(),
-      job: faker.commerce.department(),
-    }));
-    setVendors(vendorList);
+    const fetchVendors = async () => {
+      try {
+        const response = await axios.get("/api/vendors");
+        setVendors(response.data);
+      } catch (error) {
+        console.error("Failed to fetch vendors:", error);
+      }
+    };
+    fetchVendors();
   }, []);
 
+  // Socket.IO message handling
   useEffect(() => {
     socket.on("receiveMessage", (data) => {
       setMessages((prev) => [...prev, data]);
     });
+
     return () => socket.off("receiveMessage");
   }, []);
 
+  // Scroll to bottom of messages when new message arrives
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const sendMessage = () => {
     if (message.trim() && selectedVendor) {
-      const newMessage = { sender: "Client", text: message, vendorId: selectedVendor.id };
+      const newMessage = {
+        sender: "Client",
+        text: message,
+        vendorId: selectedVendor.id,
+      };
       socket.emit("sendMessage", newMessage);
       setMessages((prev) => [...prev, newMessage]);
       setMessage("");
@@ -50,87 +80,157 @@ function VendorInteraction() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans py-6">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Vendor List */}
-          <div className="w-full lg:w-1/3 bg-white shadow-xl rounded-lg p-6 border border-gray-200">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Assigned Vendors</h2>
-            <ul className="space-y-3">
-              {vendors.map((vendor) => (
-                <li
-                  key={vendor.id}
-                  className={`p-3 cursor-pointer rounded-lg transition duration-300 ease-in-out shadow-md flex items-center justify-between hover:bg-orange-100 ${
-                    selectedVendor?.id === vendor.id
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-50 text-gray-800"
-                  }`}
-                  onClick={() => {
-                    setSelectedVendor(vendor);
-                    setHasVendorResponded(false);
-                  }}
-                >
-                  <div>
-                    <span className="text-lg font-medium">{vendor.name}</span>
-                    <span className="text-sm text-gray-600 ml-2">({vendor.job})</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Chat Section */}
-          <div className="w-full lg:w-2/3 bg-white shadow-xl rounded-lg p-6 border border-gray-200 flex flex-col">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Vendor Chat</h2>
-            {selectedVendor ? (
-              <>
-                <div
-                  className="border p-4 flex-1 overflow-y-auto bg-gray-50 rounded-lg shadow-inner"
-                  style={{ maxHeight: "400px" }}
-                >
-                  {messages
-                    .filter((msg) => msg.vendorId === selectedVendor.id)
-                    .map((msg, index) => (
-                      <p
-                        key={index}
-                        className={`my-2 flex ${
-                          msg.sender === "Client" ? "justify-end" : "justify-start"
-                        }`}
-                      >
-                        <span
-                          className={`inline-block px-4 py-2 rounded-lg text-white transition duration-300 ease-in-out shadow-md break-words ${
-                            msg.sender === "Client" ? "bg-orange-500" : "bg-gray-600"
-                          }`}
-                        >
-                          {msg.text}
-                        </span>
-                      </p>
-                    ))}
-                </div>
-                <div className="mt-4 flex flex-col md:flex-row">
-                  <input
-                    type="text"
-                    className="flex-grow p-3 border rounded-lg focus:ring-4 focus:ring-orange-400 transition duration-300 ease-in-out shadow-sm mb-2 md:mb-0"
-                    placeholder="Type a message..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+    <div className="space-y-6">
+      <Card className="bg-white shadow-sm border-0 h-[calc(100vh-180px)] flex flex-col lg:flex-row">
+        {/* Vendor List */}
+        <div className="w-full lg:w-1/3 border-r border-gray-200 p-6 flex flex-col">
+          <CardHeader className="p-0 pb-4">
+            <CardTitle className="text-xl font-semibold text-gray-900">
+              Assigned Vendors
+            </CardTitle>
+            <CardDescription>
+              Select a vendor to start a conversation.
+            </CardDescription>
+          </CardHeader>
+          <div className="flex-1 overflow-y-auto space-y-3">
+            {vendors.map((vendor) => (
+              <Button
+                key={vendor.id}
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start p-4 h-auto rounded-lg transition-colors duration-200",
+                  selectedVendor?.id === vendor.id
+                    ? "bg-teal-100 text-teal-800 hover:bg-teal-200"
+                    : "hover:bg-gray-100 text-gray-800"
+                )}
+                onClick={() => {
+                  setSelectedVendor(vendor);
+                  setHasVendorResponded(false);
+                }}
+              >
+                <Avatar className="h-10 w-10 mr-3">
+                  <AvatarImage
+                    src="/placeholder.svg?height=40&width=40"
+                    alt={vendor.name}
                   />
-                  <button
-                    className="md:ml-3 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition duration-300 ease-in-out shadow-lg"
-                    onClick={sendMessage}
-                  >
-                    Send
-                  </button>
+                  <AvatarFallback className="bg-teal-500 text-white">
+                    {vendor.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col items-start">
+                  <span className="text-base font-medium">{vendor.name}</span>
+                  <span className="text-sm text-gray-500">{vendor.job}</span>
                 </div>
-              </>
-            ) : (
-              <p className="text-gray-500">Select a vendor to chat with.</p>
-            )}
+              </Button>
+            ))}
           </div>
         </div>
-      </div>
+
+        {/* Chat Section */}
+        <div className="w-full lg:w-2/3 p-6 flex flex-col">
+          <CardHeader className="p-0 pb-4 border-b border-gray-200">
+            <CardTitle className="text-xl font-semibold text-gray-900">
+              {selectedVendor
+                ? `Chat with ${selectedVendor.name}`
+                : "Vendor Chat"}
+            </CardTitle>
+          </CardHeader>
+          {selectedVendor ? (
+            <>
+              <div className="flex-1 overflow-y-auto py-4 space-y-4">
+                {messages
+                  .filter((msg) => msg.vendorId === selectedVendor.id)
+                  .map((msg, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "flex items-end gap-3",
+                        msg.sender === "Client"
+                          ? "justify-end"
+                          : "justify-start"
+                      )}
+                    >
+                      {msg.sender !== "Client" && (
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src="/placeholder.svg?height=32&width=32"
+                            alt={msg.sender}
+                          />
+                          <AvatarFallback className="bg-gray-200">
+                            {msg.sender
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div
+                        className={cn(
+                          "p-3 rounded-lg max-w-[70%]",
+                          msg.sender === "Client"
+                            ? "bg-teal-600 text-white rounded-br-none"
+                            : "bg-gray-100 text-gray-800 rounded-bl-none"
+                        )}
+                      >
+                        <p className="font-medium text-sm mb-1">{msg.sender}</p>
+                        <p className="text-sm">{msg.text}</p>
+                      </div>
+                      {msg.sender === "Client" && (
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src="/placeholder.svg?height=32&width=32"
+                            alt="You"
+                          />
+                          <AvatarFallback className="bg-teal-500 text-white">
+                            <User className="h-4 w-4" />
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                    </div>
+                  ))}
+                <div ref={messagesEndRef} /> {/* Scroll anchor */}
+              </div>
+              <div className="mt-4 flex items-center gap-2 border-t border-gray-200 pt-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-500 hover:text-teal-600"
+                >
+                  <Paperclip className="w-5 h-5" />
+                </Button>
+                <Input
+                  type="text"
+                  className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200"
+                  placeholder="Type a message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      sendMessage();
+                    }
+                  }}
+                />
+                <Button
+                  className="bg-teal-600 hover:bg-teal-700"
+                  onClick={sendMessage}
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-gray-500 text-lg">
+              <MessageSquare className="w-8 h-8 mr-2" />
+              Select a vendor to start chatting.
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }
-
-export default VendorInteraction;
