@@ -1,21 +1,9 @@
-import React from "react";
+import React from 'react'
 
-export default function Messages() {
+function Messages() {
   return (
-    <div>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-      <h1>index</h1>
-    </div>
-  );
+    <div>Messages</div>
+  )
 }
+
+export default Messages
