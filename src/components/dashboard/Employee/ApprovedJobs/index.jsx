@@ -1,32 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, XCircle, Calendar, Briefcase } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const ApprovedJobs = () => {
+  const { data: session, status } = useSession();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch approved jobs from backend
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch("/api/approvedJobsEmployee");
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Failed to fetch jobs");
+    if (status === "authenticated" && session?.user?.email) {
+      const fetchAppliedJobs = async () => {
+        try {
+          const response = await fetch(
+            `/api/applicationManagementEmployee?email=${session.user.email}`
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch applied jobs");
+          }
+          const data = await response.json();
 
-        setJobs(data.data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+          // Ensure correct data format
+          if (Array.isArray(data.approvedJobs)) {
+            setJobs(data.approvedJobs);
+          } else {
+            throw new Error("Unexpected response format");
+          }
 
-    fetchJobs();
-  }, []);
+          console.log("fetched jobs", data);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchAppliedJobs();
+    } else if (status === "unauthenticated") {
+      setLoading(false);
+    }
+  }, [session, status]);
 
   const updateJobStatus = async (id, action) => {
     const confirmText =
@@ -57,7 +83,12 @@ const ApprovedJobs = () => {
 
         setJobs((prevJobs) =>
           prevJobs.map((job) =>
-            job._id === id ? { ...job, statusJob: action === "complete" ? "Completed" : "Resigned" } : job
+            job._id === id
+              ? {
+                  ...job,
+                  statusJob: action === "complete" ? "Completed" : "Resigned",
+                }
+              : job
           )
         );
 
@@ -77,71 +108,224 @@ const ApprovedJobs = () => {
     });
   };
 
-  if (loading) return <p className="text-center text-gray-600">Loading jobs...</p>;
-  if (error) return <p className="text-center text-red-600">Error: {error}</p>;
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      Completed: {
+        variant: "default",
+        className: "bg-green-100 text-green-800",
+        icon: CheckCircle,
+      },
+      Resigned: {
+        variant: "destructive",
+        className: "bg-red-100 text-red-800",
+        icon: XCircle,
+      },
+      Approved: {
+        variant: "secondary",
+        className: "bg-blue-100 text-blue-800",
+        icon: Briefcase,
+      },
+    };
+
+    const config = statusConfig[status] || statusConfig["Approved"];
+    const IconComponent = config.icon;
+
+    return (
+      <Badge className={`flex items-center gap-1 ${config.className}`}>
+        <IconComponent className="w-3 h-3" />
+        {status || "Approved"}
+      </Badge>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
+          <p className="text-gray-600 mt-4">Loading approved jobs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+        <p className="text-red-600 text-lg font-semibold">Error: {error}</p>
+        <Button onClick={() => window.location.reload()} className="mt-4">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Approved Jobs</h1>
-      <div className="overflow-x-auto shadow-lg rounded-lg">
-        <table className="min-w-full bg-white rounded-lg">
-          <thead>
-            <tr className="bg-gray-200 text-left">
-              <th className="px-6 py-3 text-gray-600 font-medium">Job Title</th>
-              <th className="px-6 py-3 text-gray-600 font-medium">Schedule</th>
-              <th className="px-6 py-3 text-gray-600 font-medium">Status</th>
-              <th className="px-6 py-3 text-gray-600 font-medium">Arrange Meeting</th>
-              <th className="px-6 py-3 text-gray-600 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map((job) => (
-              <tr key={job._id} className="border-b hover:bg-gray-100">
-                <td className="px-6 py-4">{job.position}</td>
-                <td className="px-6 py-4">{job.appliedAt}</td>
-                <td
-                  className={`px-6 py-4 font-medium ${job.statusJob === "Completed"
-                      ? "text-green-600"
-                      : job.statusJob === "Resigned"
-                        ? "text-red-600"
-                        : "text-yellow-600"
-                    }`}
-                >
-                  {job.statusJob || "Approved"}
-                </td>
-                <td className="px-6 py-4">
-                  <Link href="/scheduleMeet">
-                    <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      onClick={() => handleArrangeMeeting(job.jobTitle)}
-                    >
-                      Arrange Meeting
-                    </button>
-                  </Link>
-                </td>
-                <td className="px-6 py-4 space-x-2">
-                  {job.statusJob !== "Completed" && job.statusJob !== "Resigned" && (
-                    <>
-                      <button
-                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                        onClick={() => updateJobStatus(job._id, "complete")}
-                      >
-                        Mark as Complete
-                      </button>
-                      <button
-                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                        onClick={() => updateJobStatus(job._id, "resign")}
-                      >
-                        Resign
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Approved Jobs</h1>
+          <p className="text-gray-600 mt-1">
+            Manage your approved job applications
+          </p>
+        </div>
       </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Total Approved
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              {jobs.length}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Completed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {jobs.filter((job) => job.statusJob === "Completed").length}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Active
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">
+              {
+                jobs.filter((job) => !job.status || job.status === "Approved")
+                  .length
+              }
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Approved Jobs Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Approved Jobs</CardTitle>
+          <CardDescription>
+            Jobs that have been approved and are ready for action
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {jobs.length === 0 ? (
+            <div className="text-center py-12">
+              <Briefcase className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 text-lg">No approved jobs found</p>
+              <p className="text-gray-500 mt-2">
+                Your approved job applications will appear here
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Job Title
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Schedule
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Status
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Meeting
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {jobs.map((job) => (
+                    <tr
+                      key={job._id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="py-4 px-4">
+                        <div className="font-medium text-gray-900">
+                          {job.position}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-gray-700">
+                        {new Date(job.appliedAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </td>
+                      <td className="py-4 px-4">
+                        {getStatusBadge(job.statusJob)}
+                      </td>
+                      <td className="py-4 px-4">
+                        <Link href="/scheduleMeet">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2 bg-transparent"
+                            onClick={() => handleArrangeMeeting(job.position)}
+                          >
+                            <Calendar className="w-4 h-4" />
+                            Arrange Meeting
+                          </Button>
+                        </Link>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex gap-2">
+                          {job.statusJob !== "Completed" &&
+                            job.statusJob !== "Resigned" && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={() =>
+                                    updateJobStatus(job._id, "complete")
+                                  }
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-1" />
+                                  Complete
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() =>
+                                    updateJobStatus(job._id, "resign")
+                                  }
+                                >
+                                  <XCircle className="w-4 h-4 mr-1" />
+                                  Resign
+                                </Button>
+                              </>
+                            )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
