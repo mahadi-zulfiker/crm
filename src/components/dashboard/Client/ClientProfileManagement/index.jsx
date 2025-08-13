@@ -25,7 +25,7 @@ import { Progress } from "@/components/ui/progress";
 import { useSession, signIn } from "next-auth/react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import { Loader2, LogIn, Plus, X } from "lucide-react";
+import { Loader2, LogIn, Plus, X, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function UserProfilePage() {
@@ -34,6 +34,7 @@ export default function UserProfilePage() {
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [imageUploading, setImageUploading] = useState(false);
   const fileInputRef = useRef(null);
   const resumeInputRef = useRef(null);
   const coverLetterInputRef = useRef(null);
@@ -71,7 +72,6 @@ export default function UserProfilePage() {
       };
 
       setClient(initializedData);
-      console.log(initializedData);
       setError("");
     } catch (error) {
       console.error("Error fetching client data:", error);
@@ -268,19 +268,20 @@ export default function UserProfilePage() {
     const file = event.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
+    setImageUploading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("image", file); // imgbb expects "image" field
+
       const res = await fetch("/api/uploadImage", {
         method: "POST",
         body: formData,
       });
-      
-      const data = await res.json();
-      console.log({ data });
 
-      if (data.url) {
+      const data = await res.json();
+
+      if (res.ok && data?.url) {
         setClient((prev) => ({
           ...prev,
           personalInfo: {
@@ -288,9 +289,42 @@ export default function UserProfilePage() {
             profilePhoto: data.url,
           },
         }));
+
+        const updatedClient = {
+          ...client,
+          personalInfo: {
+            ...client.personalInfo,
+            profilePhoto: data.url,
+          },
+          _id: client._id,
+        };
+
+        setClient(updatedClient);
+
+        await axios.put("/api/clientProfile", updatedClient);
+
+        toast({
+          title: "Image uploaded successfully!",
+          description:
+            "Your profile photo has been updated. Don't forget to save your changes.",
+        });
+      } else {
+        console.error("Upload failed:", data?.error || data);
+        toast({
+          title: "Upload failed",
+          description: data?.error || "Failed to upload image",
+          variant: "destructive",
+        });
       }
     } catch (err) {
       console.error("Error uploading image:", err);
+      toast({
+        title: "Upload error",
+        description: "An error occurred while uploading the image",
+        variant: "destructive",
+      });
+    } finally {
+      setImageUploading(false);
     }
   };
 
@@ -387,6 +421,16 @@ export default function UserProfilePage() {
 
   return (
     <div className="space-y-6">
+      {/* Header with Edit Profile Button */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">User Profile</h1>
+          <p className="text-gray-600 mt-1">
+            Manage your personal information and preferences
+          </p>
+        </div>
+      </div>
+
       {message && <p className="text-green-600">{message}</p>}
       {error && <p className="text-red-600">{error}</p>}
 
@@ -405,7 +449,6 @@ export default function UserProfilePage() {
             <Progress
               value={profileCompletion}
               className="h-4 rounded-full transition-all duration-500 ease-out"
-              // indicatorClassName="bg-teal-600"
             />
           </div>
           <p className="text-sm text-gray-600 mt-2 text-center">
@@ -413,6 +456,25 @@ export default function UserProfilePage() {
           </p>
         </CardContent>
       </Card>
+
+      <div className="flex justify-end ">
+        <Button
+          className="bg-teal-600 hover:bg-teal-700 text-white"
+          onClick={editing ? handleSave : handleEditToggle}
+        >
+          <Edit className="mr-2 h-4 w-4" />
+          {editing ? "Save Changes" : "Edit Profile"}
+        </Button>
+        {editing && (
+          <Button
+            variant="outline"
+            onClick={handleEditToggle}
+            className="ml-2 bg-transparent"
+          >
+            Cancel
+          </Button>
+        )}
+      </div>
 
       <Tabs defaultValue="personal-info" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 h-auto flex-wrap">
@@ -438,22 +500,31 @@ export default function UserProfilePage() {
               </CardTitle>
               <CardDescription>Basic details about yourself.</CardDescription>
             </CardHeader>
+
             <CardContent className="space-y-6">
               <div className="flex items-center gap-4">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage
-                    src={
-                      client.personalInfo?.profilePhoto ||
-                      "/placeholder.svg?height=96&width=96"
-                    }
-                    alt="User Profile"
-                  />
-                  <AvatarFallback className="bg-teal-500 text-white text-3xl">
-                    {client.personalInfo?.username
-                      ? client.personalInfo.username.charAt(0).toUpperCase()
-                      : "U"}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage
+                      src={
+                        client.personalInfo?.profilePhoto ||
+                        "/placeholder.svg?height=96&width=96" ||
+                        "/placeholder.svg"
+                      }
+                      alt="User Profile"
+                    />
+                    <AvatarFallback className="bg-teal-500 text-white text-3xl">
+                      {client.personalInfo?.username
+                        ? client.personalInfo.username.charAt(0).toUpperCase()
+                        : "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  {imageUploading && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-white" />
+                    </div>
+                  )}
+                </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">
                     {client.personalInfo?.username || "User"}
@@ -471,9 +542,9 @@ export default function UserProfilePage() {
                     size="sm"
                     className="mt-2 bg-transparent"
                     onClick={triggerFileInput}
-                    disabled={!editing}
+                    disabled={imageUploading}
                   >
-                    Change Photo
+                    {imageUploading ? "Uploading..." : "Change Photo"}
                   </Button>
                 </div>
               </div>
@@ -485,7 +556,7 @@ export default function UserProfilePage() {
                     name="username"
                     value={
                       editing
-                        ? client.personalInfo?.username
+                        ? client.personalInfo?.username || ""
                         : client.personalInfo?.username || "N/A"
                     }
                     onChange={(e) => handleChange(e, "personalInfo")}
@@ -500,7 +571,7 @@ export default function UserProfilePage() {
                     type="date"
                     value={
                       editing
-                        ? client.personalInfo?.dateOfBirth
+                        ? client.personalInfo?.dateOfBirth || ""
                         : client.personalInfo?.dateOfBirth || "N/A"
                     }
                     onChange={(e) => handleChange(e, "personalInfo")}
@@ -512,7 +583,7 @@ export default function UserProfilePage() {
                   <Select
                     value={
                       editing
-                        ? client.personalInfo?.gender
+                        ? client.personalInfo?.gender || ""
                         : client.personalInfo?.gender || ""
                     }
                     onValueChange={(value) =>
@@ -550,7 +621,7 @@ export default function UserProfilePage() {
                     type="email"
                     value={
                       editing
-                        ? client.personalInfo?.contact?.email
+                        ? client.personalInfo?.contact?.email || ""
                         : client.personalInfo?.contact?.email || "N/A"
                     }
                     onChange={(e) => handleChange(e, "personalInfo", "contact")}
@@ -564,7 +635,7 @@ export default function UserProfilePage() {
                     name="phone"
                     value={
                       editing
-                        ? client.personalInfo?.contact?.phone
+                        ? client.personalInfo?.contact?.phone || ""
                         : client.personalInfo?.contact?.phone || "N/A"
                     }
                     onChange={(e) => handleChange(e, "personalInfo", "contact")}
@@ -580,7 +651,7 @@ export default function UserProfilePage() {
                     name="alternativeContact"
                     value={
                       editing
-                        ? client.personalInfo?.contact?.alternativeContact
+                        ? client.personalInfo?.contact?.alternativeContact || ""
                         : client.personalInfo?.contact?.alternativeContact ||
                           "N/A"
                     }
@@ -601,7 +672,7 @@ export default function UserProfilePage() {
                     name="currentCity"
                     value={
                       editing
-                        ? client.personalInfo?.location?.currentCity
+                        ? client.personalInfo?.location?.currentCity || ""
                         : client.personalInfo?.location?.currentCity || "N/A"
                     }
                     onChange={(e) =>
@@ -644,7 +715,8 @@ export default function UserProfilePage() {
                     name="preferredLocations"
                     value={
                       editing
-                        ? client.personalInfo?.location?.preferredLocations
+                        ? client.personalInfo?.location?.preferredLocations ||
+                          ""
                         : client.personalInfo?.location?.preferredLocations ||
                           "N/A"
                     }
@@ -667,7 +739,7 @@ export default function UserProfilePage() {
                     name="linkedin"
                     value={
                       editing
-                        ? client.personalInfo?.links?.linkedin
+                        ? client.personalInfo?.links?.linkedin || ""
                         : client.personalInfo?.links?.linkedin || "N/A"
                     }
                     onChange={(e) => handleChange(e, "personalInfo", "links")}
@@ -681,7 +753,7 @@ export default function UserProfilePage() {
                     name="portfolio"
                     value={
                       editing
-                        ? client.personalInfo?.links?.portfolio
+                        ? client.personalInfo?.links?.portfolio || ""
                         : client.personalInfo?.links?.portfolio || "N/A"
                     }
                     onChange={(e) => handleChange(e, "personalInfo", "links")}
@@ -695,7 +767,7 @@ export default function UserProfilePage() {
                     name="github"
                     value={
                       editing
-                        ? client.personalInfo?.links?.github
+                        ? client.personalInfo?.links?.github || ""
                         : client.personalInfo?.links?.github || "N/A"
                     }
                     onChange={(e) => handleChange(e, "personalInfo", "links")}
@@ -709,7 +781,7 @@ export default function UserProfilePage() {
                     name="website"
                     value={
                       editing
-                        ? client.personalInfo?.links?.website
+                        ? client.personalInfo?.links?.website || ""
                         : client.personalInfo?.links?.website || "N/A"
                     }
                     onChange={(e) => handleChange(e, "personalInfo", "links")}
@@ -740,7 +812,7 @@ export default function UserProfilePage() {
                   name="desiredRoles"
                   value={
                     editing
-                      ? client.careerPreferences?.desiredRoles
+                      ? client.careerPreferences?.desiredRoles || ""
                       : client.careerPreferences?.desiredRoles || "N/A"
                   }
                   onChange={(e) => handleChange(e, "careerPreferences")}
@@ -752,7 +824,7 @@ export default function UserProfilePage() {
                 <Select
                   value={
                     editing
-                      ? client.careerPreferences?.employmentType
+                      ? client.careerPreferences?.employmentType || ""
                       : client.careerPreferences?.employmentType || ""
                   }
                   onValueChange={(value) =>
@@ -786,7 +858,7 @@ export default function UserProfilePage() {
                   name="expectedSalary"
                   value={
                     editing
-                      ? client.careerPreferences?.expectedSalary
+                      ? client.careerPreferences?.expectedSalary || ""
                       : client.careerPreferences?.expectedSalary || "N/A"
                   }
                   onChange={(e) => handleChange(e, "careerPreferences")}
@@ -798,7 +870,7 @@ export default function UserProfilePage() {
                 <Select
                   value={
                     editing
-                      ? client.careerPreferences?.availabilityToJoin
+                      ? client.careerPreferences?.availabilityToJoin || ""
                       : client.careerPreferences?.availabilityToJoin || ""
                   }
                   onValueChange={(value) =>
@@ -830,7 +902,7 @@ export default function UserProfilePage() {
                 <Select
                   value={
                     editing
-                      ? client.careerPreferences?.preferredWorkLocation
+                      ? client.careerPreferences?.preferredWorkLocation || ""
                       : client.careerPreferences?.preferredWorkLocation || ""
                   }
                   onValueChange={(value) =>
@@ -875,7 +947,7 @@ export default function UserProfilePage() {
                 name="professionalSummary"
                 value={
                   editing
-                    ? client.professionalSummary
+                    ? client.professionalSummary || ""
                     : client.professionalSummary || "N/A"
                 }
                 onChange={(e) => handleChange(e, null)}
@@ -921,7 +993,7 @@ export default function UserProfilePage() {
                       <Input
                         id={`degree-${index}`}
                         name="degree"
-                        value={editing ? edu.degree : edu.degree || "N/A"}
+                        value={editing ? edu.degree || "" : edu.degree || "N/A"}
                         onChange={(e) =>
                           handleArrayItemChange(
                             "education",
@@ -941,7 +1013,9 @@ export default function UserProfilePage() {
                         id={`institution-${index}`}
                         name="institution"
                         value={
-                          editing ? edu.institution : edu.institution || "N/A"
+                          editing
+                            ? edu.institution || ""
+                            : edu.institution || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
@@ -959,7 +1033,9 @@ export default function UserProfilePage() {
                       <Input
                         id={`startYear-${index}`}
                         name="startYear"
-                        value={editing ? edu.startYear : edu.startYear || "N/A"}
+                        value={
+                          editing ? edu.startYear || "" : edu.startYear || "N/A"
+                        }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "education",
@@ -976,7 +1052,9 @@ export default function UserProfilePage() {
                       <Input
                         id={`endYear-${index}`}
                         name="endYear"
-                        value={editing ? edu.endYear : edu.endYear || "N/A"}
+                        value={
+                          editing ? edu.endYear || "" : edu.endYear || "N/A"
+                        }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "education",
@@ -995,7 +1073,7 @@ export default function UserProfilePage() {
                       <Input
                         id={`major-${index}`}
                         name="major"
-                        value={editing ? edu.major : edu.major || "N/A"}
+                        value={editing ? edu.major || "" : edu.major || "N/A"}
                         onChange={(e) =>
                           handleArrayItemChange(
                             "education",
@@ -1012,7 +1090,7 @@ export default function UserProfilePage() {
                       <Input
                         id={`grades-${index}`}
                         name="grades"
-                        value={editing ? edu.grades : edu.grades || "N/A"}
+                        value={editing ? edu.grades || "" : edu.grades || "N/A"}
                         onChange={(e) =>
                           handleArrayItemChange(
                             "education",
@@ -1080,7 +1158,9 @@ export default function UserProfilePage() {
                       <Input
                         id={`jobTitle-${index}`}
                         name="jobTitle"
-                        value={editing ? work.jobTitle : work.jobTitle || "N/A"}
+                        value={
+                          editing ? work.jobTitle || "" : work.jobTitle || "N/A"
+                        }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "workExperience",
@@ -1100,7 +1180,9 @@ export default function UserProfilePage() {
                         id={`companyName-${index}`}
                         name="companyName"
                         value={
-                          editing ? work.companyName : work.companyName || "N/A"
+                          editing
+                            ? work.companyName || ""
+                            : work.companyName || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
@@ -1120,7 +1202,9 @@ export default function UserProfilePage() {
                         name="startDate"
                         type="date"
                         value={
-                          editing ? work.startDate : work.startDate || "N/A"
+                          editing
+                            ? work.startDate || ""
+                            : work.startDate || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
@@ -1139,7 +1223,9 @@ export default function UserProfilePage() {
                         id={`endDate-${index}`}
                         name="endDate"
                         type="date"
-                        value={editing ? work.endDate : work.endDate || "N/A"}
+                        value={
+                          editing ? work.endDate || "" : work.endDate || "N/A"
+                        }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "workExperience",
@@ -1159,7 +1245,9 @@ export default function UserProfilePage() {
                         id={`jobLocation-${index}`}
                         name="jobLocation"
                         value={
-                          editing ? work.jobLocation : work.jobLocation || "N/A"
+                          editing
+                            ? work.jobLocation || ""
+                            : work.jobLocation || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
@@ -1181,7 +1269,7 @@ export default function UserProfilePage() {
                         name="responsibilities"
                         value={
                           editing
-                            ? work.responsibilities
+                            ? work.responsibilities || ""
                             : work.responsibilities || "N/A"
                         }
                         onChange={(e) =>
@@ -1244,7 +1332,7 @@ export default function UserProfilePage() {
                     <Input
                       id={`skillName-${index}`}
                       name="name"
-                      value={editing ? skill.name : skill.name || "N/A"}
+                      value={editing ? skill.name || "" : skill.name || "N/A"}
                       onChange={(e) =>
                         handleArrayItemChange(
                           "skills",
@@ -1263,7 +1351,9 @@ export default function UserProfilePage() {
                     </Label>
                     <Select
                       value={
-                        editing ? skill.proficiency : skill.proficiency || ""
+                        editing
+                          ? skill.proficiency || ""
+                          : skill.proficiency || ""
                       }
                       onValueChange={(value) =>
                         handleArrayItemChange(
@@ -1350,7 +1440,7 @@ export default function UserProfilePage() {
                       name="projectTitle"
                       value={
                         editing
-                          ? project.projectTitle
+                          ? project.projectTitle || ""
                           : project.projectTitle || "N/A"
                       }
                       onChange={(e) =>
@@ -1373,7 +1463,7 @@ export default function UserProfilePage() {
                       name="shortDescription"
                       value={
                         editing
-                          ? project.shortDescription
+                          ? project.shortDescription || ""
                           : project.shortDescription || "N/A"
                       }
                       onChange={(e) =>
@@ -1397,7 +1487,7 @@ export default function UserProfilePage() {
                       name="technologiesUsed"
                       value={
                         editing
-                          ? project.technologiesUsed
+                          ? project.technologiesUsed || ""
                           : project.technologiesUsed || "N/A"
                       }
                       onChange={(e) =>
@@ -1421,7 +1511,7 @@ export default function UserProfilePage() {
                         name="liveDemoLink"
                         value={
                           editing
-                            ? project.liveDemoLink
+                            ? project.liveDemoLink || ""
                             : project.liveDemoLink || "N/A"
                         }
                         onChange={(e) =>
@@ -1444,7 +1534,7 @@ export default function UserProfilePage() {
                         name="githubRepository"
                         value={
                           editing
-                            ? project.githubRepository
+                            ? project.githubRepository || ""
                             : project.githubRepository || "N/A"
                         }
                         onChange={(e) =>
@@ -1518,7 +1608,7 @@ export default function UserProfilePage() {
                       name="certificationName"
                       value={
                         editing
-                          ? cert.certificationName
+                          ? cert.certificationName || ""
                           : cert.certificationName || "N/A"
                       }
                       onChange={(e) =>
@@ -1541,7 +1631,7 @@ export default function UserProfilePage() {
                       name="issuingOrganization"
                       value={
                         editing
-                          ? cert.issuingOrganization
+                          ? cert.issuingOrganization || ""
                           : cert.issuingOrganization || "N/A"
                       }
                       onChange={(e) =>
@@ -1563,7 +1653,9 @@ export default function UserProfilePage() {
                         name="issueDate"
                         type="date"
                         value={
-                          editing ? cert.issueDate : cert.issueDate || "N/A"
+                          editing
+                            ? cert.issueDate || ""
+                            : cert.issueDate || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
@@ -1585,7 +1677,9 @@ export default function UserProfilePage() {
                         name="expiryDate"
                         type="date"
                         value={
-                          editing ? cert.expiryDate : cert.expiryDate || "N/A"
+                          editing
+                            ? cert.expiryDate || ""
+                            : cert.expiryDate || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
@@ -1608,7 +1702,7 @@ export default function UserProfilePage() {
                       name="certificateUrl"
                       value={
                         editing
-                          ? cert.certificateUrl
+                          ? cert.certificateUrl || ""
                           : cert.certificateUrl || "N/A"
                       }
                       onChange={(e) =>
@@ -1678,7 +1772,9 @@ export default function UserProfilePage() {
                       id={`awardName-${index}`}
                       name="awardName"
                       value={
-                        editing ? award.awardName : award.awardName || "N/A"
+                        editing
+                          ? award.awardName || ""
+                          : award.awardName || "N/A"
                       }
                       onChange={(e) =>
                         handleArrayItemChange(
@@ -1700,7 +1796,7 @@ export default function UserProfilePage() {
                       name="issuingOrganization"
                       value={
                         editing
-                          ? award.issuingOrganization
+                          ? award.issuingOrganization || ""
                           : award.issuingOrganization || "N/A"
                       }
                       onChange={(e) =>
@@ -1720,7 +1816,7 @@ export default function UserProfilePage() {
                       id={`awardDate-${index}`}
                       name="date"
                       type="date"
-                      value={editing ? award.date : award.date || "N/A"}
+                      value={editing ? award.date || "" : award.date || "N/A"}
                       onChange={(e) =>
                         handleArrayItemChange(
                           "achievements",
@@ -1740,7 +1836,9 @@ export default function UserProfilePage() {
                       id={`awardDescription-${index}`}
                       name="description"
                       value={
-                        editing ? award.description : award.description || "N/A"
+                        editing
+                          ? award.description || ""
+                          : award.description || "N/A"
                       }
                       onChange={(e) =>
                         handleArrayItemChange(
@@ -1800,7 +1898,7 @@ export default function UserProfilePage() {
                     <Input
                       id={`languageName-${index}`}
                       name="name"
-                      value={editing ? lang.name : lang.name || "N/A"}
+                      value={editing ? lang.name || "" : lang.name || "N/A"}
                       onChange={(e) =>
                         handleArrayItemChange(
                           "languages",
@@ -1822,7 +1920,9 @@ export default function UserProfilePage() {
                     </Label>
                     <Select
                       value={
-                        editing ? lang.proficiency : lang.proficiency || ""
+                        editing
+                          ? lang.proficiency || ""
+                          : lang.proficiency || ""
                       }
                       onValueChange={(value) =>
                         handleArrayItemChange(
@@ -1907,7 +2007,9 @@ export default function UserProfilePage() {
                       id={`refereeName-${index}`}
                       name="refereeName"
                       value={
-                        editing ? ref.refereeName : ref.refereeName || "N/A"
+                        editing
+                          ? ref.refereeName || ""
+                          : ref.refereeName || "N/A"
                       }
                       onChange={(e) =>
                         handleArrayItemChange(
@@ -1929,7 +2031,7 @@ export default function UserProfilePage() {
                       name="positionCompany"
                       value={
                         editing
-                          ? ref.positionCompany
+                          ? ref.positionCompany || ""
                           : ref.positionCompany || "N/A"
                       }
                       onChange={(e) =>
@@ -1952,7 +2054,7 @@ export default function UserProfilePage() {
                       name="contactDetails"
                       value={
                         editing
-                          ? ref.contactDetails
+                          ? ref.contactDetails || ""
                           : ref.contactDetails || "N/A"
                       }
                       onChange={(e) =>
@@ -2051,25 +2153,6 @@ export default function UserProfilePage() {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Action Buttons */}
-      <div className="flex gap-2">
-        <Button
-          className="bg-teal-600 hover:bg-teal-700 text-white"
-          onClick={editing ? handleSave : handleEditToggle}
-        >
-          {editing ? "Save Changes" : "Edit Profile"}
-        </Button>
-        {editing && (
-          <Button
-            variant="outline"
-            onClick={handleEditToggle}
-            className="bg-transparent"
-          >
-            Cancel
-          </Button>
-        )}
-      </div>
     </div>
   );
 }

@@ -2,25 +2,51 @@ import { NextResponse } from "next/server";
 import { connectMongoDB } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-// Get available jobs and applications for a specific employee
+// Get all job applications for a specific employee categorized by status
 export async function GET(req) {
   try {
     const db = await connectMongoDB();
-    const jobsCollection = db.collection("jobs");
     const applicationsCollection = db.collection("applications");
 
     const { searchParams } = new URL(req.url);
     const employeeEmail = searchParams.get("email");
 
-    // Fetch jobs that are NOT completed
-    const availableJobs = await jobsCollection.find({ status: { $ne: "Completed" } }).toArray();
+    if (!employeeEmail) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    }
 
-    // Fetch applications for the employee
-    const appliedJobs = await applicationsCollection.find({ email: employeeEmail }).toArray();
+    // Fetch all applications for the employee
+    const allApplications = await applicationsCollection
+      .find({ email: employeeEmail })
+      .toArray();
 
-    return NextResponse.json({ availableJobs, appliedJobs });
+    // Categorize applications by status
+    const appliedJobs = allApplications.filter(
+      (app) => app.status === "applied"
+    );
+    const approvedJobs = allApplications.filter(
+      (app) => app.status === "Approved"
+    );
+    const rejectedJobs = allApplications.filter(
+      (app) => app.status === "Rejected"
+    );
+    const completedJobs = allApplications.filter(
+      (app) => app.statusJob === "Completed"
+    );
+
+    return NextResponse.json({
+      allApplications,
+      appliedJobs,
+      approvedJobs,
+      rejectedJobs,
+      completedJobs,
+    });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch jobs and applications" }, { status: 500 });
+    console.error("Error fetching employee jobs:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch jobs" },
+      { status: 500 }
+    );
   }
 }
 
@@ -29,12 +55,19 @@ export async function POST(req) {
   try {
     const db = await connectMongoDB();
     const applicationsCollection = db.collection("applications");
-    const { fullName, email, phone, resume, coverLetter, jobId } = await req.json();
+    const { fullName, email, phone, resume, coverLetter, jobId } =
+      await req.json();
 
     // Check if the employee has already applied for this job
-    const existingApplication = await applicationsCollection.findOne({ email, jobId });
+    const existingApplication = await applicationsCollection.findOne({
+      email,
+      jobId,
+    });
     if (existingApplication) {
-      return NextResponse.json({ error: "You have already applied for this job" }, { status: 400 });
+      return NextResponse.json(
+        { error: "You have already applied for this job" },
+        { status: 400 }
+      );
     }
 
     // Create a new job application
@@ -54,6 +87,9 @@ export async function POST(req) {
 
     return NextResponse.json({ message: "Application submitted successfully" });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to apply for job" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to apply for job" },
+      { status: 500 }
+    );
   }
 }

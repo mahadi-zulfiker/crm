@@ -19,7 +19,7 @@ import {
 
 export default function getALLRoles() {
   const roleMenus = {
-    user: [
+    client: [
       {
         title: "Dashboard",
         icon: Home,
@@ -43,6 +43,34 @@ export default function getALLRoles() {
             name: "Recommendations",
             href: "/dashboard/client/jobs/recommendations",
           },
+        ],
+      },
+      {
+        title: "Job Management",
+        icon: Briefcase,
+        items: [
+          { name: "Job Postings", href: "/dashboard/employee/jobs" },
+          { name: "Create Job", href: "/dashboard/employee/jobs/create" },
+          {
+            name: "Job Templates",
+            href: "/dashboard/employee/jobs/templates",
+          },
+        ],
+      },
+      {
+        title: "Candidates",
+        icon: Users,
+        items: [
+          {
+            name: "All Applications",
+            href: "/dashboard/employee/applications",
+          },
+          { name: "Candidate Pool", href: "/dashboard/employee/candidates" },
+          {
+            name: "Interview Schedule",
+            href: "/dashboard/employee/interviews",
+          },
+          { name: "Hired Candidates", href: "/dashboard/employee/hired" },
         ],
       },
       {
@@ -86,53 +114,67 @@ export default function getALLRoles() {
         href: "/dashboard/client/settings",
       },
     ],
-    employee: [
+    user: [
       {
         title: "Dashboard",
         icon: Home,
         href: "/dashboard/employee",
       },
+
       {
-        title: "Job Management",
+        title: "Job Search",
         icon: Briefcase,
         items: [
-          { name: "Job Postings", href: "/dashboard/employee/jobs" },
-          { name: "Create Job", href: "/dashboard/employee/jobs/create" },
-          {
-            name: "Job Templates",
-            href: "/dashboard/employee/jobs/templates",
-          },
+          { name: "Browse Jobs", href: "/allJobs" },
+          // {
+          //   name: "Recommendations",
+          //   href: "/dashboard/client/jobs/recommendations",
+          // },
         ],
       },
       {
-        title: "Candidates",
-        icon: Users,
+        title: "My Jobs",
+        icon: Briefcase,
+        items: [
+          { name: "Applied Jobs", href: "/dashboard/employee/appliedJobs" },
+          { name: "Approved Jobs", href: "/dashboard/employee/approvedJobs" },
+          { name: "Rejected Jobs", href: "/dashboard/employee/rejectedJobs" },
+          { name: "Completed Jobs", href: "/dashboard/employee/completedJobs" },
+        ],
+      },
+      {
+        title: "Job Management",
+        icon: FileText,
         items: [
           {
-            name: "All Applications",
-            href: "/dashboard/employee/applications",
+            name: "Job Apply Management",
+            href: "/dashboard/employee/jobApplyManagement",
           },
-          { name: "Candidate Pool", href: "/dashboard/employee/candidates" },
-          {
-            name: "Interview Schedule",
-            href: "/dashboard/employee/interviews",
-          },
-          { name: "Hired Candidates", href: "/dashboard/employee/hired" },
+          { name: "Job History", href: "/dashboard/employee/jobHistory" },
         ],
       },
       {
-        title: "Analytics",
-        icon: BarChart3,
+        title: "Profile",
+        icon: User,
+        href: "/dashboard/employee/profileManagement",
       },
       {
         title: "Messages",
         icon: MessageSquare,
+        href: "/dashboard/employee/messages",
+      },
+      {
+        title: "Home",
+        icon: HomeIcon,
+        href: "/",
       },
       {
         title: "Settings",
         icon: Settings,
+        href: "/dashboard/employee/settings",
       },
     ],
+
     vendor: [
       {
         title: "Dashboard",
