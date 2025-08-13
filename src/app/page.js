@@ -1,4 +1,6 @@
+import JobAdBanner from "@/components/JobAdBanner";
 import HomePage from "./homePage/page";
+import CallbackPrompt from "@/components/Callback";
 
 export default function Home() {
   return (
@@ -6,8 +8,9 @@ export default function Home() {
       {/* Constrain content to a max width */}
       <div className="container mx-auto max-w-full">
         <HomePage />
+        <JobAdBanner />
+        <CallbackPrompt />
       </div>
     </div>
   );
 }
-

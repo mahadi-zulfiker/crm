@@ -40,6 +40,7 @@ import TimeSheetJob from "./Admin/TimeSheetJob";
 import AdminProfileManagement from "./Admin/AdminProfileManagement";
 import VendorProfileManagement from "./Vendor/VendorProfileManagement";
 import ClientProfileManagement from "./Client/ClientProfileManagement";
+import Messages from "./Employee/Messages";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -163,6 +164,9 @@ const MainLayout = () => {
             {pathname === "/dashboard/employee/jobHistory" && <JobHistory />}
             {pathname === "/dashboard/employee/profileManagement" && (
               <ProfileManagement />
+            )}
+            {pathname === "/dashboard/employee/messages" && (
+              <Messages />
             )}
           </div>
         </section>
