@@ -2,10 +2,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import { Lexend } from "next/font/google";
-import JobAdBanner from "@/components/JobAdBanner";
-import RequestCallbackPage from "./requestCallBack/page";
-import CallbackPrompt from "@/components/Callback";
-import StickyHeader from "@/components/StickyHeader";
+// import JobAdBanner from "@/components/JobAdBanner";
+// import RequestCallbackPage from "./requestCallBack/page";
+// import CallbackPrompt from "@/components/Callback";
+// import StickyHeader from "@/components/StickyHeader";
 
 const lexend = Lexend({ subsets: ["latin"], weight: ["400", "700"] });
 
@@ -32,8 +32,7 @@ export default function RootLayout({ children }) {
           className={`${geistSans.variable} ${geistMono.variable} ${lexend.className} antialiased`}
         >
           {children}
-          <JobAdBanner />
-          <CallbackPrompt />
+
         </body>
       </html>
     </Providers>
