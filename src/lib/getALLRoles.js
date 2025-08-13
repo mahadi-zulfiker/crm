@@ -26,34 +26,15 @@ export default function getALLRoles() {
         href: "/dashboard/client",
       },
       {
-        title: "Job Search",
-        icon: Briefcase,
-        items: [
-          { name: "Browse Jobs", href: "/allJobs" },
-          {
-            name: "Manage Jobs",
-            href: "/dashboard/client/jobManagementClient",
-          },
-          {
-            name: "Completed Jobs",
-            href: "/dashboard/client/completedJobsClient",
-          },
-          { name: "Posted Jobs", href: "/dashboard/client/jobs/postedJobs" },
-          {
-            name: "Recommendations",
-            href: "/dashboard/client/jobs/recommendations",
-          },
-        ],
-      },
-      {
         title: "Job Management",
         icon: Briefcase,
         items: [
-          { name: "Job Postings", href: "/dashboard/employee/jobs" },
-          { name: "Create Job", href: "/dashboard/employee/jobs/create" },
+          { name: "Posted Jobs", href: "/dashboard/client/postedJobs" },
+          { name: "Job Postings", href: "/dashboard/client/jobs" },
+          { name: "Create Job", href: "/dashboard/client/createJobs" },
           {
             name: "Job Templates",
-            href: "/dashboard/employee/jobs/templates",
+            href: "/dashboard/client/templates",
           },
         ],
       },

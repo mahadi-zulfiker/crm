@@ -14,8 +14,9 @@ import { useSession } from "next-auth/react";
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
   const { data: session, status } = useSession();
-  // const role = session?.user?.role || "user";
-  const role = "user";
+  console.log(session);
+  const role = session?.user?.userType?.toLowerCase() || "";
+  // const role = "user";
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedItems, setExpandedItems] = useState(["attendance"]);
   const isMobile = useIsMobile();

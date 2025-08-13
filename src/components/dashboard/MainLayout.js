@@ -41,6 +41,7 @@ import AdminProfileManagement from "./Admin/AdminProfileManagement";
 import VendorProfileManagement from "./Vendor/VendorProfileManagement";
 import ClientProfileManagement from "./Client/ClientProfileManagement";
 import Messages from "./Employee/Messages";
+import CreateJobs from "./Client/CreateJobs";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -81,7 +82,7 @@ const MainLayout = () => {
             {pathname === "/dashboard/client/completedJobsClient" && (
               <CompletedJobsClient />
             )}
-            {pathname === "/dashboard/client/paymentHistory" && ( 
+            {pathname === "/dashboard/client/paymentHistory" && (
               <PaymentHistory />
             )}
             {pathname === "/dashboard/client/jobManagementClient" && (
@@ -96,6 +97,7 @@ const MainLayout = () => {
             {pathname === "/dashboard/client/clientProfileManagement" && (
               <ClientProfileManagement />
             )}
+            {pathname === "/dashboard/client/createJobs" && <CreateJobs />}
 
             {pathname === "/dashboard/vendor" && <Vendor />}
             {pathname === "/dashboard/vendor/jobManagementVendor" && (
@@ -165,9 +167,7 @@ const MainLayout = () => {
             {pathname === "/dashboard/employee/profileManagement" && (
               <ProfileManagement />
             )}
-            {pathname === "/dashboard/employee/messages" && (
-              <Messages />
-            )}
+            {pathname === "/dashboard/employee/messages" && <Messages />}
           </div>
         </section>
       </div>
