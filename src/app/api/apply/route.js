@@ -47,6 +47,7 @@ export async function POST(req) {
           position,
           coverLetter,
           jobId,
+          status: "applied",
           resumeId: uploadStream.id, // Store file ID instead of name
           appliedAt: new Date(),
         };
@@ -63,7 +64,10 @@ export async function POST(req) {
       uploadStream.on("error", (error) => {
         console.error("File Upload Error:", error);
         reject(
-          NextResponse.json({ error: "Failed to upload resume." }, { status: 500 })
+          NextResponse.json(
+            { error: "Failed to upload resume." },
+            { status: 500 }
+          )
         );
       });
     });

@@ -1,48 +1,46 @@
 import { NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
-import streamifier from "streamifier";
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export const config = {
   api: {
-    bodyParser: false, // disable built-in parser for streaming
+    bodyParser: false,
   },
 };
 
 export async function POST(req) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file");
+    const file = formData.get("image");
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    const base64Image = buffer.toString("base64");
 
-    // Wrap upload_stream in a promise to await it
-    const uploadResult = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "next_uploads" },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
+    // Send to imgbb
+    const imgbbRes = await fetch(
+      `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+      {
+        method: "POST",
+        body: new URLSearchParams({
+          image: base64Image, 
+        }),
+      }
+    );
+
+    const imgbbData = await imgbbRes.json();
+
+    if (!imgbbRes.ok || !imgbbData.success) {
+      return NextResponse.json(
+        { error: imgbbData.error?.message || "Upload failed" },
+        { status: 400 }
       );
-
-      streamifier.createReadStream(buffer).pipe(uploadStream);
-    });
-
-    console.log({ uploadResult });
+    }
 
     return NextResponse.json({
-      url: uploadResult.secure_url,
-      public_id: uploadResult.public_id,
+      url: imgbbData.data.url,
+      delete_url: imgbbData.data.delete_url,
     });
   } catch (error) {
     return NextResponse.json(
