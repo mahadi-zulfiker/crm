@@ -80,7 +80,7 @@ const MainLayout = () => {
             {pathname === "/dashboard/client/completedJobsClient" && (
               <CompletedJobsClient />
             )}
-            {pathname === "/dashboard/client/paymentHistory" && (
+            {pathname === "/dashboard/client/paymentHistory" && ( 
               <PaymentHistory />
             )}
             {pathname === "/dashboard/client/jobManagementClient" && (

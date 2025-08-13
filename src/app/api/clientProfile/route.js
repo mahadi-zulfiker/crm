@@ -30,7 +30,7 @@ export async function GET(req) {
 export async function PUT(req) {
   try {
     const body = await req.json();
-    const { _id, ...updateData } = body; // remove _id from fields to set
+    const { _id, ...updateData } = body; 
 
     if (!_id) {
       return NextResponse.json(
