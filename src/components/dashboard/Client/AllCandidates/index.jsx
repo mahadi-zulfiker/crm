@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,14 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function AllCandidates() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InnerAllCandidates />
+    </Suspense>
+  );
+}
+
+function InnerAllCandidates() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const jobId = searchParams.get("jobId");

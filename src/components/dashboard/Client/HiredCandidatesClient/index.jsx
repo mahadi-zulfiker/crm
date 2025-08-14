@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,14 @@ import {
 } from "lucide-react";
 
 export default function HiredCandidatesPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InnerHiredCandidatesPage />
+    </Suspense>
+  );
+}
+
+function InnerHiredCandidatesPage() {
   const searchParams = useSearchParams();
   const jobId = searchParams.get("id"); // get ?id=... from URL
   const { toast } = useToast();
