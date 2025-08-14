@@ -26,35 +26,20 @@ export default function getALLRoles() {
         href: "/dashboard/client",
       },
       {
-        title: "Job Search",
-        icon: Briefcase,
-        items: [
-          { name: "Browse Jobs", href: "/allJobs" },
-          {
-            name: "Manage Jobs",
-            href: "/dashboard/client/jobManagementClient",
-          },
-          {
-            name: "Completed Jobs",
-            href: "/dashboard/client/completedJobsClient",
-          },
-          { name: "Posted Jobs", href: "/dashboard/client/jobs/postedJobs" },
-          {
-            name: "Recommendations",
-            href: "/dashboard/client/jobs/recommendations",
-          },
-        ],
-      },
-      {
         title: "Job Management",
         icon: Briefcase,
         items: [
-          { name: "Job Postings", href: "/dashboard/employee/jobs" },
-          { name: "Create Job", href: "/dashboard/employee/jobs/create" },
+          { name: "Posted Jobs", href: "/dashboard/client/postedJobs" },
+          // { name: "Job Postings", href: "/dashboard/client/jobs" },
+          { name: "Create Job", href: "/dashboard/client/createJobs" },
           {
-            name: "Job Templates",
-            href: "/dashboard/employee/jobs/templates",
+            name: "Completed Job",
+            href: "/dashboard/client/completedJobsClient",
           },
+          // {
+          //   name: "Job Templates",
+          //   href: "/dashboard/client/templates",
+          // },
         ],
       },
       {
@@ -63,14 +48,17 @@ export default function getALLRoles() {
         items: [
           {
             name: "All Applications",
-            href: "/dashboard/employee/applications",
+            href: "/dashboard/client/allCandidates",
           },
-          { name: "Candidate Pool", href: "/dashboard/employee/candidates" },
+          // { name: "Candidate Pool", href: "/dashboard/employee/candidates" },
           {
             name: "Interview Schedule",
-            href: "/dashboard/employee/interviews",
+            href: "/dashboard/client/interviews",
           },
-          { name: "Hired Candidates", href: "/dashboard/employee/hired" },
+          {
+            name: "Hired Candidates",
+            href: "/dashboard/client/hiredCandidatesClient",
+          },
         ],
       },
       {

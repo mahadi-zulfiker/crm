@@ -41,6 +41,11 @@ import AdminProfileManagement from "./Admin/AdminProfileManagement";
 import VendorProfileManagement from "./Vendor/VendorProfileManagement";
 import ClientProfileManagement from "./Client/ClientProfileManagement";
 import Messages from "./Employee/Messages";
+import CreateJobs from "./Client/CreateJobs";
+import ALlCandidates from "./Client/AllCandidates";
+import HiredCandidatesPage from "./Client/HiredCandidatesClient";
+import JobDetailsClient from "./Client/JobDetailsClient";
+import ViewEmployeeProfile from "./Client/ViewEmployeeProfile";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -65,7 +70,7 @@ const MainLayout = () => {
 
         {/* Main Content */}
         <section
-          className={`main-content w-full overflow-x-hidden ${
+          className={`main-content w-full bg-[#f7f6f9] overflow-x-hidden ${
             isSidebarOpen ? "h-screen" : "h-[calc(113vh)]"
           }  overflow-scroll`}
         >
@@ -75,13 +80,17 @@ const MainLayout = () => {
           />
 
           {/* Content based on route */}
-          <div className={`${isSidebarOpen ? "mt-8 p-4" : "mt-8 p-4"}`}>
+          <div
+            className={`bg-[#f7f6f9] ${
+              isSidebarOpen ? "mt-8 p-4" : "mt-8 p-4"
+            }`}
+          >
             {pathname === "/dashboard/client" && <Client />}
             {pathname === "/dashboard/client/postedJobs" && <PostedJobs />}
             {pathname === "/dashboard/client/completedJobsClient" && (
               <CompletedJobsClient />
             )}
-            {pathname === "/dashboard/client/paymentHistory" && ( 
+            {pathname === "/dashboard/client/paymentHistory" && (
               <PaymentHistory />
             )}
             {pathname === "/dashboard/client/jobManagementClient" && (
@@ -95,6 +104,19 @@ const MainLayout = () => {
             )}
             {pathname === "/dashboard/client/clientProfileManagement" && (
               <ClientProfileManagement />
+            )}
+            {pathname === "/dashboard/client/createJobs" && <CreateJobs />}
+            {pathname === "/dashboard/client/jobDetailsClient" && (
+              <JobDetailsClient />
+            )}
+            {pathname === "/dashboard/client/allCandidates" && (
+              <ALlCandidates />
+            )}
+            {pathname === "/dashboard/client/hiredCandidatesClient" && (
+              <HiredCandidatesPage />
+            )}
+            {pathname === "/dashboard/client/viewEmployeeProfile" && (
+              <ViewEmployeeProfile />
             )}
 
             {pathname === "/dashboard/vendor" && <Vendor />}
@@ -165,9 +187,7 @@ const MainLayout = () => {
             {pathname === "/dashboard/employee/profileManagement" && (
               <ProfileManagement />
             )}
-            {pathname === "/dashboard/employee/messages" && (
-              <Messages />
-            )}
+            {pathname === "/dashboard/employee/messages" && <Messages />}
           </div>
         </section>
       </div>
