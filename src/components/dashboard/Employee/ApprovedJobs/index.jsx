@@ -40,7 +40,6 @@ const ApprovedJobs = () => {
             throw new Error("Unexpected response format");
           }
 
-          console.log("fetched jobs", data);
         } catch (err) {
           setError(err.message);
         } finally {

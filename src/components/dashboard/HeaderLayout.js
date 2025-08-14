@@ -14,7 +14,9 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useRef, useEffect } from "react";
-import { cn } from "@/lib/utils"; // Import cn utility
+import { cn } from "@/lib/utils";
+import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -130,16 +132,23 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
                   "origin-top-right animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
                 )}
               >
-                <button className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </button>
+                <Link
+                  href={`/dashboard/${user?.userType?.toLowerCase()}/${user?.userType?.toLowerCase()}ProfileManagement`}
+                >
+                  <button className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </button>
+                </Link>
                 <button className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </button>
-                <div className="my-1 h-px bg-muted -mx-1" /> {/* Separator */}
-                <button className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                <div className="my-1 h-px bg-muted -mx-1" />
+                <button
+                  onClick={() => signOut({ callbackUrl: "/signIn" })}
+                  className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign out</span>
                 </button>

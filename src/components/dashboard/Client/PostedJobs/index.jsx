@@ -1,40 +1,114 @@
 "use client";
-import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function PostedJobs() {
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Search,
+  Eye,
+  Edit,
+  Trash2,
+  FileText,
+  Filter,
+  Download,
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Building,
+  Briefcase,
+  Tag,
+  DollarSign,
+  MapPin,
+  Clock,
+} from "lucide-react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+
+export default function PostedJobsPage() {
+  const { data: session, status } = useSession();
   const [jobs, setJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const jobsPerPage = 5;
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch("/api/postedJobs");
-        const data = await response.json();
-        setJobs(data);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      }
-    };
-    fetchJobs();
-  }, []);
+    if (status === "authenticated" && session) {
+      const fetchJobs = async () => {
+        try {
+          const response = await fetch(
+            `/api/postedJobs?email=${session?.user?.email}`
+          );
+          const data = await response.json();
+          setJobs(data);
+          setFilteredJobs(data);
+        } catch (error) {
+          console.error("Error fetching jobs:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchJobs();
+    }
+  }, [session, status]);
 
-  // Filter and search logic
-  const filteredJobs = jobs.filter((job) => {
-    const matchesSearch = job.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      filterStatus === "All" ||
-      (filterStatus === "Completed" && job.status === "Completed") ||
-      (filterStatus === "Not Completed" && job.status !== "Completed") ||
-      (filterStatus === "Active" && job.status === "Active");
+  useEffect(() => {
+    let filtered = jobs;
 
-    return matchesSearch && matchesStatus;
-  });
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (job) =>
+          job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.location.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (filterStatus !== "All") {
+      filtered = filtered.filter((job) => {
+        if (filterStatus === "Active") {
+          return job.status === "Active" || job.status !== "Completed";
+        }
+        return job.status === filterStatus;
+      });
+    }
+
+    setFilteredJobs(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [searchTerm, filterStatus, jobs]);
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+          <p className="text-gray-600">Loading your posted jobs...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Pagination logic
   const indexOfLastJob = currentPage * jobsPerPage;
@@ -44,116 +118,324 @@ export default function PostedJobs() {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "bg-blue-100 text-blue-800";
+      case "Completed":
+        return "bg-green-100 text-green-800";
+      case "Draft":
+        return "bg-orange-100 text-orange-800";
+      case "Expired":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const handleDeleteJob = (jobId) => {
+    if (confirm("Are you sure you want to delete this job posting?")) {
+      setJobs(jobs.filter((job) => job._id !== jobId));
+    }
+  };
+
+  // Calculate stats
+  const stats = {
+    total: jobs.length,
+    active: jobs.filter(
+      (job) => job.status === "Active" || job.status !== "Completed"
+    ).length,
+    completed: jobs.filter((job) => job.status === "Completed").length,
+    draft: jobs.filter((job) => job.status === "Draft").length,
+  };
+
   return (
-    <div className="p-6 max-w-6xl mx-auto bg-gray-50 min-h-screen">
-      <h1 className="text-4xl font-extrabold text-center mb-8 text-teal-700">
-        Your Posted Jobs
-      </h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Posted Jobs</h1>
+          <p className="text-gray-600 mt-1">
+            Monitor and manage all your job postings with detailed information.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" className="text-gray-600 hover:bg-gray-100">
+            <Download className="w-4 h-4 mr-2" />
+            Export Data
+          </Button>
+          <Link href="/dashboard/client/createJobs">
+            <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              Post New Job
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-sm text-gray-600">Total Jobs</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-blue-600">{stats.active}</p>
+              <p className="text-sm text-gray-600">Active Jobs</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-green-600">
+                {stats.completed}
+              </p>
+              <p className="text-sm text-gray-600">Completed</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-orange-600">
+                {stats.draft}
+              </p>
+              <p className="text-sm text-gray-600">Draft Jobs</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Search and Filter */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 p-4 bg-white rounded-lg shadow-md">
-        <input
-          type="text"
-          placeholder="Search by job title..."
-          className="flex-1 w-full md:max-w-md p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200"
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <select
-          className="w-full md:w-[180px] p-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200"
-          onChange={(e) => setFilterStatus(e.target.value)}
-          defaultValue="All"
-        >
-          <option value="All">All Statuses</option>
-          <option value="Active">Active</option>
-          <option value="Completed">Completed</option>
-          <option value="Not Completed">Not Completed</option>
-        </select>
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search by job title, company, or location..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Statuses</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Draft">Draft</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Job Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow-lg border border-gray-200">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-teal-600 text-white text-left">
-              <th className="p-4 font-semibold rounded-tl-lg">Job Title</th>
-              <th className="p-4 font-semibold">Company</th>
-              <th className="p-4 font-semibold">Location</th>
-              <th className="p-4 font-semibold">Job Type</th>
-              <th className="p-4 font-semibold">Category</th>
-              <th className="p-4 font-semibold">Salary</th>
-              <th className="p-4 font-semibold rounded-tr-lg">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentJobs.length > 0 ? (
-              currentJobs.map((job) => (
-                <tr
-                  key={job._id}
-                  className="border-b border-gray-100 hover:bg-teal-50 transition-colors duration-200"
-                >
-                  <td className="p-4 font-medium text-gray-900">{job.title}</td>
-                  <td className="p-4 text-gray-700">{job.company}</td>
-                  <td className="p-4 text-gray-700">{job.location}</td>
-                  <td className="p-4 text-gray-700">{job.jobType}</td>
-                  <td className="p-4 text-gray-700">{job.category}</td>
-                  <td className="p-4 text-gray-700">${job.salary}</td>
-                  <td className="p-4">
-                    <span
-                      className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${
-                        job.status === "Completed"
-                          ? "bg-green-100 text-green-700"
-                          : job.status === "Active"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-red-100 text-red-700" // For "Not Completed" or other statuses
-                      }`}
+      {/* Jobs Table */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-100 hover:bg-gray-100">
+                  <TableHead className="text-gray-900 font-semibold">
+                    Job Title
+                  </TableHead>
+                  <TableHead className="text-gray-900 font-semibold">
+                    Company
+                  </TableHead>
+                  <TableHead className="text-gray-900 font-semibold">
+                    Location
+                  </TableHead>
+                  <TableHead className="text-gray-900 font-semibold">
+                    Job Type
+                  </TableHead>
+
+                  <TableHead className="text-gray-900 font-semibold">
+                    Salary
+                  </TableHead>
+                  <TableHead className="text-gray-900 font-semibold">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-gray-900 font-semibold">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentJobs.length > 0 ? (
+                  currentJobs.map((job) => (
+                    <TableRow
+                      key={job._id}
+                      className="hover:bg-gray-50 transition-colors duration-200"
                     >
-                      {job.status}
-                    </span>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr className="bg-white">
-                <td colSpan={7} className="text-center py-8 text-gray-500">
-                  No jobs found matching your criteria.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                      <TableCell className="font-medium text-gray-900">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="w-4 h-4 text-teal-600" />
+                          {job.title}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Building className="w-4 h-4 text-gray-500" />
+                          {job.company}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          {job.location}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {job.jobType}
+                      </TableCell>
+
+                      <TableCell className="text-gray-600">
+                        <div className="flex items-center gap-1 font-medium text-teal-600">
+                          <DollarSign className="w-4 h-4" />
+                          {job.salary}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`${getStatusColor(
+                            job.status
+                          )} font-semibold`}
+                        >
+                          {job.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Link
+                            href={`/dashboard/client/candidates?jobId=${job._id}`}
+                          >
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-teal-600 hover:bg-teal-50"
+                              title="View Candidates"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <Link
+                            href={`/dashboard/client/jobDetailsClient?jobId=${job._id}`}
+                          >
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-blue-600 hover:bg-blue-50"
+                              title="Edit Job"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteJob(job._id)}
+                            className="text-red-600 hover:bg-red-50"
+                            title="Delete Job"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-gray-600 hover:bg-gray-50"
+                            title="More Options"
+                          >
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-3">
+                        <FileText className="w-12 h-12 text-gray-400" />
+                        <p className="text-lg font-medium text-gray-900">
+                          No jobs found
+                        </p>
+                        <p className="text-gray-600">
+                          Try adjusting your search or filter settings.
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-8 space-x-2">
-          <button
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="p-2 rounded-lg border border-teal-300 text-teal-600 hover:bg-teal-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index}
-              onClick={() => paginate(index + 1)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                currentPage === index + 1
-                  ? "bg-teal-600 text-white shadow-md"
-                  : "bg-white text-teal-600 border border-teal-300 hover:bg-teal-50"
-              }`}
-            >
-              {index + 1}
-            </button>
-          ))}
-          <button
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="p-2 rounded-lg border border-teal-300 text-teal-600 hover:bg-teal-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-center items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+
+              {Array.from({ length: totalPages }, (_, index) => (
+                <Button
+                  key={index}
+                  variant={currentPage === index + 1 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => paginate(index + 1)}
+                  className={
+                    currentPage === index + 1
+                      ? "bg-teal-600 text-white hover:bg-teal-700"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }
+                >
+                  {index + 1}
+                </Button>
+              ))}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="text-center mt-4 text-sm text-gray-600">
+              Showing {indexOfFirstJob + 1} to{" "}
+              {Math.min(indexOfLastJob, filteredJobs.length)} of{" "}
+              {filteredJobs.length} jobs
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
