@@ -42,13 +42,13 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.email) {
-      fetchClientData(session.user.email);
+      fetchEmployeeData(session.user.email);
     }
   }, [status, session]);
 
-  const fetchClientData = async (email) => {
+  const fetchEmployeeData = async (email) => {
     try {
-      const response = await axios.get(`/api/clientProfile?email=${email}`);
+      const response = await axios.get(`/api/employeeProfile?email=${email}`);
       const data = response.data;
 
       // Ensure all array-based sections are initialized as arrays
@@ -301,7 +301,7 @@ export default function UserProfilePage() {
 
         setClient(updatedClient);
 
-        await axios.put("/api/clientProfile", updatedClient);
+        await axios.put("/api/employeeProfile", updatedClient);
 
         toast({
           title: "Image uploaded successfully!",
@@ -344,7 +344,7 @@ export default function UserProfilePage() {
 
   const handleSave = async () => {
     try {
-      await axios.put("/api/clientProfile", client);
+      await axios.put("/api/employeeProfile", client);
       setMessage("Profile updated successfully");
       setEditing(false);
       setError("");

@@ -9,7 +9,10 @@ export async function GET() {
     const applications = await db.collection("applications").find().toArray();
     return NextResponse.json({ success: true, data: applications });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 
@@ -21,7 +24,10 @@ export async function POST(req) {
     const result = await db.collection("applications").insertOne(body);
     return NextResponse.json({ success: true, data: result.insertedId });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 
@@ -30,22 +36,28 @@ export async function PUT(req) {
   try {
     const db = await connectMongoDB();
     const { id, status } = await req.json();
+    console.log("PUT /api/applicationManagement" , id, status);
 
     // Convert `id` to ObjectId
     const objectId = new ObjectId(id);
 
-    const result = await db.collection("applications").updateOne(
-      { _id: objectId },
-      { $set: { status } }
-    );
+    const result = await db
+      .collection("applications")
+      .updateOne({ _id: objectId }, { $set: { status } });
 
     if (result.modifiedCount === 0) {
-      return NextResponse.json({ success: false, message: "No document modified" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "No document modified" },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({ success: true, message: "Application updated" });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 
@@ -58,14 +70,22 @@ export async function DELETE(req) {
     // Convert `id` to ObjectId
     const objectId = new ObjectId(id);
 
-    const result = await db.collection("applications").deleteOne({ _id: objectId });
+    const result = await db
+      .collection("applications")
+      .deleteOne({ _id: objectId });
 
     if (result.deletedCount === 0) {
-      return NextResponse.json({ success: false, message: "No document deleted" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "No document deleted" },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({ success: true, message: "Application deleted" });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }

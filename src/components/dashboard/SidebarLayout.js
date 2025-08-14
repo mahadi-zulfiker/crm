@@ -14,7 +14,6 @@ import { useSession } from "next-auth/react";
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
   const { data: session, status } = useSession();
-  console.log(session);
   const role = session?.user?.userType?.toLowerCase() || "";
   // const role = "user";
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,8 +71,8 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
   return (
     <div
       className={cn(
-        "bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-300 min-h-screen",
-        isSidebarOpen ? "w-16" : "w-80"
+        "bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-300 ",
+        isSidebarOpen ? "w-16 min-h-screen" : "w-80 min-h-screen"
       )}
     >
       {/* Header with Toggle */}

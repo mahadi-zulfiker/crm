@@ -4,7 +4,6 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import {
   FaBuilding,
   FaCalendarAlt,
@@ -82,27 +81,41 @@ function SingleJob() {
           <div className="md:col-span-2 flex flex-col justify-between">
             <div className="bg-white shadow-md rounded-lg p-6 mb-6">
               <p className="flex items-center text-lg text-gray-600">
-                <FaCalendarAlt className="mr-2 text-red-500" /> Posted on: {" "}
+                <FaCalendarAlt className="mr-2 text-red-500" /> Posted on:{" "}
                 {new Date(job.postedAt).toLocaleDateString()}
               </p>
               <div className="border-t border-gray-200 pt-4">
-                <h2 className="text-2xl font-semibold mb-3 text-gray-800">Job Description</h2>
-                <p className="text-gray-700 text-sm leading-relaxed">{job.description}</p>
+                <h2 className="text-2xl font-semibold mb-3 text-gray-800">
+                  Job Description
+                </h2>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  {job.description}
+                </p>
               </div>
               <div className="border-t border-gray-200 pt-4 mt-4">
-                <h2 className="text-2xl font-semibold mb-3 text-gray-800">Responsibilities</h2>
+                <h2 className="text-2xl font-semibold mb-3 text-gray-800">
+                  Responsibilities
+                </h2>
                 <ul className="list-disc pl-5 space-y-2 text-gray-700">
                   <li>Respond to all enquiries professionally and promptly.</li>
                   <li>Collect payments and manage financial transactions.</li>
-                  <li>Assess borrowers' circumstances and provide solutions.</li>
-                  <li>Handle telephone queries and maintain detailed records.</li>
+                  <li>
+                    Assess borrowers' circumstances and provide solutions.
+                  </li>
+                  <li>
+                    Handle telephone queries and maintain detailed records.
+                  </li>
                   <li>Collaborate with team members to improve processes.</li>
                 </ul>
               </div>
               <div className="border-t border-gray-200 pt-4 mt-4">
-                <h2 className="text-2xl font-semibold mb-3 text-gray-800">Requirements</h2>
+                <h2 className="text-2xl font-semibold mb-3 text-gray-800">
+                  Requirements
+                </h2>
                 <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  <li>Previous experience in collections or financial services.</li>
+                  <li>
+                    Previous experience in collections or financial services.
+                  </li>
                   <li>Excellent communication and problem-solving skills.</li>
                   <li>Ability to manage multiple tasks efficiently.</li>
                   <li>Strong attention to detail and organizational skills.</li>
@@ -111,7 +124,10 @@ function SingleJob() {
               </div>
             </div>
             <div className="flex my-4 gap-8 justify-between">
-              <button className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 shadow-md" onClick={() => window.location.href = '/allJobs'}>
+              <button
+                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 shadow-md"
+                onClick={() => (window.location.href = "/allJobs")}
+              >
                 Back to Search
               </button>
               <Link href={`/singleJob/${jobId}/apply`}>
@@ -135,7 +151,9 @@ function SingleJob() {
             <div className="bg-white shadow-md rounded-lg p-4 flex flex-col items-center text-center">
               <FaMoneyBillWave className="text-3xl text-yellow-500 mb-3" />
               <p className="mb-2 font-bold">Salary</p>
-              <p className="text-lg">{job.salary ? `$${job.salary}` : "Not specified"}</p>
+              <p className="text-lg">
+                {job.salary ? `$${job.salary}` : "Not specified"}
+              </p>
             </div>
             <div>
               <div className="my-4">

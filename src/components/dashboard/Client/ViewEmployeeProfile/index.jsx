@@ -44,7 +44,7 @@ export default function ViewEmployeeProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const employeeEmail = "NatureEmployee@gmail.com";
+  const employeeEmail = searchParams.get("email")?.trim();
 
   const fetchEmployeeData = useCallback(async (email) => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -59,31 +59,91 @@ export default function ViewEmployeeProfile() {
       );
       const data = response.data;
 
-      // Normalize projects to ensure technologiesUsed is an array
+      // Normalize projects to match expected field names and ensure technologiesUsed is an array
       const normalizedProjects = (data.projects || []).map((project) => ({
-        ...project,
+        projectName: project.projectTitle || "Untitled Project",
+        description: project.shortDescription || "No description provided.",
         technologiesUsed: Array.isArray(project.technologiesUsed)
           ? project.technologiesUsed
           : typeof project.technologiesUsed === "string"
-          ? project.technologiesUsed.split(",").map((tech) => tech.trim())
+          ? project.technologiesUsed
+              .split(",")
+              .map((tech) => tech.trim())
+              .filter((tech) => tech)
           : [],
+        projectUrl: project.liveDemoLink || project.githubRepository || "",
       }));
+
+      // Normalize skills to filter out invalid entries
+      const normalizedSkills = (data.skills || [])
+        .filter((skill) => skill.name && skill.proficiency)
+        .map((skill) => ({
+          skillName: skill.name,
+          proficiency: skill.proficiency,
+        }));
 
       // Initialize arrays and nested objects
       const initializedData = {
         ...data,
-        education: data.education || [],
-        workExperience: data.workExperience || [],
-        skills: data.skills || [],
+        name: data.username || "Unknown",
+        email: data.email || "Not provided",
+        education: (data.education || []).map((edu) => ({
+          degree: edu.degree || "Not specified",
+          institution: edu.institution || "Not specified",
+          graduationYear: edu.endYear || "Not specified",
+          gpa: edu.grades || "",
+        })),
+        workExperience: (data.workExperience || []).map((exp) => ({
+          jobTitle: exp.jobTitle || "Not specified",
+          companyName: exp.companyName || "Not specified",
+          startDate: exp.startDate || "",
+          endDate: exp.endDate || "",
+          description:
+            exp.responsibilities ||
+            exp.achievements ||
+            "No description provided.",
+        })),
+        skills: normalizedSkills,
         projects: normalizedProjects,
-        certifications: data.certifications || [],
-        languages: data.languages || [],
+        certifications: (data.certifications || []).map((cert) => ({
+          certificationName: cert.certificationName || "Not specified",
+          issuingOrganization: cert.issuingOrganization || "Not specified",
+          dateObtained: cert.issueDate || "",
+        })),
+        languages: (data.languages || []).map((lang) => ({
+          language: lang.name || "Not specified",
+          proficiency: lang.proficiency || "Not specified",
+        })),
+        achievements: (data.achievements || []).map((ach) => ({
+          awardName: ach.awardName || "Not specified",
+          issuingOrganization: ach.issuingOrganization || "Not specified",
+          date: ach.date || "",
+        })),
         personalInfo: {
-          ...data.personalInfo,
-          contact: data.personalInfo?.contact || {},
-          location: data.personalInfo?.location || {},
+          firstName: data.personalInfo?.username || data.username || "Unknown",
+          lastName: "",
+          jobTitle: data.careerPreferences?.desiredRoles || "Professional",
+          profilePicture: "", // API doesn't provide this, fallback to placeholder
+          contact: {
+            email:
+              data.personalInfo?.contact?.email || data.email || "Not provided",
+            phone: data.personalInfo?.contact?.phone || "Not provided",
+          },
+          location: {
+            city: data.personalInfo?.location?.currentCity || "Not specified",
+            country:
+              data.personalInfo?.location?.preferredLocations ||
+              "Not specified",
+          },
           links: data.personalInfo?.links || {},
+          summary: data.professionalSummary || "No description available.",
         },
+        availability:
+          data.careerPreferences?.availabilityToJoin || "Not specified",
+        hourlyRate: data.careerPreferences?.expectedSalary || "Not specified",
+        projectsCompleted: data.projects?.length || 0,
+        successRate: 0, // API doesn't provide this, set default
+        responseTime: "Not specified", // API doesn't provide this
       };
 
       setEmployee(initializedData);
@@ -161,6 +221,7 @@ export default function ViewEmployeeProfile() {
       github: Github,
       twitter: Twitter,
       website: Globe,
+      portfolio: Globe,
     };
     return icons[platform?.toLowerCase()] || Globe;
   };
@@ -340,7 +401,7 @@ export default function ViewEmployeeProfile() {
                           }'s profile picture`}
                           className="object-cover"
                         />
-                        <AvatarFallback className=" text-2xl bg-teal-100 text-teal-700 font-semibold">
+                        <AvatarFallback className="text-2xl bg-teal-100 text-teal-700 font-semibold">
                           {(
                             employee.personalInfo?.firstName ||
                             employee.name ||
@@ -535,9 +596,7 @@ export default function ViewEmployeeProfile() {
                       <span className="text-sm text-gray-600">Hourly Rate</span>
                       <span className="font-semibold text-teal-600 text-sm flex items-center">
                         <DollarSign className="w-3 h-3" aria-hidden="true" />
-                        {employee.hourlyRate
-                          ? `${employee.hourlyRate}/hr`
-                          : "Not specified"}
+                        {employee.hourlyRate || "Not specified"}
                       </span>
                     </div>
                   </div>
@@ -638,7 +697,7 @@ export default function ViewEmployeeProfile() {
                             </p>
                           </div>
                           <p className="text-gray-700 text-sm leading-relaxed">
-                            {exp.description || "No description provided."}
+                            {exp.description}
                           </p>
                         </div>
                       </div>
@@ -683,7 +742,7 @@ export default function ViewEmployeeProfile() {
                               aria-hidden="true"
                             />
                             <p className="text-sm text-gray-600">
-                              {edu.graduationYear || "Year not specified"}
+                              {edu.graduationYear}
                             </p>
                           </div>
                           {edu.gpa && (

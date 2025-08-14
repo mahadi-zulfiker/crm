@@ -30,12 +30,16 @@ export default function getALLRoles() {
         icon: Briefcase,
         items: [
           { name: "Posted Jobs", href: "/dashboard/client/postedJobs" },
-          { name: "Job Postings", href: "/dashboard/client/jobs" },
+          // { name: "Job Postings", href: "/dashboard/client/jobs" },
           { name: "Create Job", href: "/dashboard/client/createJobs" },
           {
-            name: "Job Templates",
-            href: "/dashboard/client/templates",
+            name: "Completed Job",
+            href: "/dashboard/client/completedJobsClient",
           },
+          // {
+          //   name: "Job Templates",
+          //   href: "/dashboard/client/templates",
+          // },
         ],
       },
       {
@@ -44,14 +48,17 @@ export default function getALLRoles() {
         items: [
           {
             name: "All Applications",
-            href: "/dashboard/employee/applications",
+            href: "/dashboard/client/allCandidates",
           },
-          { name: "Candidate Pool", href: "/dashboard/employee/candidates" },
+          // { name: "Candidate Pool", href: "/dashboard/employee/candidates" },
           {
             name: "Interview Schedule",
-            href: "/dashboard/employee/interviews",
+            href: "/dashboard/client/interviews",
           },
-          { name: "Hired Candidates", href: "/dashboard/employee/hired" },
+          {
+            name: "Hired Candidates",
+            href: "/dashboard/client/hiredCandidatesClient",
+          },
         ],
       },
       {
