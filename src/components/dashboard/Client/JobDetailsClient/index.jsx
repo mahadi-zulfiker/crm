@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,14 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 
 export default function JobDetailsClient() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InnerJobDetailsClient />
+    </Suspense>
+  );
+}
+
+function InnerJobDetailsClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = searchParams.get("jobId");
