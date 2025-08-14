@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,14 @@ import axios from "axios";
 import Head from "next/head";
 
 export default function ViewEmployeeProfile() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InnerViewEmployeeProfile />
+    </Suspense>
+  );
+}
+
+function InnerViewEmployeeProfile() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -44,7 +52,7 @@ export default function ViewEmployeeProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const employeeEmail = "NatureEmployee@gmail.com";
+  const employeeEmail = searchParams.get("email");
 
   const fetchEmployeeData = useCallback(async (email) => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
