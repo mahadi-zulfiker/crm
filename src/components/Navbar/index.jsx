@@ -290,8 +290,10 @@ const Navbar = ({ setHeaderHeight }) => {
                             onMouseLeave={handleMouseLeave}
                         >
                             <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
-                                <span>Our Services</span>
-                                <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
+                                <Link href="/services" className="flex items-center space-x-1">
+                                    <span>Our Services</span>
+                                    <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
+                                </Link>
                             </button>
                             {isServicesMenuOpen && (
                                 <div className="absolute top-full left-0 bg-white text-gray-800 shadow-2xl w-64 mt-2 p-4 rounded-lg z-50 border border-gray-200 transform opacity-100 scale-100 transition-all duration-300 animate-in slide-in-from-top-2">
