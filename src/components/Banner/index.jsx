@@ -46,12 +46,7 @@ const BannerSlider = () => {
         /> */}
 
         {/* Option 2: Uncomment for Video Background (MP4) */}
-        <video
-          autoPlay
-          loop
-          muted
-          className="w-full h-full object-cover"
-        >
+        <video autoPlay loop muted className="w-full h-full object-cover">
           <source src="/hero.mp4" type="video/mp4" />
         </video>
       </div>
@@ -75,6 +70,30 @@ const BannerSlider = () => {
             </p>
           </motion.div>
         </AnimatePresence>
+
+        {/* Floating Particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-white/20 rounded-full"
+              animate={{
+                x: [0, Math.random() * 1000],
+                y: [0, Math.random() * 1000],
+                opacity: [0, 1, 0],
+              }}
+              transition={{
+                duration: Math.random() * 10 + 10,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+            />
+          ))}
+        </div>
 
         {/* CTA Buttons */}
         <div className="mt-6 flex flex-wrap justify-center gap-4 z-20">
