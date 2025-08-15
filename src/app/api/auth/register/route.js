@@ -1,6 +1,17 @@
 import { connectMongoDB } from "@/lib/mongodb";
 import bcrypt from "bcrypt";
 
+export async function OPTIONS() {
+  return new Response(null, { status: 204 });
+}
+
+export async function GET() {
+  return new Response(JSON.stringify({ status: "ok" }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
 export async function POST(req) {
   try {
     console.log("➡️ Register API Called");
@@ -21,19 +32,19 @@ export async function POST(req) {
     const db = await connectMongoDB();
     console.log("✅ Connected to MongoDB");
 
-    // 🔹 Check if Admin exists, if not, create one
-    // const adminExists = await db.collection("users").findOne({ userType: "Admin" });
-
-    const adminPassword = await bcrypt.hash("admin123", 10);
-    await db.collection("users").insertOne({
-      username: "admin",
-      email: "admin@example.com",
-      password: adminPassword,
-      userType: "Admin",
-      createdAt: new Date(),
-    });
-
-    console.log("🛠️ Admin user created successfully");
+    // 🔹 Ensure a default admin exists (only create once)
+    const existingAdmin = await db.collection("users").findOne({ email: "admin@example.com" });
+    if (!existingAdmin) {
+      const adminPassword = await bcrypt.hash("admin123", 10);
+      await db.collection("users").insertOne({
+        username: "admin",
+        email: "admin@example.com",
+        password: adminPassword,
+        userType: "Admin",
+        createdAt: new Date(),
+      });
+      console.log("🛠️ Admin user created successfully");
+    }
 
     // 🔹 Check if user already exists
     const existingUser = await db.collection("users").findOne({ email });
