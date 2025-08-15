@@ -36,7 +36,7 @@ export default function HiredCandidatesPage() {
 
 function InnerHiredCandidatesPage() {
   const searchParams = useSearchParams();
-  const jobId = searchParams.get("id"); // get ?id=... from URL
+  const jobId = searchParams.get("id");
   const { toast } = useToast();
 
   const router = useRouter();

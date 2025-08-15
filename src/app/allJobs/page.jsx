@@ -1,478 +1,944 @@
 "use client";
 
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Search,
+  MapPin,
+  Building,
+  DollarSign,
+  Clock,
+  Filter,
+  Sparkles,
+  Heart,
+  Share2,
+  Briefcase,
+  Target,
+  UserPlus,
+  Rocket,
+  Handshake,
+  BarChart2,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaSearch } from "react-icons/fa";
-import { motion } from "framer-motion";
-import { UserPlus, Rocket, Handshake, BarChart2 } from "lucide-react";
-import Swal from "sweetalert2"; // Import Swal2
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import Navbar from "@/components/Navbar";
 
-function AllJobs() {
-    const [jobs, setJobs] = useState([]);
-    const [filteredJobs, setFilteredJobs] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const jobsPerPage = 9;
+export default function JobListings() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-    const router = useRouter();
+  // State management
+  const [jobs, setJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [companies, setCompanies] = useState([]);
 
-    useEffect(() => {
-        async function fetchJobs() {
-            try {
-                const res = await fetch("/api/jobs");
-                if (res.ok) {
-                    const data = await res.json();
-                    setJobs(data);
-                    setFilteredJobs(data);
-                    setCategories([...new Set(data.map((job) => job.category))]);
-                } else {
-                    setError("Failed to fetch jobs. Please try again later.");
-                }
-            } catch (error) {
-                console.error("Error fetching jobs:", error);
-                setError("An error occurred while fetching jobs.");
-            } finally {
-                setLoading(false);
-            }
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [selectedJobType, setSelectedJobType] = useState("all");
+  const [selectedExperience, setSelectedExperience] = useState("all");
+  const [salaryRange, setSalaryRange] = useState("all");
+  const [isRemote, setIsRemote] = useState("all");
+
+  // UI states
+  const [loading, setLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());
+
+  // Fetch jobs data
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/jobs");
+        if (response.ok) {
+          const data = await response.json();
+          setJobs(data);
+          setFilteredJobs(data);
+
+          // Extract unique values for filters
+          setCategories([
+            ...new Set(data.map((job) => job.category).filter(Boolean)),
+          ]);
+          setLocations([
+            ...new Set(data.map((job) => job.location).filter(Boolean)),
+          ]);
+          setCompanies([
+            ...new Set(data.map((job) => job.company).filter(Boolean)),
+          ]);
+        } else {
+          setError("Failed to fetch jobs. Please try again later.");
         }
-
-        fetchJobs();
-    }, []);
-
-    useEffect(() => {
-        let filtered = jobs;
-
-        if (searchQuery) {
-            filtered = filtered.filter((job) =>
-                job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                job.company.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-        }
-
-        setFilteredJobs(filtered);
-        setCurrentPage(1);
-    }, [searchQuery, jobs]);
-
-    const handleJobClick = (jobId) => {
-        router.push(`/singleJob/${jobId}`);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+        setError("An error occurred while fetching jobs.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Function to handle "Apply Now"
-    const handleApplyNow = async (e, jobTitle) => {
-        e.stopPropagation(); // Stop event propagation to prevent triggering handleJobClick
+    fetchJobs();
+  }, []);
 
-        const { value: formValues } = await Swal.fire({
-            title: `<span class="text-2xl font-bold text-gray-800">Apply for ${jobTitle}</span>`,
-            html: `
-                <div class="space-y-4 text-left p-4">
-                    <div>
-                        <label for="swal-input-name" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                        <input id="swal-input-name" class="swal2-input custom-swal-input" placeholder="John Doe">
-                    </div>
-                    <div>
-                        <label for="swal-input-email" class="block text-sm font-medium text-gray-700 mb-1">Your Email</label>
-                        <input id="swal-input-email" type="email" class="swal2-input custom-swal-input" placeholder="john.doe@example.com">
-                    </div>
-                    <div>
-                        <label for="swal-input-role" class="block text-sm font-medium text-gray-700 mb-1">Role Preference</label>
-                        <select id="swal-input-role" class="swal2-select custom-swal-input">
-                            <option value="">Select a role</option>
-                            <option value="Full-time">Full-time</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Contract">Contract</option>
-                            <option value="Freelance">Freelance</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="swal-input-cv" class="block text-sm font-medium text-gray-700 mb-1">Upload CV (PDF, DOC, DOCX)</label>
-                        <input id="swal-input-cv" type="file" class="swal2-file custom-swal-file" accept=".pdf,.doc,.docx">
-                    </div>
-                </div>
-            `,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Submit Application',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'custom-swal-popup',
-                title: 'custom-swal-title',
-                confirmButton: 'custom-swal-confirm-button',
-                cancelButton: 'custom-swal-cancel-button',
-            },
-            buttonsStyling: false, // Disable default Swal2 button styling to use custom classes
-            preConfirm: () => {
-                const name = document.getElementById('swal-input-name').value;
-                const email = document.getElementById('swal-input-email').value;
-                const rolePreference = document.getElementById('swal-input-role').value;
-                const cvFile = document.getElementById('swal-input-cv').files[0];
+  // Simulate async processing for search/filter
+  const simulateAsync = (fn) => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      fn();
+      setIsProcessing(false);
+    }, 300);
+  };
 
-                if (!name || !email || !rolePreference || !cvFile) {
-                    Swal.showValidationMessage('All fields are required!');
-                    return false;
-                }
+  // Handle search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    applyFilters();
+  };
 
-                // Basic email validation
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    Swal.showValidationMessage('Please enter a valid email address.');
-                    return false;
-                }
+  // Apply all filters
+  const applyFilters = () => {
+    simulateAsync(() => {
+      let filtered = [...jobs];
 
-                // File type validation (already handled by accept attribute but good to have server-side too)
-                const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-                if (cvFile && !allowedTypes.includes(cvFile.type)) {
-                    Swal.showValidationMessage('Please upload a PDF, DOC, or DOCX file for your CV.');
-                    return false;
-                }
+      // Search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (job) =>
+            job.title?.toLowerCase().includes(query) ||
+            job.company?.toLowerCase().includes(query) ||
+            job.location?.toLowerCase().includes(query) ||
+            job.description?.toLowerCase().includes(query) ||
+            job.category?.toLowerCase().includes(query)
+        );
+      }
 
-                return { name, email, rolePreference, cvFile };
-            }
+      // Category filter
+      if (selectedCategory !== "all") {
+        filtered = filtered.filter((job) => job.category === selectedCategory);
+      }
+
+      // Location filter
+      if (selectedLocation !== "all") {
+        filtered = filtered.filter((job) => job.location === selectedLocation);
+      }
+
+      // Job type filter
+      if (selectedJobType !== "all") {
+        filtered = filtered.filter((job) => job.jobType === selectedJobType);
+      }
+
+      // Experience filter
+      if (selectedExperience !== "all") {
+        filtered = filtered.filter(
+          (job) => job.experienceLevel === selectedExperience
+        );
+      }
+
+      // Remote filter
+      if (isRemote !== "all") {
+        filtered = filtered.filter((job) => {
+          if (isRemote === "remote") return job.workType === "Remote";
+          if (isRemote === "onsite") return job.workType === "On-site";
+          if (isRemote === "hybrid") return job.workType === "Hybrid";
+          return true;
         });
+      }
 
-        if (formValues) {
-            // In a real application, you would send formValues.name, formValues.email,
-            // formValues.rolePreference, and formValues.cvFile to your backend for processing.
-            // Example of how you might prepare data for FormData if sending to an API:
-            // const formData = new FormData();
-            // formData.append('name', formValues.name);
-            // formData.append('email', formValues.email);
-            // formData.append('rolePreference', formValues.rolePreference);
-            // formData.append('cv', formValues.cvFile);
-            //
-            // try {
-            //     const response = await fetch('/api/apply', {
-            //         method: 'POST',
-            //         body: formData,
-            //     });
-            //     if (response.ok) {
-            //         Swal.fire({
-            //             icon: 'success',
-            //             title: 'Application Submitted!',
-            //             text: `Thank you, ${formValues.name}! Your application for "${jobTitle}" has been received.`,
-            //             confirmButtonText: 'OK'
-            //         });
-            //     } else {
-            //         Swal.fire({
-            //             icon: 'error',
-            //             title: 'Submission Failed',
-            //             text: 'There was an issue submitting your application. Please try again.',
-            //             confirmButtonText: 'OK'
-            //         });
-            //     }
-            // } catch (error) {
-            //     console.error("Error submitting application:", error);
-            //     Swal.fire({
-            //         icon: 'error',
-            //         title: 'Submission Failed',
-            //         text: 'An unexpected error occurred. Please try again.',
-            //         confirmButtonText: 'OK'
-            //     });
-            // }
+      // Salary range filter
+      if (salaryRange !== "all") {
+        filtered = filtered.filter((job) => {
+          const salary = Number.parseInt(
+            job.salary?.replace(/[^0-9]/g, "") || 0
+          );
+          switch (salaryRange) {
+            case "0-30k":
+              return salary <= 30000;
+            case "30k-60k":
+              return salary > 30000 && salary <= 60000;
+            case "60k-100k":
+              return salary > 60000 && salary <= 100000;
+            case "100k+":
+              return salary > 100000;
+            default:
+              return true;
+          }
+        });
+      }
 
-            // For this example, we'll just simulate a successful submission.
-            console.log("Application Data:", formValues);
+      setFilteredJobs(filtered);
+    });
+  };
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Application Submitted!',
-                text: `Thank you, ${formValues.name}! Your application for "${jobTitle}" has been received. We'll be in touch.`,
-                confirmButtonText: 'OK',
-                customClass: {
-                    popup: 'custom-swal-success-popup',
-                    confirmButton: 'custom-swal-confirm-button',
-                },
-                buttonsStyling: false,
-            });
-        }
-    };
-
-    const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
-    const currentJobs = filteredJobs.slice(
-        (currentPage - 1) * jobsPerPage,
-        currentPage * jobsPerPage
-    );
-
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-800">
-                <p className="text-lg font-semibold">Loading jobs...</p>
-            </div>
-        );
+  // Apply filters when any filter changes
+  useEffect(() => {
+    if (!loading && jobs.length > 0) {
+      applyFilters();
     }
+  }, [
+    searchQuery,
+    selectedCategory,
+    selectedLocation,
+    selectedJobType,
+    selectedExperience,
+    salaryRange,
+    isRemote,
+    jobs,
+    loading,
+  ]);
 
-    if (error) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-800">
-                <p className="text-lg font-semibold">{error}</p>
-            </div>
-        );
+  const handleClearSearch = () => {
+    setSearchQuery("");
+  };
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setSelectedLocation("all");
+    setSelectedJobType("all");
+    setSelectedExperience("all");
+    setSalaryRange("all");
+    setIsRemote("all");
+  };
+
+  const toggleMobileFilter = () => {
+    setIsMobileFilterOpen(!isMobileFilterOpen);
+  };
+
+  // Handle job actions
+  const handleJobClick = (jobId) => {
+    router.push(`/singleJob/${jobId}`);
+  };
+
+  const handleBookmark = (jobId, e) => {
+    e.stopPropagation();
+    const newBookmarked = new Set(bookmarkedJobs);
+    if (newBookmarked.has(jobId)) {
+      newBookmarked.delete(jobId);
+      toast.success("Job removed from bookmarks");
+    } else {
+      newBookmarked.add(jobId);
+      toast.success("Job bookmarked successfully");
     }
+    setBookmarkedJobs(newBookmarked);
+  };
 
+  const handleApply = (jobId, jobTitle, e) => {
+    e.stopPropagation();
+    if (!session) {
+      toast.error("Please login to apply for jobs");
+      router.push("/login");
+      return;
+    }
+    router.push(`/singleJob/${jobId}`);
+  };
+
+  const handleShare = (job, e) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({
+        title: job.title,
+        text: `Check out this job at ${job.company}`,
+        url: `${window.location.origin}/jobs/${job._id}`,
+      });
+    } else {
+      navigator.clipboard.writeText(
+        `${window.location.origin}/jobs/${job._id}`
+      );
+      toast.success("Job link copied to clipboard");
+    }
+  };
+
+  const getJobTypeColor = (type) => {
+    switch (type?.toLowerCase()) {
+      case "full-time":
+        return "bg-green-100 text-green-800";
+      case "part-time":
+        return "bg-blue-100 text-blue-800";
+      case "contract":
+        return "bg-orange-100 text-orange-800";
+      case "freelance":
+        return "bg-purple-100 text-purple-800";
+      case "internship":
+        return "bg-pink-100 text-pink-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getExperienceColor = (level) => {
+    switch (level?.toLowerCase()) {
+      case "entry-level":
+        return "bg-green-100 text-green-800";
+      case "mid-level":
+        return "bg-blue-100 text-blue-800";
+      case "senior-level":
+        return "bg-purple-100 text-purple-800";
+      case "executive":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  if (loading) {
     return (
-        <div>
-            <Navbar />
-            <div className="bg-gray-50 min-h-screen text-gray-800 flex flex-col">
-                <div className="container mx-auto px-4 py-12">
-                    <h1 className="text-4xl font-bold text-center text-gray-800">
-                        Find Work That Works For You.
-                    </h1>
-                    <p className="text-lg mb-5 mt-4 text-center text-gray-600">We connect professionals to temp, perm, and contract jobs across the UK.</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 mt-10 text-center">
-                        <div className="bg-slate-100 rounded-md p-4 shadow-sm hover:shadow-md transition flex flex-col items-center">
-                            <UserPlus className="h-6 w-6 text-teal-600 mb-2" />
-                            <p className="text-gray-600 font-semibold">Free to Register With Us</p>
-                        </div>
-                        <div className="bg-slate-100 rounded-md p-4 shadow-sm hover:shadow-md transition flex flex-col items-center">
-                            <Rocket className="h-6 w-6 text-teal-600 mb-2" />
-                            <p className="text-gray-600 font-semibold">Fast-track to Top Employers</p>
-                        </div>
-                        <div className="bg-slate-100 rounded-md p-4 shadow-sm hover:shadow-md transition flex flex-col items-center">
-                            <Handshake className="h-6 w-6 text-teal-600 mb-2" />
-                            <p className="text-gray-600 font-semibold">1:1 Support from Our Team</p>
-                        </div>
-                        <div className="bg-slate-100 rounded-md p-4 shadow-sm hover:shadow-md transition flex flex-col items-center">
-                            <BarChart2 className="h-6 w-6 text-teal-600 mb-2" />
-                            <p className="text-gray-600 font-semibold">Career Growth Resources</p>
-                        </div>
-                    </div>
-
-                    {/* Filters Area */}
-                    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <button
-                                    onClick={() => router.push("/signUp")}
-                                    className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-indigo-700 shadow-sm transition-all"
-                                >
-                                    Register
-                                </button>
-                                <button
-                                    onClick={() => router.push("/uploadCV")}
-                                    className="bg-teal-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-green-700 shadow-sm transition-all"
-                                >
-                                    Upload Your CV
-                                </button>
-                            </div>
-
-                            <div className="relative w-full md:w-[350px]">
-                                <input
-                                    type="text"
-                                    className="w-full p-3 pl-10 rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 text-gray-700"
-                                    placeholder="Search by keywords, company"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                            </div>
-                        </div>
-                    </div>
-                    {/* Categories as Tiles */}
-                    {categories.length > 0 && (
-                        <div className="mb-12">
-                            <h2 className="text-2xl font-bold mb-4">Browse by Categories</h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                {categories.map((cat, index) => (
-                                    <div
-                                        key={index}
-                                        className="bg-white rounded-lg shadow hover:shadow-md transition-all p-4 cursor-pointer text-center border border-gray-200 text-md font-medium text-gray-700 hover:bg-indigo-50"
-                                        onClick={() => setSearchQuery(cat)}
-                                    >
-                                        {cat}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Job Listings */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {currentJobs.length > 0 ? (
-                            currentJobs.map((job) => (
-                                <motion.div
-                                    key={job._id}
-                                    className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer border border-gray-200"
-                                    whileHover={{ scale: 1.03 }}
-                                >
-                                    <div className="p-6">
-                                        <h2 className="text-xl font-semibold text-gray-800 mb-3 line-clamp-2">{job.title}</h2>
-                                        <p className="flex items-center text-gray-600 mb-2 text-sm">
-                                            <FaBuilding className="mr-2 text-gray-500" />
-                                            <span className="font-medium line-clamp-1">{job.company}</span>
-                                        </p>
-                                        <p className="flex items-center text-gray-600 mb-3 text-sm">
-                                            <FaMapMarkerAlt className="mr-2 text-gray-500" />
-                                            <span className="font-medium">{job.location}</span>
-                                        </p>
-                                        <p className="text-gray-700 mb-4 line-clamp-3">{job.description}</p>
-                                        <div className="flex items-center justify-between">
-                                            {job.salary && (
-                                                <p className="flex items-center text-green-600 font-semibold text-sm">
-                                                    <FaMoneyBillWave className="mr-2 text-green-500" />
-                                                    <span className="font-bold">${job.salary}</span>
-                                                </p>
-                                            )}
-                                            <p className="text-xs text-gray-500 italic">
-                                                Posted on: {new Date(job.postedAt).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                        <div className="mt-4 border-t border-gray-200 pt-4 flex justify-between items-center gap-2">
-                                            <button
-                                                onClick={(e) => handleJobClick(job._id)}
-                                                className="flex-grow bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-400 shadow-sm text-sm"
-                                            >
-                                                View Details
-                                            </button>
-                                            <button
-                                                onClick={(e) => handleApplyNow(e, job.title)}
-                                                className="flex-grow bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm text-sm"
-                                            >
-                                                Apply Now
-                                            </button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))
-                        ) : (
-                            <p className="col-span-full text-center text-gray-600">No jobs match your current search criteria.</p>
-                        )}
-                    </div>
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex justify-center mt-10">
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => handlePageChange(page)}
-                                    className={`px-4 py-2 mx-1 rounded-md font-semibold focus:outline-none ${page === currentPage
-                                        ? "bg-indigo-600 text-white shadow-md"
-                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-            <Footer />
-
-            {/* Styled JSX for scoped CSS */}
-            <style jsx global>{`
-                /* Custom styles for Swal2 modal */
-                .custom-swal-popup {
-                    padding-top: 20px !important;
-                    border-radius: 0.75rem !important; /* Tailwind's rounded-lg */
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; /* Tailwind's shadow-lg */
-                    background-color: #ffffff !important;
-                    color: #333333 !important;
-                    font-family: 'Inter', sans-serif !important; /* Use a common clean font */
-                }
-
-                .custom-swal-title {
-                    color: #1f2937 !important; /* Tailwind's gray-800 */
-                    font-size: 1.5rem !important; /* Tailwind's text-2xl */
-                    font-weight: 700 !important; /* Tailwind's font-bold */
-                    margin-bottom: 1.5rem !important;
-                }
-
-                .custom-swal-input {
-                    width: 100% !important;
-                    padding: 0.75rem !important;
-                    border: 1px solid #d1d5db !important; /* Tailwind's border-gray-300 */
-                    border-radius: 0.375rem !important; /* Tailwind's rounded-md */
-                    font-size: 1rem !important;
-                    color: #374151 !important; /* Tailwind's gray-700 */
-                    margin: 0 !important;
-                    margin-top: 0.25rem !important; /* Added for spacing with label */
-                    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
-                    
-                }
-
-                .custom-swal-input:focus {
-                    border-color: #6366f1 !important; /* Tailwind's indigo-500 or blue-500 */
-                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important; /* Focus ring */
-                    outline: none !important;
-                }
-
-                .custom-swal-file {
-                    /* Basic styling for file input */
-                    padding: 0.75rem !important;
-                    border: 1px solid #d1d5db !important;
-                    border-radius: 0.375rem !important;
-                    font-size: 1rem !important;
-                    color: #374151 !important;
-                    background-color: #f9fafb !important; /* Light background */
-                    margin-top: 0.25rem !important;
-                    width: 100% !important;
-                }
-
-                .custom-swal-file::file-selector-button {
-                    background-color: #4f46e5 !important; /* Tailwind's indigo-600 */
-                    color: white !important;
-                    border: none !important;
-                    padding: 0.5rem 1rem !important;
-                    border-radius: 0.375rem !important;
-                    cursor: pointer !important;
-                    margin-right: 1rem !important;
-                    transition: background-color 0.15s ease-in-out !important;
-                }
-
-                .custom-swal-file::file-selector-button:hover {
-                    background-color: #4338ca !important; /* Darker indigo on hover */
-                }
-
-                .custom-swal-confirm-button {
-                    background-color: #4f46e5 !important; /* Tailwind's indigo-600 */
-                    color: white !important;
-                    font-weight: 600 !important; /* Tailwind's font-semibold */
-                    padding: 0.625rem 1.5rem !important; /* Tailwind's py-2.5 px-6 */
-                    border-radius: 0.375rem !important; /* Tailwind's rounded-md */
-                    transition: background-color 0.2s ease-in-out !important;
-                    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-                }
-
-                .custom-swal-confirm-button:hover {
-                    background-color: #4338ca !important; /* Tailwind's indigo-700 */
-                }
-
-                .custom-swal-cancel-button {
-                    background-color: #ef4444 !important; /* Tailwind's red-500 */
-                    color: white !important;
-                    font-weight: 600 !important;
-                    padding: 0.625rem 1.5rem !important;
-                    border-radius: 0.375rem !important;
-                    transition: background-color 0.2s ease-in-out !important;
-                    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-                    margin-left: 0.75rem !important; /* Added for spacing */
-                }
-
-                .custom-swal-cancel-button:hover {
-                    background-color: #dc2626 !important; /* Tailwind's red-600 */
-                }
-
-                /* Specific styling for the success modal */
-                .custom-swal-success-popup {
-                    border-left: 5px solid #22c55e !important; /* Tailwind's green-500 */
-                }
-
-                /* Ensure the swal2-input, swal2-select, swal2-file reset some default styles */
-                .swal2-input, .swal2-select, .swal2-file {
-                    box-sizing: border-box !important; /* Important for consistent sizing */
-                }
-            `}</style>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-blue-400 animate-pulse"></div>
+          <p className="text-gray-600">Loading jobs...</p>
         </div>
+      </div>
     );
-}
+  }
 
-export default AllJobs;
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center space-y-4">
+          <div className="text-red-500 text-6xl">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Oops! Something went wrong
+          </h2>
+          <p className="text-gray-600">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-teal-400 hover:bg-teal-700"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 transition-colors duration-300">
+      <Navbar />
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-4xl font-bold text-center text-gray-800">
+            Find Work That Works For You.
+          </h1>
+          <p className="text-lg mb-5 mt-4 text-center text-gray-600">
+            We connect professionals to temp, perm, and contract jobs across the
+            UK.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 mt-10 text-center">
+            <div className="bg-slate-100 rounded-md p-4 shadow-sm hover:shadow-md transition flex flex-col items-center">
+              <UserPlus className="h-6 w-6 text-teal-600 mb-2" />
+              <p className="text-gray-600 font-semibold">
+                Free to Register With Us
+              </p>
+            </div>
+            <div className="bg-slate-100 rounded-md p-4 shadow-sm hover:shadow-md transition flex flex-col items-center">
+              <Rocket className="h-6 w-6 text-teal-600 mb-2" />
+              <p className="text-gray-600 font-semibold">
+                Fast-track to Top Employers
+              </p>
+            </div>
+            <div className="bg-slate-100 rounded-md p-4 shadow-sm hover:shadow-md transition flex flex-col items-center">
+              <Handshake className="h-6 w-6 text-teal-600 mb-2" />
+              <p className="text-gray-600 font-semibold">
+                1:1 Support from Our Team
+              </p>
+            </div>
+            <div className="bg-slate-100 rounded-md p-4 shadow-sm hover:shadow-md transition flex flex-col items-center">
+              <BarChart2 className="h-6 w-6 text-teal-600 mb-2" />
+              <p className="text-gray-600 font-semibold">
+                Career Growth Resources
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Search Bar */}
+        <motion.div
+          className="mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <form
+            onSubmit={handleSearch}
+            className="flex w-full max-w-4xl mx-auto"
+          >
+            <div className="relative flex-grow">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
+                <Search className="h-5 w-5 text-gray-500" />
+              </div>
+              <Input
+                type="text"
+                className="pl-10 pr-3 py-3 text-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Search jobs, skills, or companies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={isProcessing || loading}
+              className="ml-3 px-6 py-3 bg-teal-400 hover:bg-teal-700 text-white disabled:opacity-50"
+            >
+              {isProcessing ? "Searching..." : "Search"}
+            </Button>
+            {searchQuery && (
+              <Button
+                type="button"
+                onClick={handleClearSearch}
+                variant="ghost"
+                className="ml-2 text-blue-600 hover:text-blue-700"
+              >
+                Clear
+              </Button>
+            )}
+          </form>
+        </motion.div>
+
+        {/* Main Content */}
+        <div className="lg:grid lg:grid-cols-4 lg:gap-8">
+          {/* Filter Sidebar (Desktop) */}
+          <motion.div
+            className="hidden lg:block lg:col-span-1"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <div className="sticky top-20">
+              <Card className="shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Filters
+                    </h3>
+                    <Button
+                      onClick={handleResetFilters}
+                      variant="ghost"
+                      size="sm"
+                      className="text-blue-600"
+                    >
+                      Reset
+                    </Button>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Category Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Category
+                      </label>
+                      <Select
+                        value={selectedCategory}
+                        onValueChange={setSelectedCategory}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Categories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories</SelectItem>
+                          {categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Location Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Location
+                      </label>
+                      <Select
+                        value={selectedLocation}
+                        onValueChange={setSelectedLocation}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Locations" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Locations</SelectItem>
+                          {locations.map((location) => (
+                            <SelectItem key={location} value={location}>
+                              {location}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Job Type Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Job Type
+                      </label>
+                      <Select
+                        value={selectedJobType}
+                        onValueChange={setSelectedJobType}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Types" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Types</SelectItem>
+                          <SelectItem value="Full-time">Full-time</SelectItem>
+                          <SelectItem value="Part-time">Part-time</SelectItem>
+                          <SelectItem value="Contract">Contract</SelectItem>
+                          <SelectItem value="Freelance">Freelance</SelectItem>
+                          <SelectItem value="Internship">Internship</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Experience Level Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Experience Level
+                      </label>
+                      <Select
+                        value={selectedExperience}
+                        onValueChange={setSelectedExperience}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Levels" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Levels</SelectItem>
+                          <SelectItem value="Entry-level">
+                            Entry Level
+                          </SelectItem>
+                          <SelectItem value="Mid-level">Mid Level</SelectItem>
+                          <SelectItem value="Senior-level">
+                            Senior Level
+                          </SelectItem>
+                          <SelectItem value="Executive">Executive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Remote Work Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Work Type
+                      </label>
+                      <Select value={isRemote} onValueChange={setIsRemote}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Work Types" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Work Types</SelectItem>
+                          <SelectItem value="remote">Remote</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
+                          <SelectItem value="onsite">On-site</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Salary Range Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Salary Range
+                      </label>
+                      <Select
+                        value={salaryRange}
+                        onValueChange={setSalaryRange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Salaries" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Salaries</SelectItem>
+                          <SelectItem value="0-30k">$0 - $30k</SelectItem>
+                          <SelectItem value="30k-60k">$30k - $60k</SelectItem>
+                          <SelectItem value="60k-100k">$60k - $100k</SelectItem>
+                          <SelectItem value="100k+">$100k+</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </motion.div>
+
+          {/* Job Listings */}
+          <div className="lg:col-span-3">
+            {/* Mobile Filter Toggle */}
+            <div className="mb-4 lg:hidden">
+              <Button
+                onClick={toggleMobileFilter}
+                variant="outline"
+                className="w-full flex justify-center items-center bg-transparent"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                {isMobileFilterOpen ? "Close Filters" : "Filters"}
+                {(selectedCategory !== "all" ||
+                  selectedLocation !== "all" ||
+                  selectedJobType !== "all" ||
+                  selectedExperience !== "all" ||
+                  salaryRange !== "all" ||
+                  isRemote !== "all") && (
+                  <Badge className="ml-2 bg-teal-400 text-white">Active</Badge>
+                )}
+              </Button>
+
+              <AnimatePresence>
+                {isMobileFilterOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4"
+                  >
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Filters
+                          </h3>
+                          <Button
+                            onClick={handleResetFilters}
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-600"
+                          >
+                            Reset
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <Select
+                            value={selectedCategory}
+                            onValueChange={setSelectedCategory}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">
+                                All Categories
+                              </SelectItem>
+                              {categories.map((category) => (
+                                <SelectItem key={category} value={category}>
+                                  {category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                          <Select
+                            value={selectedLocation}
+                            onValueChange={setSelectedLocation}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Location" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Locations</SelectItem>
+                              {locations.map((location) => (
+                                <SelectItem key={location} value={location}>
+                                  {location}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                          <Select
+                            value={selectedJobType}
+                            onValueChange={setSelectedJobType}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Job Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Types</SelectItem>
+                              <SelectItem value="Full-time">
+                                Full-time
+                              </SelectItem>
+                              <SelectItem value="Part-time">
+                                Part-time
+                              </SelectItem>
+                              <SelectItem value="Contract">Contract</SelectItem>
+                              <SelectItem value="Freelance">
+                                Freelance
+                              </SelectItem>
+                              <SelectItem value="Internship">
+                                Internship
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          <Select
+                            value={selectedExperience}
+                            onValueChange={setSelectedExperience}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Experience" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Levels</SelectItem>
+                              <SelectItem value="Entry-level">
+                                Entry Level
+                              </SelectItem>
+                              <SelectItem value="Mid-level">
+                                Mid Level
+                              </SelectItem>
+                              <SelectItem value="Senior-level">
+                                Senior Level
+                              </SelectItem>
+                              <SelectItem value="Executive">
+                                Executive
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          <Select value={isRemote} onValueChange={setIsRemote}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Work Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">
+                                All Work Types
+                              </SelectItem>
+                              <SelectItem value="remote">Remote</SelectItem>
+                              <SelectItem value="hybrid">Hybrid</SelectItem>
+                              <SelectItem value="onsite">On-site</SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          <Select
+                            value={salaryRange}
+                            onValueChange={setSalaryRange}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Salary Range" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Salaries</SelectItem>
+                              <SelectItem value="0-30k">$0 - $30k</SelectItem>
+                              <SelectItem value="30k-60k">
+                                $30k - $60k
+                              </SelectItem>
+                              <SelectItem value="60k-100k">
+                                $60k - $100k
+                              </SelectItem>
+                              <SelectItem value="100k+">$100k+</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Results Info */}
+            <div className="mb-6 flex items-center justify-between">
+              <p className="text-sm text-gray-500">
+                Showing{" "}
+                <span className="font-medium text-gray-900">
+                  {filteredJobs.length}
+                </span>{" "}
+                jobs
+              </p>
+              <Button
+                onClick={handleResetFilters}
+                variant="ghost"
+                className="text-blue-600 hover:text-blue-700"
+              >
+                Reset Filters
+              </Button>
+            </div>
+
+            {/* Job Listings or States */}
+            {isProcessing ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-12 h-12 rounded-full bg-blue-400 animate-pulse mb-4"></div>
+                <p className="text-gray-600">Processing filters...</p>
+              </div>
+            ) : filteredJobs.length === 0 ? (
+              <motion.div
+                className="text-center py-12 bg-white rounded-lg shadow-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No jobs found
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Try adjusting your search criteria or browse all jobs
+                </p>
+                <Button
+                  onClick={handleResetFilters}
+                  className="bg-teal-400 hover:bg-teal-700"
+                >
+                  View all jobs
+                </Button>
+              </motion.div>
+            ) : (
+              <div className="space-y-6">
+                <AnimatePresence>
+                  {filteredJobs.map((job, index) => (
+                    <motion.div
+                      key={job._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      whileHover={{ y: -2 }}
+                      className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer border border-gray-100"
+                      onClick={() => handleJobClick(job._id)}
+                    >
+                      <div className="p-6">
+                        {/* Header */}
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex-1">
+                            <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-2">
+                              {job.title}
+                            </h3>
+                            <div className="flex items-center text-gray-600 mb-2">
+                              <Building className="w-4 h-4 mr-2" />
+                              <span className="font-medium">{job.company}</span>
+                            </div>
+                            <div className="flex items-center text-gray-600">
+                              <MapPin className="w-4 h-4 mr-2" />
+                              <span>{job.location}</span>
+                              {job.workType && (
+                                <Badge
+                                  className="ml-2 bg-gray-100 text-gray-700"
+                                  size="sm"
+                                >
+                                  {job.workType}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => handleBookmark(job._id, e)}
+                            className={`${
+                              bookmarkedJobs.has(job._id)
+                                ? "text-red-500"
+                                : "text-gray-400"
+                            } hover:text-red-500`}
+                          >
+                            <Heart
+                              className={`w-5 h-5 ${
+                                bookmarkedJobs.has(job._id)
+                                  ? "fill-current"
+                                  : ""
+                              }`}
+                            />
+                          </Button>
+                        </div>
+
+                        {/* Badges */}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {job.jobType && (
+                            <Badge className={getJobTypeColor(job.jobType)}>
+                              {job.jobType}
+                            </Badge>
+                          )}
+                          {job.experienceLevel && (
+                            <Badge
+                              className={getExperienceColor(
+                                job.experienceLevel
+                              )}
+                            >
+                              {job.experienceLevel}
+                            </Badge>
+                          )}
+                          {job.category && (
+                            <Badge className="bg-blue-100 text-blue-800">
+                              <Briefcase className="w-3 h-3 mr-1" />
+                              {job.category}
+                            </Badge>
+                          )}
+                          {job.urgent && (
+                            <Badge className="bg-red-100 text-red-800">
+                              <Target className="w-3 h-3 mr-1" />
+                              Urgent
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-gray-700 mb-4 line-clamp-3">
+                          {job.description}
+                        </p>
+
+                        {/* Footer */}
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                          <div className="flex items-center space-x-4">
+                            {job.salary && (
+                              <div className="flex items-center text-green-600 font-semibold">
+                                <DollarSign className="w-4 h-4 mr-1" />
+                                {job.salary}
+                              </div>
+                            )}
+                            <div className="flex items-center text-gray-500 text-sm">
+                              <Clock className="w-4 h-4 mr-1" />
+                              {new Date(
+                                job.postedAt || job.createdAt
+                              ).toLocaleDateString()}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => handleShare(job, e)}
+                            >
+                              <Share2 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              onClick={(e) =>
+                                handleApply(job._id, job.title, e)
+                              }
+                              className="bg-teal-400 hover:bg-teal-700 text-white"
+                              size="sm"
+                            >
+                              Apply Now
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
