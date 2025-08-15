@@ -94,9 +94,11 @@ export default function ContactUs() {
       <Navbar />
 
       {/* Hero */}
-      <header className="relative isolate overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-600" />
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10" />
+      <header className="relative isolate overflow-hidden py-4">
+        <div className="absolute inset-0 bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-600 opacity-90" />
+
+        <div className="absolute inset-0 bg-[url('/contactUs.jpg')] bg-cover bg-center opacity-10" />
+
         <div className="relative mx-auto flex h-[220px] sm:h-[280px] md:h-[340px] max-w-7xl items-center px-4 sm:px-6 text-white">
           <div className="max-w-3xl" data-aos="fade-up">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs sm:text-sm backdrop-blur">
