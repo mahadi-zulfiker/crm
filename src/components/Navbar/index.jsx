@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { FaEnvelope, FaPhoneAlt, FaBars, FaTimes, FaChevronDown, FaUser, FaSignOutAlt, FaDashcube } from "react-icons/fa";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
+import { useLoading } from "@/contexts/LoadingContext";
+import Swal from "sweetalert2";
 import logo from "../../../public/drWhiteLogo.png";
 import Link from "next/link";
 
@@ -20,6 +22,8 @@ const Navbar = ({ setHeaderHeight }) => {
     
     const router = useRouter();
     const { data: session, status } = useSession();
+    const { show: showLoading, hide: hideLoading } = useLoading();
+    const [justLoggedOut, setJustLoggedOut] = useState(false);
     const userType = session?.user?.userType?.toLowerCase();
 
     let dropdownTimeout;
@@ -52,6 +56,13 @@ const Navbar = ({ setHeaderHeight }) => {
             setHeaderHeight(fullNavbar.offsetHeight);
         }
     }, [setHeaderHeight, isScrolled]);
+
+    // Ensure UI responds instantly on logout and resets appropriately
+    useEffect(() => {
+        if (status !== "authenticated") {
+            setJustLoggedOut(false);
+        }
+    }, [status]);
 
     const handleMouseEnter = (menu) => {
         clearTimeout(dropdownTimeout);
@@ -86,9 +97,53 @@ const Navbar = ({ setHeaderHeight }) => {
     };
 
     const dashboardLink = userType ? dashboardRoutes[userType] || "/dashboard" : "/dashboard";
+    const isAuthenticated = status === "authenticated" && !justLoggedOut;
 
     const handleSignOut = async () => {
-        await signOut({ callbackUrl: "/" });
+        const content = `
+            <div class=\"flex items-center gap-3\">
+                <div class=\"flex h-10 w-10 items-center justify-center rounded-full bg-teal-100\">
+                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" class=\"h-6 w-6 text-teal-700\">
+                        <path fill-rule=\"evenodd\" d=\"M12 2.25a9.75 9.75 0 1 0 9.75 9.75A9.761 9.761 0 0 0 12 2.25ZM10.28 9.22a.75.75 0 0 1 1.06 0L12 9.879l.66-.659a.75.75 0 1 1 1.06 1.06l-.659.66.659.66a.75.75 0 1 1-1.06 1.06L12 12.001l-.66.659a.75.75 0 1 1-1.06-1.06l.659-.66-.659-.66a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\" />
+                    </svg>
+                </div>
+                <div class=\"text-left\">
+                    <div class=\"text-base md:text-lg font-semibold text-gray-800\">Logout?</div>
+                    <div class=\"text-xs md:text-sm text-gray-500\">Are you sure you want to log out?</div>
+                </div>
+            </div>
+        `;
+
+        const result = await Swal.fire({
+            html: content,
+            backdrop: true,
+            showCancelButton: true,
+            focusConfirm: false,
+            buttonsStyling: false,
+            reverseButtons: true,
+            allowOutsideClick: true,
+            customClass: {
+                popup: "rounded-2xl shadow-2xl border border-gray-200 w-[92%] max-w-sm md:max-w-md",
+                actions: "flex gap-3 px-6 pb-6 pt-2",
+                htmlContainer: "px-6 pt-6",
+                confirmButton: "bg-gradient-to-r from-teal-600 to-teal-500 text-white px-5 py-2 rounded-lg hover:from-teal-700 hover:to-teal-600 text-sm md:text-base",
+                cancelButton: "bg-gray-200 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-300 text-sm md:text-base",
+            },
+            confirmButtonText: "Logout",
+            cancelButtonText: "Cancel",
+        });
+        if (!result.isConfirmed) return;
+        try {
+            setJustLoggedOut(true); // instant UI update
+            closeMobileMenu();
+            showLoading();
+            await signOut({ redirect: false });
+            hideLoading();
+            router.replace("/signIn");
+        } catch (error) {
+            console.error("Logout failed", error);
+            hideLoading();
+        }
     };
 
     const goToDashboard = () => {
@@ -131,7 +186,7 @@ const Navbar = ({ setHeaderHeight }) => {
                     </div>
 
                     <div className="flex items-center space-x-4">
-                        {status === "authenticated" ? (
+                        {isAuthenticated ? (
                             <>
                                 <button 
                                     onClick={goToDashboard} 
