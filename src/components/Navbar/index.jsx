@@ -3,33 +3,70 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FaEnvelope, FaPhoneAlt, FaBars, FaTimes } from "react-icons/fa";
+import { FaEnvelope, FaPhoneAlt, FaBars, FaTimes, FaChevronDown, FaUser, FaSignOutAlt, FaDashcube } from "react-icons/fa";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import logo from "../../../public/drWhiteLogo.png";
 import Link from "next/link";
 
-const Navbar = ({ setHeaderHeight }) => { // Accept setHeaderHeight prop
+const Navbar = ({ setHeaderHeight }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isServicesMenuOpen, setIsServicesMenuOpen] = useState(false);
+    const [isWhyDemandRecruitmentMenuOpen, setIsWhyDemandRecruitmentMenuOpen] = useState(false);
+    const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    
     const router = useRouter();
     const { data: session, status } = useSession();
     const userType = session?.user?.userType?.toLowerCase();
-    const [isServicesMenuOpen, setIsServicesMenuOpen] = useState(false);
-    const [isWhyDemandRecruitmentMenuOpen, setIsWhyDemandRecruitmentMenuOpen] = useState(false);
-    const [isGetStartedOpen, setisGetStartedOpen] = useState(false);
 
     let dropdownTimeout;
+
+    // Check if device is mobile
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Handle scroll effect
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollThreshold = isMobile ? 10 : 20;
+            setIsScrolled(window.scrollY > scrollThreshold);
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [isMobile]);
+
+    // Handle navbar height measurement
+    useEffect(() => {
+        const fullNavbar = document.getElementById('full-navbar');
+        if (fullNavbar && setHeaderHeight) {
+            setHeaderHeight(fullNavbar.offsetHeight);
+        }
+    }, [setHeaderHeight, isScrolled]);
 
     const handleMouseEnter = (menu) => {
         clearTimeout(dropdownTimeout);
         if (menu === "services") {
             setIsServicesMenuOpen(true);
             setIsWhyDemandRecruitmentMenuOpen(false);
+            setIsGetStartedOpen(false);
         } else if (menu === "whyDemandRecruitment") {
             setIsWhyDemandRecruitmentMenuOpen(true);
             setIsServicesMenuOpen(false);
+            setIsGetStartedOpen(false);
         } else if (menu === "getStarted") {
-            setisGetStartedOpen(true);
+            setIsGetStartedOpen(true);
+            setIsServicesMenuOpen(false);
+            setIsWhyDemandRecruitmentMenuOpen(false);
         }
     };
 
@@ -37,8 +74,8 @@ const Navbar = ({ setHeaderHeight }) => { // Accept setHeaderHeight prop
         dropdownTimeout = setTimeout(() => {
             setIsServicesMenuOpen(false);
             setIsWhyDemandRecruitmentMenuOpen(false);
-            setisGetStartedOpen(false);
-        }, 200);
+            setIsGetStartedOpen(false);
+        }, 150);
     };
 
     const dashboardRoutes = {
@@ -49,18 +86,6 @@ const Navbar = ({ setHeaderHeight }) => { // Accept setHeaderHeight prop
     };
 
     const dashboardLink = userType ? dashboardRoutes[userType] || "/dashboard" : "/dashboard";
-
-    useEffect(() => {
-        console.log("User Type:", userType);
-        console.log("Redirecting to:", dashboardLink);
-
-        // Measure height of the entire Navbar after render
-        const fullNavbar = document.getElementById('full-navbar');
-        if (fullNavbar && setHeaderHeight) {
-            setHeaderHeight(fullNavbar.offsetHeight);
-        }
-
-    }, [userType, setHeaderHeight]); // Depend on setHeaderHeight to re-measure if it changes
 
     const handleSignOut = async () => {
         await signOut({ callbackUrl: "/" });
@@ -74,228 +99,318 @@ const Navbar = ({ setHeaderHeight }) => { // Accept setHeaderHeight prop
         }
     };
 
-    return (
-        <div id="full-navbar"> {/* Add ID for easy height measurement */}
-            {/* Top Navbar */}
-            <div className="bg-gray-700 text-white text-sm py-3 px-6 flex flex-col md:flex-row items-center justify-between">
-                <div className="flex items-center space-x-4 mb-2 md:mb-0">
-                    <div className="flex items-center space-x-1">
-                        <FaEnvelope className="text-teal-500" />
-                        <a
-                            href="mailto:info@demandrecruitmentservices.co.uk"
-                            className="text-white hover:text-teal-600"
-                        >
-                            info@demandrecruitmentservices.co.uk
-                        </a>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                        <FaPhoneAlt className="text-teal-500" />
-                        <a
-                            href="tel:+442038761531"
-                            className="text-white hover:text-teal-600"
-                        >
-                            +44 0203 876 1531
-                        </a>
-                    </div>
-                </div>
+    const closeMobileMenu = () => {
+        setIsSidebarOpen(false);
+        setIsMobileMenuOpen(false);
+    };
 
-                <div className="flex space-x-6">
-                    {status === "authenticated" ? (
-                        <>
-                            <button onClick={goToDashboard} className="hover:text-yellow-400 transition">
-                                Dashboard
-                            </button>
-                            <button onClick={handleSignOut} className="hover:text-yellow-400 transition">
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link href="/signIn" className="hover:text-yellow-400 transition">
-                                🔒 Login
-                            </Link>
-                            <Link href="/signUp" className="hover:text-yellow-400 transition">
-                                📝 Sign Up
-                            </Link>
-                            <Link href="/requestEmployee" className="hover:text-yellow-400 transition">
-                                Request Staff
-                            </Link>
-                        </>
-                    )}
+    return (
+        <div id="full-navbar" className={`relative z-50 ${isMobile ? 'sticky top-0' : ''}`}>
+            {/* Top Contact Bar */}
+            <div className={`bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 text-white text-sm py-2 px-4 transition-all duration-300 ${isScrolled ? 'py-1' : 'py-2'} ${isMobile && isScrolled ? 'hidden' : ''}`}>
+                <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between">
+                    <div className="flex items-center space-x-4 mb-2 sm:mb-0">
+                        <div className="flex items-center space-x-2 group cursor-pointer">
+                            <FaEnvelope className="text-teal-400 group-hover:text-teal-300 transition-all duration-300 group-hover:scale-110" />
+                            <a
+                                href="mailto:info@demandrecruitmentservices.co.uk"
+                                className="text-gray-200 hover:text-teal-300 transition-all duration-300 text-xs sm:text-sm group-hover:underline"
+                            >
+                                info@demandrecruitmentservices.co.uk
+                            </a>
+                        </div>
+                        <div className="flex items-center space-x-2 group cursor-pointer">
+                            <FaPhoneAlt className="text-teal-400 group-hover:text-teal-300 transition-all duration-300 group-hover:scale-110" />
+                            <a
+                                href="tel:+442038761531"
+                                className="text-gray-200 hover:text-teal-300 transition-all duration-300 text-xs sm:text-sm group-hover:underline"
+                            >
+                                +44 0203 876 1531
+                            </a>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                        {status === "authenticated" ? (
+                            <>
+                                <button 
+                                    onClick={goToDashboard} 
+                                    className="flex items-center space-x-1 text-gray-200 hover:text-teal-300 transition-all duration-300 group bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-md hover:shadow-lg"
+                                >
+                                    <FaDashcube className="text-xs group-hover:scale-110 transition-transform duration-300" />
+                                    <span className="text-xs sm:text-sm font-medium">Dashboard</span>
+                                </button>
+                                <button 
+                                    onClick={handleSignOut} 
+                                    className="flex items-center space-x-1 text-gray-200 hover:text-red-400 transition-all duration-300 group bg-gray-700 hover:bg-red-600 px-3 py-1 rounded-md hover:shadow-lg"
+                                >
+                                    <FaSignOutAlt className="text-xs group-hover:scale-110 transition-transform duration-300" />
+                                    <span className="text-xs sm:text-sm font-medium">Logout</span>
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/signIn" className="flex items-center space-x-1 text-gray-200 hover:text-teal-300 transition-all duration-300 group bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-md hover:shadow-lg">
+                                    <FaUser className="text-xs group-hover:scale-110 transition-transform duration-300" />
+                                    <span className="text-xs sm:text-sm font-medium">Login</span>
+                                </Link>
+                                <Link href="/signUp" className="bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white px-4 py-1 rounded-md text-xs sm:text-sm transition-all duration-300 hover:shadow-lg hover:scale-105 font-medium">
+                                    Sign Up
+                                </Link>
+                                <Link href="/requestEmployee" className="text-gray-200 hover:text-teal-300 transition-all duration-300 text-xs sm:text-sm font-medium hover:underline">
+                                    Request Staff
+                                </Link>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* Main Navbar - with Logo, Employers, Employee, Environment, Social Value, Governance */}
-            <nav className="bg-gray-800 text-white py-4">
-                <div className="container mx-auto px-6 flex items-center justify-between">
-                    <Link href="/">
-                        <Image src={logo} alt="LOGO" width={80} height={60} className="opacity-70" />
-                    </Link>
-
-                    {/* Desktop Navigation - New Menus & Employers/Employee */}
-                    <div className="hidden lg:flex items-center space-x-8">
-                        <Link href="/ourSupport" className="hover:text-teal-500 transition">Our Support</Link>
-                        <Link href="/environment" className="hover:text-teal-500 transition">Environment</Link>
-                        <Link href="/socialValue" className="hover:text-teal-500 transition">Social Value</Link>
-                        <Link href="/governance" className="hover:text-teal-500 transition">Governance</Link>
-                        <Link href="/employer" className="border-2 border-teal-600 bg-transparent hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition">Employers</Link>
-                        <Link href="/employees" className="border-2 border-teal-600 bg-teal-600 hover:bg-teal-700 hover:border-teal-700 text-white px-6 py-2 rounded-lg transition">Employee</Link>
-                    </div>
-
-                    {/* Mobile Menu Toggle */}
-                    <button type="button" onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-2xl focus:outline-none">
-                        <FaBars />
-                    </button>
-                </div>
-            </nav>
-
-            {/* Secondary Navbar - Moved Existing Menus */}
-            <nav className="bg-gray-900 text-white py-3 border-t border-gray-600 shadow-lg">
-                <div className="container mx-auto px-6 hidden lg:flex items-center space-x-4">
-                    <Link href="/" className="px-3 py-2 rounded-md hover:text-teal-600 transition font-semibold">Home</Link>
-
-                    {/* Services Dropdown */}
-                    <div
-                        className="relative"
-                        onMouseEnter={() => handleMouseEnter("services")}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <Link href="/services">
-                            <button className="px-3 py-2 rounded-md hover:text-teal-600 transition flex items-center font-semibold">
-                                <span>Our Services</span> <span className="ml-1 text-xs">▼</span>
-                            </button>
+            {/* Main Navigation Bar */}
+            <nav className={`bg-gradient-to-r from-gray-800 to-gray-900 shadow-lg transition-all duration-300 ${isScrolled ? 'shadow-xl' : 'shadow-lg'} ${isMobile ? 'sticky top-0 z-50' : ''}`}>
+                <div className="container mx-auto px-4">
+                    <div className="flex items-center justify-between h-16 lg:h-20">
+                        {/* Logo */}
+                        <Link href="/" className="flex items-center group">
+                            <Image 
+                                src={logo} 
+                                alt="Demand Recruitment Services" 
+                                width={isScrolled ? 70 : 80} 
+                                height={isScrolled ? 50 : 60} 
+                                className="transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-lg" 
+                            />
                         </Link>
-                        {isServicesMenuOpen && (
-                            <div className="absolute bg-white text-gray-800 shadow-xl w-52 mt-2 p-4 rounded-lg z-[10000000] border border-gray-200">
-                                <Link href="/recruitment" className="block py-2 hover:text-teal-600 transition">Recruitment Services</Link>
-                                <Link href="/communityService" className="block py-2 hover:text-teal-600 transition">Community Services</Link>
-                                <Link href="/facilityService" className="block py-2 hover:text-teal-600 transition">Facility Management</Link>
-                            </div>
-                        )}
-                    </div>
 
-                    {/* Why Demand Recruitment Mega Menu */}
-                    <div
-                        className="relative"
-                        onMouseEnter={() => handleMouseEnter("whyDemandRecruitment")}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <p>
-                            <button className="px-3 py-2 rounded-md hover:text-teal-600 transition flex items-center font-semibold">
-                                <span>Why Demand Recruitment</span> <span className="ml-1 text-xs">▼</span>
-                            </button>
-                        </p>
-                        {isWhyDemandRecruitmentMenuOpen && (
-                            <div className="absolute left-1/2 -translate-x-1/2 bg-white text-gray-800 shadow-2xl mt-2 p-6 rounded-lg z-[10000000] w-[600px] grid grid-cols-2 gap-6 border border-gray-200">
-                                {/* Column 1 */}
-                                <div>
-                                    <h3 className="font-bold text-lg mb-3 text-gray-700">INSIGHTS & NEWS</h3>
-                                    <Link href="/newsEvent" className="block py-1 hover:text-teal-600 transition">News & events</Link>
-                                    <Link href="/caseStudies" className="block py-1 hover:text-teal-600 transition">Case studies</Link>
-                                    <Link href="/insight" className="block py-1 hover:text-teal-600 transition">Insights & white papers</Link>
-                                    <Link href="/podcastVideo" className="block py-1 hover:text-teal-600 transition">Podcasts & video</Link>
-                                </div>
-                                {/* Column 2 */}
-                                <div>
-                                    <h3 className="font-bold text-lg mb-3 text-gray-700">TECHNOLOGY & INNOVATION</h3>
-                                    <Link href="/artificialIntelligence" className="block py-1 hover:text-teal-600 transition">Artificial Intelligence</Link>
-                                    <Link href="/facilitiesTransformation" className="block py-1 hover:text-teal-600 transition">Facilities Transformation</Link>
-                                    <Link href="/zeroNavigator" className="block py-1 hover:text-teal-600 transition">Net Zero Navigator 2025</Link>
-                                </div>
+                        {/* Desktop Navigation */}
+                        <div className="hidden lg:flex items-center space-x-8">
+                            <Link href="/ourSupport" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group">
+                                Our Support
+                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
+                            </Link>
+                            <Link href="/environment" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group">
+                                Environment
+                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
+                            </Link>
+                            <Link href="/socialValue" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group">
+                                Social Value
+                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
+                            </Link>
+                            <Link href="/governance" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group">
+                                Governance
+                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
+                            </Link>
+                            
+                            <div className="flex items-center space-x-3">
+                                <Link href="/employer" className="bg-transparent border-2 border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-gray-900 px-6 py-2 rounded-lg transition-all duration-300 font-medium hover:shadow-lg hover:scale-105 transform">
+                                    Employers
+                                </Link>
+                                <Link href="/employees" className="bg-gradient-to-r from-teal-400 to-teal-500 hover:from-teal-500 hover:to-teal-600 text-gray-900 px-6 py-2 rounded-lg transition-all duration-300 font-medium hover:shadow-lg hover:scale-105 transform">
+                                    Employee
+                                </Link>
                             </div>
-                        )}
-                    </div>
+                        </div>
 
-                    <Link href="/insight" className="px-3 py-2 rounded-md hover:text-teal-600 transition font-semibold">Insights</Link>
-                    <Link href="/allJobs" className="px-3 py-2 rounded-md hover:text-teal-600 transition font-semibold">Find a Job</Link>
-                    <Link href="/contactUs" className="px-3 py-2 rounded-md hover:text-teal-600 transition font-semibold">Contact Us</Link>
-                    <Link href="/aboutUs" className="px-3 py-2 rounded-md hover:text-teal-600 transition font-semibold">About Us</Link>
-                    <Link href="/referAFriend" className="px-3 py-2 rounded-md hover:text-teal-600 transition font-semibold">Refer</Link>
-                    <div
-                        className="relative"
-                        onMouseEnter={() => handleMouseEnter("getStarted")}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <p>
-                            <button className="px-3 py-2 rounded-md hover:text-teal-600 transition flex items-center font-semibold">
-                                <span>Get Started</span> <span className="ml-1 text-xs">▼</span>
-                            </button>
-                        </p>
-                        {isGetStartedOpen && (
-                            <div className="absolute left-1/2 -translate-x-1/2 bg-white text-gray-800 shadow-2xl mt-2 p-6 rounded-lg z-[10000000] w-[200px] grid grid-cols-1 gap-6 border border-gray-200">
-                                {/* Column 1 */}
-                                <div>
-                                    <Link href="/requestEmployee" className="block py-1 hover:text-teal-600 transition">Request Services</Link>
-                                    <Link href="/signUp" className="block py-1 hover:text-teal-600 transition">Join Our Team</Link>
-                                    <Link href="/contactUs" className="block py-1 hover:text-teal-600 transition">Subscribe</Link>
-                                    <Link href="/insight" className="block py-1 hover:text-teal-600 transition">Login</Link>
-                                </div>
-                            </div>
-                        )}
+                        {/* Mobile Menu Button */}
+                        <button 
+                            type="button" 
+                            onClick={() => setIsSidebarOpen(true)} 
+                            className="lg:hidden p-2 rounded-md text-gray-200 hover:text-teal-400 hover:bg-gray-700 transition-all duration-300 hover:scale-110"
+                        >
+                            <FaBars className="text-xl" />
+                        </button>
                     </div>
                 </div>
             </nav>
 
-            {/* Mobile Sidebar (remains unchanged) */}
+            {/* Secondary Navigation Bar - Hidden on Mobile */}
+            <nav className={`bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-lg ${isMobile ? 'hidden' : ''}`}>
+                <div className="container mx-auto px-4">
+                    <div className="hidden lg:flex items-center justify-center space-x-8 py-3">
+                        <Link href="/" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Home</Link>
+
+                        {/* Services Dropdown */}
+                        <div
+                            className="relative group"
+                            onMouseEnter={() => handleMouseEnter("services")}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                                <span>Our Services</span>
+                                <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
+                            </button>
+                            {isServicesMenuOpen && (
+                                <div className="absolute top-full left-0 bg-white text-gray-800 shadow-2xl w-64 mt-2 p-4 rounded-lg z-50 border border-gray-200 transform opacity-100 scale-100 transition-all duration-300 animate-in slide-in-from-top-2">
+                                    <div className="space-y-2">
+                                        <Link href="/recruitment" className="block py-3 px-4 rounded-md hover:bg-gray-50 transition-all duration-300 border-l-2 border-transparent hover:border-teal-500 hover:translate-x-1 transform">
+                                            <div className="font-semibold text-gray-800">Recruitment Services</div>
+                                            <div className="text-xs text-gray-500">Find the perfect talent</div>
+                                        </Link>
+                                        <Link href="/communityService" className="block py-3 px-4 rounded-md hover:bg-gray-50 transition-all duration-300 border-l-2 border-transparent hover:border-teal-500 hover:translate-x-1 transform">
+                                            <div className="font-semibold text-gray-800">Community Services</div>
+                                            <div className="text-xs text-gray-500">Supporting local communities</div>
+                                        </Link>
+                                        <Link href="/facilityService" className="block py-3 px-4 rounded-md hover:bg-gray-50 transition-all duration-300 border-l-2 border-transparent hover:border-teal-500 hover:translate-x-1 transform">
+                                            <div className="font-semibold text-gray-800">Facility Management</div>
+                                            <div className="text-xs text-gray-500">Comprehensive facility solutions</div>
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Why Demand Recruitment Mega Menu */}
+                        <div
+                            className="relative group"
+                            onMouseEnter={() => handleMouseEnter("whyDemandRecruitment")}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                                <span>Why Demand Recruitment</span>
+                                <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
+                            </button>
+                            {isWhyDemandRecruitmentMenuOpen && (
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 bg-white text-gray-800 shadow-2xl mt-2 p-8 rounded-lg z-50 w-[700px] grid grid-cols-2 gap-8 border border-gray-200 transform opacity-100 scale-100 transition-all duration-300 animate-in slide-in-from-top-2">
+                                    <div>
+                                        <h3 className="font-bold text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">INSIGHTS & NEWS</h3>
+                                        <div className="space-y-3">
+                                            <Link href="/newsEvent" className="block py-2 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">News & Events</Link>
+                                            <Link href="/caseStudies" className="block py-2 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Case Studies</Link>
+                                            <Link href="/insight" className="block py-2 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Insights & White Papers</Link>
+                                            <Link href="/podcastVideo" className="block py-2 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Podcasts & Video</Link>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg mb-4 text-gray-700 border-b border-gray-200 pb-2">TECHNOLOGY & INNOVATION</h3>
+                                        <div className="space-y-3">
+                                            <Link href="/artificialIntelligence" className="block py-2 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Artificial Intelligence</Link>
+                                            <Link href="/facilitiesTransformation" className="block py-2 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Facilities Transformation</Link>
+                                            <Link href="/zeroNavigator" className="block py-2 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Net Zero Navigator 2025</Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <Link href="/insight" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Insights</Link>
+                        <Link href="/allJobs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Find a Job</Link>
+                        <Link href="/contactUs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Contact Us</Link>
+                        <Link href="/aboutUs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">About Us</Link>
+                        <Link href="/referAFriend" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Refer</Link>
+
+                        {/* Get Started Dropdown */}
+                        <div
+                            className="relative group"
+                            onMouseEnter={() => handleMouseEnter("getStarted")}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                                <span>Get Started</span>
+                                <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
+                            </button>
+                            {isGetStartedOpen && (
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 bg-white text-gray-800 shadow-2xl mt-2 p-4 rounded-lg z-50 w-48 border border-gray-200 transform opacity-100 scale-100 transition-all duration-300 animate-in slide-in-from-top-2">
+                                    <div className="space-y-2">
+                                        <Link href="/requestEmployee" className="block py-3 px-4 rounded-md hover:bg-gray-50 transition-all duration-300 border-l-2 border-transparent hover:border-teal-500 hover:translate-x-1 transform">
+                                            <div className="font-semibold text-gray-800">Request Services</div>
+                                        </Link>
+                                        <Link href="/signUp" className="block py-3 px-4 rounded-md hover:bg-gray-50 transition-all duration-300 border-l-2 border-transparent hover:border-teal-500 hover:translate-x-1 transform">
+                                            <div className="font-semibold text-gray-800">Join Our Team</div>
+                                        </Link>
+                                        <Link href="/contactUs" className="block py-3 px-4 rounded-md hover:bg-gray-50 transition-all duration-300 border-l-2 border-transparent hover:border-teal-500 hover:translate-x-1 transform">
+                                            <div className="font-semibold text-gray-800">Subscribe</div>
+                                        </Link>
+                                        <Link href="/insight" className="block py-3 px-4 rounded-md hover:bg-gray-50 transition-all duration-300 border-l-2 border-transparent hover:border-teal-500 hover:translate-x-1 transform">
+                                            <div className="font-semibold text-gray-800">Login</div>
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Mobile Sidebar */}
             {isSidebarOpen && (
                 <>
-                    <div className="fixed inset-0 bg-black/50 z-30" onClick={() => setIsSidebarOpen(false)} />
-                    <div className="fixed top-0 left-0 h-full w-64 bg-black text-white transform transition-transform duration-300 z-40">
-                        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
-                            <h2 className="text-xl font-bold">Menu</h2>
-                            <button type="button" onClick={() => setIsSidebarOpen(false)} className="text-2xl focus:outline-none">
-                                <FaTimes />
+                    <div 
+                        className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity duration-300" 
+                        onClick={closeMobileMenu} 
+                    />
+                    <div className="fixed top-0 left-0 h-full w-80 bg-white text-gray-800 transform transition-transform duration-300 z-50 shadow-2xl">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+                            <div className="flex items-center space-x-3">
+                                <Image src={logo} alt="Logo" width={40} height={30} className="transition-all duration-300 hover:scale-110" />
+                                <h2 className="text-lg font-bold text-gray-800">Menu</h2>
+                            </div>
+                            <button 
+                                type="button" 
+                                onClick={closeMobileMenu} 
+                                className="p-2 rounded-full hover:bg-gray-200 transition-all duration-300 hover:scale-110"
+                            >
+                                <FaTimes className="text-xl text-gray-600" />
                             </button>
                         </div>
-                        <div className="flex flex-col space-y-6 my-6 px-4">
-                            {/* New Menus for Mobile (top section) */}
-                            <Link href="/ourSupport" className="text-lg hover:text-teal-600 transition">Our Support</Link>
-                            <Link href="/environment" className="text-lg hover:text-teal-600 transition">Environment</Link>
-                            <Link href="/socialValue" className="text-lg hover:text-teal-600 transition">Social Value</Link>
-                            <Link href="/governance" className="text-lg hover:text-teal-600 transition">Governance</Link>
-                            <Link href="/employer" className="bg-teal-600 hover:bg-teal-600 text-white text-center px-6 py-2 rounded-lg transition">Employers</Link>
-                            <Link href="/employees" className="bg-teal-600 hover:bg-teal-600 text-white text-center px-6 py-2 rounded-lg transition">Employee</Link>
+                        
+                        <div className="flex flex-col h-full">
+                            <div className="flex-1 overflow-y-auto py-6 px-6">
+                                <div className="space-y-6">
+                                    {/* Primary Navigation */}
+                                    <div className="space-y-3">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Main Navigation</h3>
+                                        <Link href="/ourSupport" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Our Support</Link>
+                                        <Link href="/environment" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Environment</Link>
+                                        <Link href="/socialValue" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Social Value</Link>
+                                        <Link href="/governance" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Governance</Link>
+                                    </div>
 
-                            <div className="border-t border-gray-700 w-full my-4"></div> {/* Divider */}
+                                    {/* Action Buttons */}
+                                    <div className="space-y-3">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</h3>
+                                        <Link href="/employer" className="block w-full text-center text-white py-3 px-4 rounded-lg transition-all duration-300 font-medium bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 hover:scale-105 transform hover:shadow-lg">
+                                            Employers
+                                        </Link>
+                                        <Link href="/employees" className="block w-full text-center text-white py-3 px-4 rounded-lg transition-all duration-300 font-medium bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 hover:scale-105 transform hover:shadow-lg">
+                                            Employee
+                                        </Link>
+                                    </div>
 
+                                    {/* Services Section */}
+                                    <div className="space-y-3">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Services</h3>
+                                        <Link href="/" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Home</Link>
+                                        <Link href="/recruitment" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Recruitment Services</Link>
+                                        <Link href="/communityService" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Community Services</Link>
+                                        <Link href="/facilityService" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Facility Management</Link>
+                                    </div>
 
-                            {/* Original Menus for Mobile (moved to secondary section) */}
-                            <Link href="/" className="text-lg hover:text-teal-600 transition">Home</Link>
+                                    {/* Why Demand Recruitment */}
+                                    <div className="space-y-3">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Why Demand Recruitment</h3>
+                                        <div className="pl-4 space-y-2">
+                                            <h4 className="text-xs font-medium text-gray-400">INSIGHTS & NEWS</h4>
+                                            <Link href="/newsEvent" className="block py-1 text-gray-600 hover:text-teal-600 transition-all duration-300 text-sm hover:translate-x-2 transform">News & Events</Link>
+                                            <Link href="/caseStudies" className="block py-1 text-gray-600 hover:text-teal-600 transition-all duration-300 text-sm hover:translate-x-2 transform">Case Studies</Link>
+                                            <Link href="/insight" className="block py-1 text-gray-600 hover:text-teal-600 transition-all duration-300 text-sm hover:translate-x-2 transform">Insights & White Papers</Link>
+                                            <Link href="/podcastVideo" className="block py-1 text-gray-600 hover:text-teal-600 transition-all duration-300 text-sm hover:translate-x-2 transform">Podcasts & Video</Link>
+                                            
+                                            <h4 className="text-xs font-medium text-gray-400 mt-4">TECHNOLOGY & INNOVATION</h4>
+                                            <Link href="/artificialIntelligence" className="block py-1 text-gray-600 hover:text-teal-600 transition-all duration-300 text-sm hover:translate-x-2 transform">Artificial Intelligence</Link>
+                                            <Link href="/facilitiesTransformation" className="block py-1 text-gray-600 hover:text-teal-600 transition-all duration-300 text-sm hover:translate-x-2 transform">Facilities Transformation</Link>
+                                            <Link href="/zeroNavigator" className="block py-1 text-gray-600 hover:text-teal-600 transition-all duration-300 text-sm hover:translate-x-2 transform">Net Zero Navigator 2025</Link>
+                                        </div>
+                                    </div>
 
-                            {/* Services Dropdown for Mobile */}
-                            <div className="relative">
-                                <button className="text-lg hover:text-teal-600 transition flex items-center">
-                                    <span>Our Services</span> <span className="ml-1 text-xs">▼</span>
-                                </button>
-                                <div className="ml-4 mt-2 space-y-2">
-                                    <Link href="/recruitment" className="block text-gray-300 hover:text-[#EA580C]">Recruitment Service</Link>
-                                    <Link href="/communityService" className="block text-gray-300 hover:text-[#EA580C]">Community Services</Link>
-                                    <Link href="/facilityService" className="block text-gray-300 hover:text-[#EA580C]">Facility Management</Link>
+                                    {/* Other Links */}
+                                    <div className="space-y-3">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">More</h3>
+                                        <Link href="/allJobs" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Find a Job</Link>
+                                        <Link href="/aboutUs" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">About Us</Link>
+                                        <Link href="/contactUs" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Contact Us</Link>
+                                        <Link href="/referAFriend" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Refer</Link>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* Why Demand Recruitment Menu for Mobile (simplified for mobile) */}
-                            <div className="relative">
-                                <button className="text-lg hover:text-orange-400 transition flex items-center">
-                                    <span>Why Demand Recruitment</span> <span className="ml-1 text-xs">▼</span>
-                                </button>
-                                <div className="ml-4 mt-2 space-y-2">
-                                    <h4 className="font-semibold text-gray-400">INSIGHTS & NEWS</h4>
-                                    <Link href="/newsEvent" className="block text-gray-300 hover:text-[#EA580C]">News & events</Link>
-                                    <Link href="/caseStudies" className="block text-gray-300 hover:text-[#EA580C]">Case studies</Link>
-                                    <Link href="/insight" className="block text-gray-300 hover:text-[#EA580C]">Insights & white papers</Link>
-                                    <Link href="/podcastVideo" className="block text-gray-300 hover:text-[#EA580C]">Podcasts & video</Link>
-                                    <h4 className="font-semibold text-gray-400 mt-4">TECHNOLOGY & INNOVATION</h4>
-                                    <Link href="/artificialIntelligence" className="block text-gray-300 hover:text-[#EA580C]">Artificial Intelligence</Link>
-                                    <Link href="/facilitiesTransformation" className="block text-gray-300 hover:text-[#EA580C]">Facilities Transformation</Link>
-                                    <Link href="/zeroNavigator" className="block text-gray-300 hover:text-[#EA580C]">Net Zero Navigator 2025</Link>
-                                </div>
-                            </div>
-
-                            <Link href="/allJobs" className="text-lg hover:text-orange-400 transition">Job Search</Link>
-                            <Link href="/aboutUs" className="text-lg hover:text-orange-400 transition">About Us</Link>
-                            <Link href="/contactUs" className="text-lg hover:text-orange-400 transition">Contact Us</Link>
-                            <Link href="/referAFriend" className="text-lg hover:text-orange-400 transition">Refer</Link>
                         </div>
                     </div>
                 </>
