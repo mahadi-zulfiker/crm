@@ -37,23 +37,23 @@ const BannerSlider = () => {
       {/* ✅ Background Image or Video */}
       <div className="absolute inset-0 z-0">
         {/* Option 1: Background Image */}
-        <Image
+        {/* <Image
           src="/meddd111.jpg"
           alt="Background"
           layout="fill"
           objectFit="cover"
           priority
-        />
+        /> */}
 
         {/* Option 2: Uncomment for Video Background (MP4) */}
-        {/* <video
+        <video
           autoPlay
           loop
           muted
           className="w-full h-full object-cover"
         >
-          <source src="/your-video.mp4" type="video/mp4" />
-        </video> */}
+          <source src="/hero.mp4" type="video/mp4" />
+        </video>
       </div>
 
       {/* Overlay with Animated Text */}
