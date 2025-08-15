@@ -1,34 +1,43 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Trophy, Users, Briefcase, LineChart } from 'lucide-react';
+import { Trophy, Users, Briefcase, LineChart, Star, Award, TrendingUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 function Achievements() {
   const originalAchievements = [
     {
-      icon: <Trophy size={48} className="text-teal-500 mx-auto" />,
+      icon: <Trophy size={40} className="text-yellow-500" />,
       title: 'Award-Winning Service',
       description: 'Recognized for excellence in recruitment services.',
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-50',
     },
     {
-      icon: <Users size={48} className="text-teal-500 mx-auto" />,
+      icon: <Users size={40} className="text-blue-500" />,
       title: 'Happy Clients',
       description: 'Successfully matched thousands of candidates with top companies.',
       countTarget: 10000,
       countPrefix: '+',
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-50',
     },
     {
-      icon: <Briefcase size={48} className="text-teal-500 mx-auto" />,
+      icon: <Briefcase size={40} className="text-emerald-500" />,
       title: 'Diverse Job Placements',
       description: 'Placed candidates in various industries worldwide.',
+      color: 'text-emerald-500',
+      bgColor: 'bg-emerald-50',
     },
     {
-      icon: <LineChart size={48} className="text-teal-500 mx-auto" />,
+      icon: <LineChart size={40} className="text-purple-500" />,
       title: 'Consistent Growth',
       description: 'Achieved a 50% growth rate year over year.',
       countTarget: 50,
       countSuffix: '%',
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-50',
     },
   ];
 
@@ -39,7 +48,7 @@ function Achievements() {
     ...originalAchievements.slice(0, numClonesEachSide),
   ];
 
-  const [currentIndex, setCurrentIndex] = useState(numClonesEachSide); // Start at the first 'real' slide
+  const [currentIndex, setCurrentIndex] = useState(numClonesEachSide);
   const [slidesToShow, setSlidesToShow] = useState(3);
   const carouselRef = useRef(null);
   const slideIntervalRef = useRef(null);
@@ -67,7 +76,7 @@ function Achievements() {
       'Happy Clients': 0,
       'Consistent Growth': 0,
     };
-    const duration = 1000; // 1 second
+    const duration = 1000;
     let startTime = null;
 
     const animateCount = (timestamp) => {
@@ -83,11 +92,10 @@ function Achievements() {
       if (progress < duration) {
         animationFrameId = requestAnimationFrame(animateCount);
       } else {
-        setCounts(targets); // Ensure final value is accurate
+        setCounts(targets);
       }
     };
     
-    // Only start animation on component mount
     animationFrameId = requestAnimationFrame(animateCount);
 
     return () => cancelAnimationFrame(animationFrameId);
@@ -111,7 +119,7 @@ function Achievements() {
       }
     };
     window.addEventListener('resize', handleResize);
-    handleResize(); // Set initial value
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -126,13 +134,13 @@ function Achievements() {
   // Logic for jumping to the real slides when entering clone zones
   const handleLoopJump = useCallback(() => {
     if (!carouselRef.current) return;
-    setTransitionEnabled(false); // Disable transition for instant jump
+    setTransitionEnabled(false);
     if (currentIndex >= originalAchievements.length + numClonesEachSide) {
       setCurrentIndex(numClonesEachSide + (currentIndex % originalAchievements.length));
     } else if (currentIndex < numClonesEachSide) {
       setCurrentIndex(originalAchievements.length + currentIndex);
     }
-    setTimeout(() => setTransitionEnabled(true), 50); // A small delay is needed
+    setTimeout(() => setTransitionEnabled(true), 50);
   }, [currentIndex, originalAchievements.length, numClonesEachSide]);
 
   useEffect(() => {
@@ -246,11 +254,46 @@ function Achievements() {
   const activeDotIndex = getRealIndex(currentIndex);
 
   return (
-    <section className="py-16 bg-gradient-to-br from-gray-50 to-teal-50">
-      <div className="container mx-auto px-4">
-        <h2 data-aos="fade-up" className="text-5xl font-extrabold text-center text-gray-800 mb-12">
-          Our Achievements
-        </h2>
+    <section className="relative py-20 bg-white overflow-hidden">
+      <div className="container mx-auto px-4 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium mb-6"
+          >
+            <Award className="w-4 h-4" />
+            <span>Recognition & Success</span>
+          </motion.div>
+          
+          <motion.h2 
+            data-aos="fade-up" 
+            className="text-4xl md:text-5xl font-bold text-gray-800 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            Our{' '}
+            <span className="text-gray-800">
+              Achievements
+            </span>
+          </motion.h2>
+          
+          <motion.p
+            className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            Celebrating milestones and success stories that define our commitment to excellence in recruitment.
+          </motion.p>
+        </motion.div>
 
         <div className="relative select-none">
           <div className="overflow-hidden">
@@ -272,37 +315,67 @@ function Achievements() {
                   onMouseDown={handleMouseDown}
                   onTouchStart={handleMouseDown}
                 >
-                  <div className="bg-white p-8 rounded-3xl shadow-xl text-center flex flex-col items-center space-y-4 transform transition-all duration-500 hover:scale-105 h-full border border-gray-200 hover:border-teal-300">
-                    <div className="bg-teal-50 p-4 rounded-full transition-all duration-300 transform hover:scale-110">
-                      {achievement.icon}
+                  <motion.div 
+                    className="relative h-full"
+                    whileHover={{ y: -5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {/* Card Content */}
+                    <div className="relative bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center flex flex-col items-center space-y-4 transform transition-all duration-300 hover:shadow-md h-full">
+                      <motion.div 
+                        className={`w-16 h-16 rounded-xl ${achievement.bgColor} p-4 shadow-sm transition-all duration-300 transform hover:scale-110`}
+                        whileHover={{ 
+                          rotate: 360,
+                          transition: { duration: 0.6 }
+                        }}
+                      >
+                        {achievement.icon}
+                      </motion.div>
+                      
+                      <h3 className="text-xl font-bold text-gray-800">
+                        {achievement.countTarget ? (
+                          <span className="text-gray-800">
+                            {achievement.countPrefix}{counts[achievement.title].toLocaleString()}
+                            {achievement.countSuffix}
+                          </span>
+                        ) : (
+                          achievement.title
+                        )}
+                      </h3>
+                      
+                      <p className="text-gray-600 font-medium leading-relaxed flex-grow">
+                        {achievement.description}
+                      </p>
+                      
+                      {/* Achievement Badge */}
+                      <motion.div 
+                        className="inline-flex items-center gap-2 bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium border border-gray-200"
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <Star className="w-4 h-4 fill-current" />
+                        <span>Excellence</span>
+                      </motion.div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800">
-                      {achievement.countTarget ? (
-                        <>
-                          {achievement.countPrefix}{counts[achievement.title].toLocaleString()}
-                          {achievement.countSuffix}
-                        </>
-                      ) : (
-                        achievement.title
-                      )}
-                    </h3>
-                    <p className="text-gray-600 font-medium">{achievement.description}</p>
-                  </div>
+                  </motion.div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Dots - based on original achievements */}
-          <div className="flex justify-center mt-8 space-x-2">
+          {/* Enhanced Dots */}
+          <div className="flex justify-center mt-8 space-x-3">
             {originalAchievements.map((_, dotIndex) => (
-              <button
+              <motion.button
                 key={dotIndex}
                 onClick={() => setCurrentIndex(dotIndex + numClonesEachSide)}
-                className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-                  dotIndex === activeDotIndex ? 'bg-teal-600' : 'bg-gray-300'
-                } hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600 cursor-pointer`}
-              ></button>
+                className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer ${
+                  dotIndex === activeDotIndex 
+                    ? 'bg-gray-800 shadow-sm' 
+                    : 'bg-gray-300 hover:bg-gray-400'
+                }`}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+              />
             ))}
           </div>
         </div>
