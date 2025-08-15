@@ -78,15 +78,17 @@ function SingleJob() {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center bg-white p-8 rounded-lg shadow-md">
-            <Loader2 className="h-12 w-12 text-teal-600 mx-auto mb-4" />
-            <p className="text-lg font-semibold text-gray-700">
-              Loading job details...
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Please wait while we fetch the information
-            </p>
+        <div className="flex-1 flex items-center justify-center h-screen w-screen">
+           <div className="text-center flex justify-center items-center  bg-white p-8 rounded-lg shadow-md h-screen w-screen">
+            <div className="align-middle">
+              <Loader2 className="h-12 w-12 text-teal-600 mx-auto mb-4" />
+              <p className="text-lg font-semibold text-gray-700">
+                Loading job details...
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Please wait while we fetch the information
+              </p>
+            </div>
           </div>
         </div>
         <Footer />
@@ -199,17 +201,13 @@ function SingleJob() {
               {job.description}
             </p>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <FaUsers className="text-2xl text-teal-600 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Applications</p>
                 <p className="font-semibold text-gray-900">24</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <FaEye className="text-2xl text-teal-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Views</p>
-                <p className="font-semibold text-gray-900">156</p>
-              </div>
+
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <FaMoneyBillWave className="text-2xl text-teal-600 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Salary</p>
@@ -222,7 +220,7 @@ function SingleJob() {
                 <p className="text-sm text-gray-600">Deadline</p>
                 <p className="font-semibold text-gray-900">Dec 31</p>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Key Responsibilities */}
