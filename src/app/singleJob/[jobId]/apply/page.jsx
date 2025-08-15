@@ -74,6 +74,7 @@ const ApplyPage = () => {
           coverLetter: "",
         });
         document.getElementById("resume").value = "";
+        router.push("/allJobs");
       } else {
         toast.error(result.error || "Failed to submit application.");
       }

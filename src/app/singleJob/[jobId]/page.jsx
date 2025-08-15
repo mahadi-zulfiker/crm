@@ -18,6 +18,11 @@ import {
   FaEye,
   FaBookmark,
   FaShare,
+  FaHome,
+  FaExclamationTriangle,
+  FaStar,
+  FaEnvelope,
+  FaPhone,
 } from "react-icons/fa";
 import Link from "next/link";
 import { Loader2 } from "@/components/ui/loader2";
@@ -79,7 +84,7 @@ function SingleJob() {
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
         <div className="flex-1 flex items-center justify-center h-screen w-screen">
-           <div className="text-center flex justify-center items-center  bg-white p-8 rounded-lg shadow-md h-screen w-screen">
+          <div className="text-center flex justify-center items-center  bg-white p-8 rounded-lg shadow-md h-screen w-screen">
             <div className="align-middle">
               <Loader2 className="h-12 w-12 text-teal-600 mx-auto mb-4" />
               <p className="text-lg font-semibold text-gray-700">
@@ -116,6 +121,17 @@ function SingleJob() {
     );
   }
 
+  // Parse skills into an array
+  const skillsArray = job.skills
+    ? job.skills.split(",").map((skill) => skill.trim())
+    : [];
+  const benefitsArray = job.benefits
+    ? job.benefits.split(",").map((benefit) => benefit.trim())
+    : [];
+  const requirementsArray = job.requirements
+    ? job.requirements.split(",").map((req) => req.trim())
+    : [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -130,9 +146,23 @@ function SingleJob() {
                   <FaBuilding className="text-white text-xl" />
                 </div>
                 <div>
-                  <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">
-                    {job.title}
-                  </h1>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">
+                      {job.title}
+                    </h1>
+                    {job.featured && (
+                      <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center">
+                        <FaStar className="mr-1" />
+                        Featured
+                      </span>
+                    )}
+                    {job.isUrgent && (
+                      <span className="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center">
+                        <FaExclamationTriangle className="mr-1" />
+                        Urgent
+                      </span>
+                    )}
+                  </div>
                   <p className="text-lg text-teal-600 font-medium">
                     {job.company}
                   </p>
@@ -146,11 +176,15 @@ function SingleJob() {
                 </div>
                 <div className="flex items-center gap-2">
                   <FaClock className="text-teal-600" />
-                  <span>{job.jobType || "Full-time"}</span>
+                  <span>{job.jobType}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaBriefcase className="text-teal-600" />
-                  <span>{job.experience || "Mid-level"}</span>
+                  <span>{job.experienceLevel}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FaHome className="text-teal-600" />
+                  <span>{job.workType}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaCalendarAlt className="text-teal-600" />
@@ -201,26 +235,34 @@ function SingleJob() {
               {job.description}
             </p>
 
-            {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <FaUsers className="text-2xl text-teal-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Applications</p>
-                <p className="font-semibold text-gray-900">24</p>
+                <p className="text-sm text-gray-600">Vacancies</p>
+                <p className="font-semibold text-gray-900">{job.vacancy}</p>
               </div>
-
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <FaEye className="text-2xl text-teal-600 mx-auto mb-2" />
+                <p className="text-sm text-gray-600">Job Reference</p>
+                <p className="font-semibold text-gray-900">
+                  {job.jobReference}
+                </p>
+              </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <FaMoneyBillWave className="text-2xl text-teal-600 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Salary</p>
                 <p className="font-semibold text-gray-900">
-                  {job.salary ? `$${job.salary}` : "Competitive"}
+                  {job.currency} {job.salaryMin} - {job.salaryMax}
                 </p>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <FaCalendarAlt className="text-2xl text-teal-600 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Deadline</p>
-                <p className="font-semibold text-gray-900">Dec 31</p>
+                <p className="font-semibold text-gray-900">
+                  {new Date(job.deadline).toLocaleDateString()}
+                </p>
               </div>
-            </div> */}
+            </div>
           </div>
 
           {/* Key Responsibilities */}
@@ -229,20 +271,36 @@ function SingleJob() {
               <span className="w-1 h-6 bg-teal-600 rounded-full mr-3"></span>
               Key Responsibilities
             </h2>
-            <ul className="space-y-4">
-              {[
-                "Respond to all enquiries professionally and promptly",
-                "Collect payments and manage financial transactions",
-                "Assess borrowers' circumstances and provide solutions",
-                "Handle telephone queries and maintain detailed records",
-                "Collaborate with team members to improve processes",
-              ].map((item, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
-                  <span className="text-gray-700">{item}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                <span className="text-gray-700">{job.responsibilities}</span>
+              </div>
+              <div className="flex items-start">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                <span className="text-gray-700">
+                  Lead and mentor junior developers
+                </span>
+              </div>
+              <div className="flex items-start">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                <span className="text-gray-700">
+                  Collaborate with cross-functional teams
+                </span>
+              </div>
+              <div className="flex items-start">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                <span className="text-gray-700">
+                  Ensure code quality and best practices
+                </span>
+              </div>
+              <div className="flex items-start">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                <span className="text-gray-700">
+                  Participate in technical decision making
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Requirements */}
@@ -251,20 +309,45 @@ function SingleJob() {
               <span className="w-1 h-6 bg-teal-600 rounded-full mr-3"></span>
               Requirements & Qualifications
             </h2>
-            <ul className="space-y-4">
-              {[
-                "Previous experience in collections or financial services",
-                "Excellent communication and problem-solving skills",
-                "Ability to manage multiple tasks efficiently",
-                "Strong attention to detail and organizational skills",
-                "Proficiency with financial software and tools",
-              ].map((item, index) => (
-                <li key={index} className="flex items-start">
+            <div className="space-y-4 mb-6">
+              {requirementsArray.map((requirement, index) => (
+                <div key={index} className="flex items-start">
                   <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
-                  <span className="text-gray-700">{item}</span>
-                </li>
+                  <span className="text-gray-700">
+                    Experience with {requirement}
+                  </span>
+                </div>
               ))}
-            </ul>
+              <div className="flex items-start">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                <span className="text-gray-700">
+                  5+ years of experience in relevant field
+                </span>
+              </div>
+              <div className="flex items-start">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                <span className="text-gray-700">
+                  {job.educationLevel} or equivalent
+                </span>
+              </div>
+            </div>
+
+            {/* Skills Section */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Required Skills
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {skillsArray.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-sm font-medium"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Benefits */}
@@ -274,24 +357,41 @@ function SingleJob() {
               Benefits & Perks
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                "Health Insurance",
-                "Dental Coverage",
-                "Retirement Plan",
-                "Paid Time Off",
-                "Professional Development",
-                "Flexible Schedule",
-                "Remote Work Options",
-                "Performance Bonuses",
-              ].map((benefit, index) => (
+              {benefitsArray.map((benefit, index) => (
                 <div
                   key={index}
                   className="flex items-center p-3 bg-teal-50 rounded-lg"
                 >
                   <span className="w-2 h-2 bg-teal-600 rounded-full mr-3"></span>
-                  <span className="text-gray-700 font-medium">{benefit}</span>
+                  <span className="text-gray-700 font-medium capitalize">
+                    {benefit}
+                  </span>
                 </div>
               ))}
+              <div className="flex items-center p-3 bg-teal-50 rounded-lg">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mr-3"></span>
+                <span className="text-gray-700 font-medium">
+                  Health Insurance
+                </span>
+              </div>
+              <div className="flex items-center p-3 bg-teal-50 rounded-lg">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mr-3"></span>
+                <span className="text-gray-700 font-medium">
+                  Professional Development
+                </span>
+              </div>
+              <div className="flex items-center p-3 bg-teal-50 rounded-lg">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mr-3"></span>
+                <span className="text-gray-700 font-medium">
+                  Performance Bonuses
+                </span>
+              </div>
+              <div className="flex items-center p-3 bg-teal-50 rounded-lg">
+                <span className="w-2 h-2 bg-teal-600 rounded-full mr-3"></span>
+                <span className="text-gray-700 font-medium">
+                  Competitive Salary
+                </span>
+              </div>
             </div>
           </div>
 
@@ -344,7 +444,7 @@ function SingleJob() {
                 <div>
                   <p className="text-sm text-gray-600">Salary Range</p>
                   <p className="font-semibold text-gray-900">
-                    {job.salary ? `$${job.salary}` : "Competitive"}
+                    {job.currency} {job.salaryMin} - {job.salaryMax}
                   </p>
                 </div>
               </div>
@@ -360,26 +460,69 @@ function SingleJob() {
               <div className="flex justify-between">
                 <span className="text-gray-600">Job Type:</span>
                 <span className="font-semibold text-gray-900">
-                  {job.jobType || "Full-time"}
+                  {job.jobType}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Experience:</span>
                 <span className="font-semibold text-gray-900">
-                  {job.experience || "Mid-level"}
+                  {job.experienceLevel}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Category:</span>
                 <span className="font-semibold text-gray-900">
-                  {job.category || "Finance"}
+                  {job.category}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Remote:</span>
+                <span className="text-gray-600">Work Type:</span>
                 <span className="font-semibold text-gray-900">
-                  {job.remote ? "Yes" : "No"}
+                  {job.workType}
                 </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Education:</span>
+                <span className="font-semibold text-gray-900">
+                  {job.educationLevel}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Vacancies:</span>
+                <span className="font-semibold text-gray-900">
+                  {job.vacancy}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Contact Information
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
+                  <FaEnvelope className="text-teal-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="font-semibold text-gray-900">
+                    {job.contactEmail}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
+                  <FaPhone className="text-teal-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Phone</p>
+                  <p className="font-semibold text-gray-900">
+                    {job.contactPhone}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -410,19 +553,19 @@ function SingleJob() {
             <div className="space-y-3">
               {[
                 {
-                  title: "Senior Financial Analyst",
+                  title: "Frontend Developer",
                   company: "TechCorp",
-                  location: "New York",
+                  location: "Dhaka, Bangladesh",
                 },
                 {
-                  title: "Collections Specialist",
-                  company: "FinanceInc",
-                  location: "Chicago",
+                  title: "React Developer",
+                  company: "DevInc",
+                  location: "Chittagong, Bangladesh",
                 },
                 {
-                  title: "Credit Analyst",
-                  company: "BankCorp",
-                  location: "Boston",
+                  title: "Full Stack Developer",
+                  company: "WebCorp",
+                  location: "Sylhet, Bangladesh",
                 },
               ].map((similarJob, index) => (
                 <div
