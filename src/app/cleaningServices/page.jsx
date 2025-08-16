@@ -1,15 +1,25 @@
+"use client";
+
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Head from "next/head";
 import { CheckCircle } from "lucide-react";
-import { FaFileAlt, FaPlayCircle } from "react-icons/fa";
+import { FaFileAlt, FaPlayCircle, FaShieldAlt, FaLeaf, FaCalendarCheck, FaUsers } from "react-icons/fa";
 import StickyHeader from "@/components/StickyHeader";
+import { motion } from "framer-motion";
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 export default function CleaningServices() {
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true });
+  }, []);
+
   return (
     <>
       <Navbar />
-      <StickyHeader></StickyHeader>
+      <StickyHeader />
       <Head>
         <title>Cleaning & Sanitization | Demand Recruitment Services Ltd</title>
         <meta
@@ -19,16 +29,35 @@ export default function CleaningServices() {
       </Head>
 
       <main className="text-gray-800">
-        {/* Hero Section */}
-        <section className="relative bg-[url('/services/10.jpg')] bg-cover bg-center text-white py-24 text-center px-4">
-          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+        {/* Hero Section with softer overlay */}
+        <section className="relative bg-[url('/services/10.jpg')] bg-cover bg-center text-white py-28 text-center px-4 overflow-hidden">
+          <div className="absolute inset-0 bg-teal-800 bg-opacity-40"></div> {/* Softer teal overlay */}
           <div className="relative max-w-4xl mx-auto">
-            <h1 className="text-5xl font-bold drop-shadow-lg">
+            <motion.h1
+              className="text-5xl font-bold drop-shadow-lg"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               Cleaning & Sanitization Services
-            </h1>
-            <p className="mt-4 text-xl drop-shadow-md">
+            </motion.h1>
+            <motion.p
+              className="mt-4 text-xl drop-shadow-md"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
               Clean, Safe, and Healthy Environments – Every Time
-            </p>
+            </motion.p>
+            {/* Trust Badges */}
+            <div className="flex justify-center gap-4 mt-6" data-aos="fade-up" data-aos-delay="400">
+              <span className="flex items-center gap-2 bg-white text-gray-800 px-4 py-2 rounded-full shadow-md">
+                <FaShieldAlt className="text-green-500" /> CQC Certified
+              </span>
+              <span className="flex items-center gap-2 bg-white text-gray-800 px-4 py-2 rounded-full shadow-md">
+                <FaShieldAlt className="text-blue-500" /> GDPR Compliant
+              </span>
+            </div>
           </div>
         </section>
 
@@ -37,76 +66,148 @@ export default function CleaningServices() {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-16">
             {/* Introduction */}
-            <div>
+            <div data-aos="fade-up">
               <h2 className="text-3xl font-bold mb-6 text-center">
                 Hygiene You Can Rely On
               </h2>
               <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-gray-100 p-6 rounded-xl shadow-md">
+                <motion.div
+                  className="bg-gray-100 p-6 rounded-xl shadow-md"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
                   <p>
                     We provide professional-grade cleaning and disinfection
                     services tailored to healthcare, commercial, and residential
                     environments.
                   </p>
-                </div>
-                <div className="bg-gray-100 p-6 rounded-xl shadow-md">
+                </motion.div>
+                <motion.div
+                  className="bg-gray-100 p-6 rounded-xl shadow-md"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
                   <p>
                     Our trained staff use safe, effective products and follow
                     strict hygiene protocols to ensure a healthy environment for
                     all occupants.
                   </p>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Benefits - Broken into themed clusters */}
+            <div className="bg-gray-50 py-8 px-4 rounded-xl shadow" data-aos="fade-up" data-aos-delay="200">
+              <h2 className="text-3xl font-bold mb-8 text-center">
+                Why Our Cleaning Services Stand Out
+              </h2>
+              <div className="space-y-12">
+                {/* Cluster 1: Eco-Friendly */}
+                <div>
+                  <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2 justify-center">
+                    <FaLeaf className="text-green-600" /> Eco-Friendly Solutions
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {[
+                      {
+                        title: "Eco-Friendly Products",
+                        desc: "Sustainable solutions without compromising cleanliness.",
+                        icon: CheckCircle,
+                      },
+                    ].map(({ title, desc, icon: Icon }, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="bg-white p-6 rounded-xl shadow flex items-start space-x-4 hover:shadow-xl transition-shadow duration-300"
+                        whileHover={{ y: -5 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Icon className="text-green-600 w-6 h-6 mt-1" />
+                        <div>
+                          <h4 className="font-semibold text-lg">{title}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{desc}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cluster 2: Compliance & Safety */}
+                <div>
+                  <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2 justify-center">
+                    <FaShieldAlt className="text-blue-600" /> Compliance & Safety
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {[
+                      {
+                        title: "Hospital-Grade Disinfection",
+                        desc: "Eliminate harmful pathogens with trusted cleaning agents.",
+                        icon: CheckCircle,
+                      },
+                      {
+                        title: "Trained & Certified Staff",
+                        desc: "Professionals trained in infection control and safety.",
+                        icon: CheckCircle,
+                      },
+                      {
+                        title: "Compliance & Audit Readiness",
+                        desc: "Cleaning logs and records ready for inspections.",
+                        icon: CheckCircle,
+                      },
+                    ].map(({ title, desc, icon: Icon }, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="bg-white p-6 rounded-xl shadow flex items-start space-x-4 hover:shadow-xl transition-shadow duration-300"
+                        whileHover={{ y: -5 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Icon className="text-green-600 w-6 h-6 mt-1" />
+                        <div>
+                          <h4 className="font-semibold text-lg">{title}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{desc}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cluster 3: Flexibility */}
+                <div>
+                  <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2 justify-center">
+                    <FaCalendarCheck className="text-teal-600" /> Flexibility
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {[
+                      {
+                        title: "Scheduled & On-Demand",
+                        desc: "Flexible service plans based on your facility’s needs.",
+                        icon: CheckCircle,
+                      },
+                      {
+                        title: "Daily, Weekly, Deep Clean Options",
+                        desc: "Custom packages for offices, clinics, and homes.",
+                        icon: CheckCircle,
+                      },
+                    ].map(({ title, desc, icon: Icon }, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="bg-white p-6 rounded-xl shadow flex items-start space-x-4 hover:shadow-xl transition-shadow duration-300"
+                        whileHover={{ y: -5 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Icon className="text-green-600 w-6 h-6 mt-1" />
+                        <div>
+                          <h4 className="font-semibold text-lg">{title}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{desc}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Benefits */}
-            <div className="bg-gray-50 py-8 px-4 rounded-xl shadow">
-              <h2 className="text-3xl font-bold mb-8 text-center">
-                Why Our Cleaning Services Stand Out
-              </h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: "Hospital-Grade Disinfection",
-                    desc: "Eliminate harmful pathogens with trusted cleaning agents.",
-                  },
-                  {
-                    title: "Scheduled & On-Demand",
-                    desc: "Flexible service plans based on your facility’s needs.",
-                  },
-                  {
-                    title: "Trained & Certified Staff",
-                    desc: "Professionals trained in infection control and safety.",
-                  },
-                  {
-                    title: "Eco-Friendly Products",
-                    desc: "Sustainable solutions without compromising cleanliness.",
-                  },
-                  {
-                    title: "Daily, Weekly, Deep Clean Options",
-                    desc: "Custom packages for offices, clinics, and homes.",
-                  },
-                  {
-                    title: "Compliance & Audit Readiness",
-                    desc: "Cleaning logs and records ready for inspections.",
-                  },
-                ].map(({ title, desc }, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white p-6 rounded-xl shadow flex items-start space-x-4"
-                  >
-                    <CheckCircle className="text-green-600 w-6 h-6 mt-1" />
-                    <div>
-                      <h3 className="font-semibold text-lg">{title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Explore */}
-            <div className="bg-white p-8 rounded-xl shadow">
+            {/* Explore with hover effects */}
+            <div className="bg-white p-8 rounded-xl shadow" data-aos="fade-up" data-aos-delay="300">
               <h2 className="text-4xl font-bold mb-6 text-center">
                 Explore Our Cleaning Capabilities
               </h2>
@@ -119,31 +220,60 @@ export default function CleaningServices() {
                   {
                     text: "View Healthcare Facility Cleaning Case Study",
                     icon: FaFileAlt,
+                    href: "#case-study",
                   },
-                  { text: "Watch Disinfection Demo Video", icon: FaPlayCircle },
+                  { text: "Watch Disinfection Demo Video", icon: FaPlayCircle, href: "#demo-video" },
                   {
                     text: "Download Cleaning Checklist Template",
                     icon: FaFileAlt,
+                    href: "#checklist",
                   },
                   {
                     text: "Watch Our Staff Hygiene Training Clip",
                     icon: FaPlayCircle,
+                    href: "#training-clip",
                   },
-                ].map(({ text, icon: Icon }, idx) => (
-                  <a
+                ].map(({ text, icon: Icon, href }, idx) => (
+                  <motion.a
                     key={idx}
-                    href="#"
+                    href={href}
                     className="flex items-center gap-4 p-4 bg-gray-100 rounded-lg shadow-md hover:bg-gray-200 transition"
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <Icon className="text-xl text-gray-700" />
                     <span className="text-gray-800 font-medium">{text}</span>
-                  </a>
+                  </motion.a>
                 ))}
               </div>
             </div>
 
+            {/* Customer Review */}
+            <div className="bg-teal-50 py-10 px-6 rounded-xl shadow" data-aos="fade-up" data-aos-delay="400">
+              <h2 className="text-3xl font-bold mb-6 text-center">What Our Clients Say</h2>
+              <motion.div
+                className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <p className="text-xl italic text-gray-700 mb-4">
+                  “Demand Recruitment's cleaning team transformed our clinic's hygiene standards. Their attention to detail and use of eco-friendly products have significantly reduced infection risks.”
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold">
+                    JM
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">John Matthews</p>
+                    <p className="text-sm text-gray-500">Clinic Manager, NHS Trust</p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
             {/* Contact Form */}
-            <div className="bg-gray-100 py-10 px-6 rounded-xl shadow">
+            <div className="bg-gray-100 py-10 px-6 rounded-xl shadow" data-aos="fade-up" data-aos-delay="500">
               <h2 className="text-3xl font-bold mb-4 text-center">
                 Talk to Our Cleaning Experts
               </h2>
@@ -178,7 +308,7 @@ export default function CleaningServices() {
                 </label>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-900 transition"
+                  className="px-6 py-3 bg-teal-600 text-white rounded hover:bg-teal-700 transition w-full md:w-auto"
                 >
                   Request a Call Back
                 </button>
@@ -197,7 +327,7 @@ export default function CleaningServices() {
               </h3>
               <a
                 href="/requestEmployee"
-                className="block bg-teal-600 text-white text-center py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition"
+                className="block bg-teal-600 text-white text-center py-2 px-4 rounded-lg font-semibold hover:bg-teal-700 transition"
               >
                 🧹 Request Staff
               </a>
