@@ -1,6 +1,6 @@
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
-import Head from 'next/head';
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import Head from "next/head";
 import {
   CheckCircle,
   ShieldCheck,
@@ -14,13 +14,15 @@ import {
   BookMarked,
   PlayCircle,
   Download,
-} from 'lucide-react';
-import { FaFileAlt } from 'react-icons/fa';
+} from "lucide-react";
+import { FaFileAlt } from "react-icons/fa";
+import StickyHeader from "@/components/StickyHeader";
 
 export default function SupportedLiving() {
   return (
     <>
       <Navbar />
+      <StickyHeader></StickyHeader>
       <Head>
         <title>Supported Living | Demand Recruitment Services Ltd</title>
         <meta
@@ -44,11 +46,15 @@ export default function SupportedLiving() {
             <div className="mt-12 flex justify-center space-x-8">
               <div className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-sm p-4 rounded-xl text-center shadow-lg">
                 <p className="text-4xl font-bold">99%</p>
-                <p className="text-sm font-light uppercase tracking-wider mt-1">Client Safety Score</p>
+                <p className="text-sm font-light uppercase tracking-wider mt-1">
+                  Client Safety Score
+                </p>
               </div>
               <div className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-sm p-4 rounded-xl text-center shadow-lg">
                 <p className="text-4xl font-bold">500+</p>
-                <p className="text-sm font-light uppercase tracking-wider mt-1">Lives Empowered</p>
+                <p className="text-sm font-light uppercase tracking-wider mt-1">
+                  Lives Empowered
+                </p>
               </div>
             </div>
           </div>
@@ -59,9 +65,13 @@ export default function SupportedLiving() {
           <div className="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-teal-600 text-center">
             <Quote className="w-10 h-10 text-teal-600 mx-auto mb-4" />
             <p className="text-xl italic font-serif text-gray-700">
-              "The support my son receives from Demand Recruitment Services has given him a new lease on life. He's more independent and confident than ever before. We couldn't be more grateful."
+              "The support my son receives from Demand Recruitment Services has
+              given him a new lease on life. He's more independent and confident
+              than ever before. We couldn't be more grateful."
             </p>
-            <p className="mt-4 font-semibold text-gray-900">— Maria, Parent & Guardian</p>
+            <p className="mt-4 font-semibold text-gray-900">
+              — Maria, Parent & Guardian
+            </p>
           </div>
         </div>
 
@@ -77,15 +87,17 @@ export default function SupportedLiving() {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="bg-gray-50 p-8 rounded-2xl shadow-inner border border-gray-100 transform transition-transform hover:scale-105 duration-300">
                   <p className="text-lg leading-relaxed text-gray-700">
-                    We help individuals live independently with the right support, promoting
-                    safety, confidence, and wellbeing. Our services are tailored to each
-                    individual's unique needs and aspirations.
+                    We help individuals live independently with the right
+                    support, promoting safety, confidence, and wellbeing. Our
+                    services are tailored to each individual's unique needs and
+                    aspirations.
                   </p>
                 </div>
                 <div className="bg-gray-50 p-8 rounded-2xl shadow-inner border border-gray-100 transform transition-transform hover:scale-105 duration-300">
                   <p className="text-lg leading-relaxed text-gray-700">
-                    Our trained support workers provide personalised assistance with daily living,
-                    social inclusion, and personal development, fostering a life of dignity and purpose.
+                    Our trained support workers provide personalised assistance
+                    with daily living, social inclusion, and personal
+                    development, fostering a life of dignity and purpose.
                   </p>
                 </div>
               </div>
@@ -98,19 +110,48 @@ export default function SupportedLiving() {
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[
-                  { icon: User, title: 'Independence Focused', desc: 'Helping individuals live on their own terms, safely and confidently.' },
-                  { icon: HeartHandshake, title: '24/7 Personalised Support', desc: 'Round-the-clock care tailored to personal goals and preferences.' },
-                  { icon: Home, title: 'Safe & Comfortable Homes', desc: 'Clean, accessible, and secure supported housing environments.' },
-                  { icon: Users, title: 'Trained & Compassionate Staff', desc: 'Professionals who prioritise dignity and empathy.' },
-                  { icon: ShieldCheck, title: 'Community Integration', desc: 'Encouraging participation, friendships, and local engagement.' },
-                  { icon: Star, title: 'Family & Guardian Collaboration', desc: 'Open communication and partnership with loved ones.' },
+                  {
+                    icon: User,
+                    title: "Independence Focused",
+                    desc: "Helping individuals live on their own terms, safely and confidently.",
+                  },
+                  {
+                    icon: HeartHandshake,
+                    title: "24/7 Personalised Support",
+                    desc: "Round-the-clock care tailored to personal goals and preferences.",
+                  },
+                  {
+                    icon: Home,
+                    title: "Safe & Comfortable Homes",
+                    desc: "Clean, accessible, and secure supported housing environments.",
+                  },
+                  {
+                    icon: Users,
+                    title: "Trained & Compassionate Staff",
+                    desc: "Professionals who prioritise dignity and empathy.",
+                  },
+                  {
+                    icon: ShieldCheck,
+                    title: "Community Integration",
+                    desc: "Encouraging participation, friendships, and local engagement.",
+                  },
+                  {
+                    icon: Star,
+                    title: "Family & Guardian Collaboration",
+                    desc: "Open communication and partnership with loved ones.",
+                  },
                 ].map(({ icon: Icon, title, desc }, idx) => (
-                  <div key={idx} className="p-6 bg-gray-50 rounded-2xl shadow-md border border-gray-200 flex flex-col items-start space-y-3 transform transition-all hover:shadow-xl hover:scale-105 duration-300">
+                  <div
+                    key={idx}
+                    className="p-6 bg-gray-50 rounded-2xl shadow-md border border-gray-200 flex flex-col items-start space-y-3 transform transition-all hover:shadow-xl hover:scale-105 duration-300"
+                  >
                     <div className="p-3 bg-teal-500 rounded-full text-white">
                       <Icon className="w-6 h-6" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-xl text-gray-900">{title}</h3>
+                      <h3 className="font-semibold text-xl text-gray-900">
+                        {title}
+                      </h3>
                       <p className="text-sm text-gray-600 mt-1">{desc}</p>
                     </div>
                   </div>
@@ -124,7 +165,8 @@ export default function SupportedLiving() {
                 Explore Our Supported Living Resources
               </h2>
               <p className="mb-10 text-lg text-gray-600 text-center">
-                Learn how we make independence possible through tailored support.
+                Learn how we make independence possible through tailored
+                support.
               </p>
               <div className="grid md:grid-cols-2 gap-8 text-left">
                 {/* Callout Button with Icon */}
@@ -204,7 +246,8 @@ export default function SupportedLiving() {
                 Let’s Talk Supported Living
               </h2>
               <p className="text-center text-gray-600 mb-10 text-lg">
-                Connect with our care coordinators to find the right support package for your needs.
+                Connect with our care coordinators to find the right support
+                package for your needs.
               </p>
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Trust Signals & Client Story */}
@@ -213,7 +256,10 @@ export default function SupportedLiving() {
                     <Award className="text-teal-600 w-8 h-8" /> Our Commitment
                   </h3>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    We are dedicated to providing the highest standards of care. Our services are CQC-certified and we adhere strictly to GDPR regulations, ensuring your peace of mind and data security.
+                    We are dedicated to providing the highest standards of care.
+                    Our services are CQC-certified and we adhere strictly to
+                    GDPR regulations, ensuring your peace of mind and data
+                    security.
                   </p>
                   <p className="mt-4 text-sm font-semibold text-teal-600">
                     Your support journey starts with one conversation.
@@ -249,9 +295,14 @@ export default function SupportedLiving() {
                     className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
                   ></textarea>
                   <label className="flex items-start gap-3">
-                    <input type="checkbox" className="mt-1 w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300" />
+                    <input
+                      type="checkbox"
+                      className="mt-1 w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300"
+                    />
                     <span className="text-sm text-gray-600">
-                      I consent to have Demand Recruitment Services Ltd store my submitted information for updates and to contact me about my inquiry.
+                      I consent to have Demand Recruitment Services Ltd store my
+                      submitted information for updates and to contact me about
+                      my inquiry.
                     </span>
                   </label>
                   <div className="text-center">

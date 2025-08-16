@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import axios from "axios";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import StickyHeader from "@/components/StickyHeader";
 
 const AccountApprovalEmployee = () => {
     const { data: session } = useSession();
@@ -38,6 +39,7 @@ const AccountApprovalEmployee = () => {
     return (
         <div>
             <Navbar />
+            <StickyHeader></StickyHeader>
             <div className="min-h-screen bg-gray-200 flex items-center justify-center p-6">
                 <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-lg w-full text-white">
                     <h2 className="text-2xl font-bold mb-4">Employee Approval</h2>

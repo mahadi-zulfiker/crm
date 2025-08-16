@@ -12,6 +12,7 @@ import team2 from "../../../public/team/team2.jpg";
 import team3 from "../../../public/team/team3.jpg";
 import whoImage1 from "../../../public/services/1.jpg";
 import whoImage2 from "../../../public/services/2.jpg";
+import StickyHeader from "@/components/StickyHeader";
 
 const AboutUs = () => {
   const [gradient, setGradient] = useState(
@@ -38,6 +39,7 @@ const AboutUs = () => {
   return (
     <div className="bg-gray-50">
       <Navbar />
+      <StickyHeader></StickyHeader>
 
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">

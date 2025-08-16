@@ -34,6 +34,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
+import StickyHeader from "@/components/StickyHeader";
 
 export default function JobListings() {
   const { data: session, status } = useSession();
@@ -332,6 +333,7 @@ export default function JobListings() {
   return (
     <div className="min-h-screen bg-gray-50 transition-colors duration-300">
       <Navbar />
+      <StickyHeader></StickyHeader>
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div

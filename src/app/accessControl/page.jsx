@@ -8,11 +8,13 @@ import Achievements from "@/components/Achievements";
 import img1 from "../../../public/services/82.jpg";
 import img2 from "../../../public/services/83.jpg";
 import img3 from "../../../public/services/84.jpg";
+import StickyHeader from "@/components/StickyHeader";
 
 const AccessControlVisitorManagement = () => {
   return (
     <div className="bg-gray-50">
       <Navbar />
+      <StickyHeader></StickyHeader>
       
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-900 to-gray-700 relative text-white py-24 text-center">

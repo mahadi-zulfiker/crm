@@ -7,9 +7,9 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 const services = [
-  { id: "healthcare", name: "Healthcare", icon: <FaHeartbeat className="text-5xl text-[#3b82f6]" /> },
-  { id: "hospitality", name: "Hospitality", icon: <FaConciergeBell className="text-5xl text-[#f472b6]" /> },
-  { id: "fm", name: "Facilities", icon: <FaWrench className="text-5xl text-[#10b981]" /> },
+  { id: "healthcare", name: "Healthcare", icon: <FaHeartbeat className="text-5xl text-teal-600" /> },
+  { id: "hospitality", name: "Hospitality", icon: <FaConciergeBell className="text-5xl text-teal-600" /> },
+  { id: "fm", name: "Facilities", icon: <FaWrench className="text-5xl text-teal-600" /> },
 ];
 
 export default function Brief() {
@@ -25,63 +25,59 @@ export default function Brief() {
 
   const buttonVariants = {
     initial: { scale: 1 },
-    hover: { scale: 1.05, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)" },
+    hover: { scale: 1.05, boxShadow: "0 6px 18px rgba(0,0,0,0.15)" },
     tap: { scale: 0.95 },
   };
 
   return (
-    <section className="relative w-full bg-white text-gray-800 font-sans overflow-hidden py-16 lg:py-24">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-teal-50" />
+    <section className="relative w-full bg-white text-gray-800 font-sans overflow-hidden py-20 lg:py-28">
+      {/* Background subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+        <div className="flex flex-col lg:flex-row items-center gap-16">
           {/* Left Content */}
-          <div
-            className="w-full lg:w-1/2 flex flex-col justify-center text-center lg:text-left"
-            data-aos="fade-up"
-          >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-gray-800 tracking-tight">
-              Connecting Exceptional{" "}
-              <br className="hidden lg:inline" /> Talent with{" "}
-              <span className="text-gray-700">Transformative Roles</span>
+          <div className="w-full lg:w-1/2" data-aos="fade-up">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-snug text-gray-900 tracking-tight">
+              Your Partner in <span className="text-teal-700">Recruitment Excellence</span>
             </h1>
-            <p className="mt-6 text-base md:text-lg text-gray-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              We are a leading recruitment partner in the UK, specializing in
-              sectors where talent makes the greatest impact. Our mission is to
-              bridge ambitious professionals with organizations that are shaping
-              the future.
+            <p className="mt-6 text-base md:text-lg text-gray-600 leading-relaxed max-w-xl">
+              At AMGoal Recruitment, we specialize in connecting ambitious professionals with
+              transformative opportunities. With expertise across key industries, we deliver staffing
+              solutions that drive organizational success and career growth.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center lg:justify-start items-center gap-4">
+
+            {/* CTA Buttons */}
+            <div className="mt-8 flex flex-wrap gap-4">
               <motion.a
                 href="/insight"
-                className="inline-flex items-center px-6 py-2.5 md:px-8 md:py-3 rounded-full bg-[#155e57] text-white font-semibold text-sm md:text-base shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-teal-200 transition-all duration-300"
+                className="inline-flex items-center px-6 py-3 md:px-8 md:py-3 rounded-lg bg-teal-700 text-white font-semibold text-sm md:text-base shadow-lg hover:bg-teal-800 transition-all duration-300"
                 variants={buttonVariants}
                 initial="initial"
                 whileHover="hover"
                 whileTap="tap"
               >
-                Explore Our Services
+                Explore Opportunities
               </motion.a>
               <a
                 href="/caseStudies"
-                className="text-sm md:text-base text-[#155e57] font-medium hover:text-teal-700 transition-colors duration-300"
+                className="text-sm md:text-base text-teal-700 font-medium hover:underline"
               >
-                View Case Studies &rarr;
+                View Case Studies →
               </a>
             </div>
           </div>
 
           {/* Right Glassmorphic Card */}
           <motion.div
-            className="relative w-full lg:w-1/2 p-8 md:p-10 bg-white/50 backdrop-blur-3xl border border-white/80 rounded-3xl shadow-xl overflow-hidden flex flex-col justify-between"
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4, type: "spring", stiffness: 100 }}
+            className="relative w-full lg:w-1/2 p-10 bg-white/70 backdrop-blur-2xl border border-gray-200 rounded-3xl shadow-xl flex flex-col"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 100 }}
             data-aos="fade-left"
           >
-            {/* Floating Icon Circle */}
-            <div className="absolute -top-10 -right-10 w-36 h-36 md:w-48 md:h-48 rounded-full bg-teal-100/50 flex items-center justify-center p-8 opacity-90 z-20 shadow-lg">
+            {/* Floating Icon */}
+            <div className="absolute -top-10 -right-10 w-28 h-28 md:w-36 md:h-36 rounded-full bg-teal-100 flex items-center justify-center shadow-lg">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={services[index].id}
@@ -89,68 +85,55 @@ export default function Brief() {
                   animate={{ opacity: 1, rotate: 0, scale: 1 }}
                   exit={{ opacity: 0, rotate: 15, scale: 0.8 }}
                   transition={{ duration: 0.6, ease: "easeInOut" }}
-                  className="flex flex-col items-center justify-center text-teal-800"
+                  className="flex flex-col items-center text-teal-700"
                 >
                   {services[index].icon}
-                  <div className="mt-2 text-sm md:text-lg font-bold text-gray-700 text-center">
+                  <div className="mt-2 text-sm md:text-base font-medium text-gray-700">
                     {services[index].name}
                   </div>
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* Card Content */}
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
+            {/* Content */}
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
               Our Core Expertise
             </h3>
-            <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-prose">
-              We specialize in providing top-tier staffing solutions and recruitment
-              technology for key sectors, ensuring every placement adds significant
-              value and fuels growth.
+            <p className="text-base md:text-lg text-gray-600 leading-relaxed mb-6">
+              We provide tailored staffing and recruitment solutions in high-impact industries.
+              Every placement ensures mutual growth — empowering both professionals and businesses.
             </p>
-            <hr className="my-6 border-gray-200" />
 
             {/* Tags */}
             <div className="flex flex-wrap gap-3">
-              <motion.button
-                variants={buttonVariants}
-                initial="initial"
-                whileHover="hover"
-                whileTap="tap"
-                className="px-4 py-2 rounded-full text-xs md:text-sm bg-white/70 backdrop-blur-lg border border-white/90 text-[#155e57] font-medium shadow-md hover:shadow-lg transition-all duration-300"
-              >
-                <FaHandshake className="inline-block mr-2" /> Recruitment
-              </motion.button>
-              <motion.button
-                variants={buttonVariants}
-                initial="initial"
-                whileHover="hover"
-                whileTap="tap"
-                className="px-4 py-2 rounded-full text-xs md:text-sm bg-white/70 backdrop-blur-lg border border-white/90 text-[#155e57] font-medium shadow-md hover:shadow-lg transition-all duration-300"
-              >
-                <FaBullhorn className="inline-block mr-2" /> Consulting
-              </motion.button>
-              <motion.button
-                variants={buttonVariants}
-                initial="initial"
-                whileHover="hover"
-                whileTap="tap"
-                className="px-4 py-2 rounded-full text-xs md:text-sm bg-white/70 backdrop-blur-lg border border-white/90 text-[#155e57] font-medium shadow-md hover:shadow-lg transition-all duration-300"
-              >
-                <FaBriefcase className="inline-block mr-2" /> Platform
-              </motion.button>
+              {[
+                { label: "Recruitment", icon: <FaHandshake /> },
+                { label: "Consulting", icon: <FaBullhorn /> },
+                { label: "Platform", icon: <FaBriefcase /> },
+              ].map((tag, i) => (
+                <motion.button
+                  key={i}
+                  variants={buttonVariants}
+                  initial="initial"
+                  whileHover="hover"
+                  whileTap="tap"
+                  className="px-4 py-2 rounded-full text-xs md:text-sm bg-gray-50 border border-gray-200 text-teal-700 font-medium flex items-center gap-2 shadow-sm hover:bg-gray-100"
+                >
+                  {tag.icon} {tag.label}
+                </motion.button>
+              ))}
             </div>
 
             {/* Footer */}
-            <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="text-sm text-gray-500 font-light">
+            <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-3">
+              <div className="text-sm text-gray-500">
                 Trusted by leading UK organisations
               </div>
               <a
                 href="/services"
-                className="text-sm font-semibold text-[#155e57] hover:text-teal-700 transition-colors duration-300"
+                className="text-sm font-semibold text-teal-700 hover:underline"
               >
-                Our Sectors &rarr;
+                Our Sectors →
               </a>
             </div>
           </motion.div>
