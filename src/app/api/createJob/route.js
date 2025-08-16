@@ -108,6 +108,13 @@ export async function POST(req) {
       postedAt: new Date(),
     });
 
+    await db
+      .collection("users")
+      .updateOne(
+        { email },
+        { $inc: { totalJobsPosted: 1 }, $set: { lastUpdate: new Date() } }
+      );
+
     return NextResponse.json(
       { message: "Job posted successfully!", jobId: result.insertedId },
       { status: 201 }
