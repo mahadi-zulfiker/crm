@@ -14,8 +14,7 @@ import { useSession } from "next-auth/react";
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
   const { data: session, status } = useSession();
-  const role = session?.user?.userType?.toLowerCase() || "";
-  // const role = "user";
+  const role = session?.user?.userType?.toLowerCase() || "user";
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedItems, setExpandedItems] = useState(["attendance"]);
   const isMobile = useIsMobile();
@@ -86,7 +85,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
               <h2 className="text-lg font-bold text-gray-800 capitalize">
                 {role} Portal
               </h2>
-              <p className="text-xs text-gray-500">JobPortal Pro</p>
+              <p className="text-xs text-gray-500">CMR</p>
             </div>
           </div>
         )}
@@ -256,7 +255,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
       {!isSidebarOpen && (
         <div className="p-4 border-t border-gray-200">
           <div className="text-center">
-            <p className="text-xs text-gray-400">JobPortal Pro v2.0.0</p>
+            <p className="text-xs text-gray-400">CMR v2.0.0</p>
             <p className="text-[10px] text-gray-300 mt-1">
               © 2024 All Rights Reserved
             </p>
