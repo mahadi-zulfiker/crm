@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import img from "../../../public/Job.jpg";
+import StickyHeader from "@/components/StickyHeader";
 
 function PostAJob() {
   const [formData, setFormData] = useState({
@@ -58,7 +59,7 @@ function PostAJob() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      });      
+      });
 
       if (res.ok) {
         toast.success("Job posted successfully!");
@@ -77,6 +78,7 @@ function PostAJob() {
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
       <Navbar />
+      <StickyHeader></StickyHeader>
       <div className="flex-1 flex items-center justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-7xl w-full py-12">
           {/* Image Section */}
@@ -91,10 +93,14 @@ function PostAJob() {
 
           {/* Form Section */}
           <div className="bg-white rounded-lg shadow-lg p-8 lg:p-12">
-            <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">Post a Job</h1>
+            <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">
+              Post a Job
+            </h1>
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Job Title</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Job Title
+                </label>
                 <input
                   type="text"
                   name="title"
@@ -106,7 +112,9 @@ function PostAJob() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Company</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Company
+                </label>
                 <input
                   type="text"
                   name="company"
@@ -118,7 +126,9 @@ function PostAJob() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Location</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Location
+                </label>
                 <input
                   type="text"
                   name="location"
@@ -130,7 +140,9 @@ function PostAJob() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Job Type</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Job Type
+                </label>
                 <select
                   name="jobType"
                   value={formData.jobType}
@@ -150,7 +162,9 @@ function PostAJob() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Category</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Category
+                </label>
                 <select
                   name="category"
                   value={formData.category}
@@ -170,7 +184,9 @@ function PostAJob() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Job Description</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Job Description
+                </label>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -182,7 +198,9 @@ function PostAJob() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Salary</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Salary
+                </label>
                 <input
                   type="number"
                   name="salary"
@@ -194,7 +212,9 @@ function PostAJob() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Job Reference</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Job Reference
+                </label>
                 <input
                   type="text"
                   name="jobReference"
@@ -206,7 +226,9 @@ function PostAJob() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Vacancy</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Vacancy
+                </label>
                 <input
                   type="number"
                   name="vacancy"
@@ -225,7 +247,9 @@ function PostAJob() {
                   onChange={handleChange}
                   className="h-5 w-5 text-blue-500 rounded focus:ring-blue-500"
                 />
-                <label className="ml-2 text-sm font-medium text-gray-700">Mark as Featured</label>
+                <label className="ml-2 text-sm font-medium text-gray-700">
+                  Mark as Featured
+                </label>
               </div>
 
               <button
