@@ -46,6 +46,8 @@ import ALlCandidates from "./Client/AllCandidates";
 import HiredCandidatesPage from "./Client/HiredCandidatesClient";
 import JobDetailsClient from "./Client/JobDetailsClient";
 import ViewEmployeeProfile from "./Client/ViewEmployeeProfile";
+import InterviewScheduleClient from "./Client/InterviewScheduleClient";
+import SetInterViewClient from "./Client/SetInterviewClient";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -117,6 +119,12 @@ const MainLayout = () => {
             )}
             {pathname === "/dashboard/client/viewEmployeeProfile" && (
               <ViewEmployeeProfile />
+            )}
+            {pathname === "/dashboard/client/interviewScheduleClient" && (
+              <InterviewScheduleClient />
+            )}
+            {pathname === "/dashboard/client/setInterviewClient" && (
+              <SetInterViewClient />
             )}
 
             {pathname === "/dashboard/vendor" && <Vendor />}

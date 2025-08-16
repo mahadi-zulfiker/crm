@@ -28,7 +28,7 @@ import {
   Send,
 } from "lucide-react";
 
-export default function InterviewScheduleClient() {
+export default function SetInterViewClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
