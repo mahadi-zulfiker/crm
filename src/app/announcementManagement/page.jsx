@@ -8,11 +8,13 @@ import Achievements from "@/components/Achievements";
 import img1 from "../../../public/services/64.jpg";
 import img2 from "../../../public/services/65.jpg";
 import img3 from "../../../public/services/66.jpg";
+import StickyHeader from "@/components/StickyHeader";
 
 const CommunicationAnnouncementManagement = () => {
   return (
     <div className="bg-gray-50">
       <Navbar />
+      <StickyHeader></StickyHeader>
       
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-900 to-gray-700 relative text-white py-24 text-center">

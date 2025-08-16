@@ -1,15 +1,19 @@
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
-import Head from 'next/head';
-import { CheckCircle } from 'lucide-react';
-import { FaFileAlt, FaPlayCircle } from 'react-icons/fa';
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import Head from "next/head";
+import { CheckCircle } from "lucide-react";
+import { FaFileAlt, FaPlayCircle } from "react-icons/fa";
+import StickyHeader from "@/components/StickyHeader";
 
 export default function IntegratedFacilitiesManagement() {
   return (
     <>
       <Navbar />
+      <StickyHeader></StickyHeader>
       <Head>
-        <title>Integrated Facilities Management | Demand Recruitment Services Ltd</title>
+        <title>
+          Integrated Facilities Management | Demand Recruitment Services Ltd
+        </title>
         <meta
           name="description"
           content="Comprehensive Integrated Facilities Management solutions for seamless property operations and maintenance."
@@ -21,7 +25,9 @@ export default function IntegratedFacilitiesManagement() {
         <section className="relative bg-[url('/services/4.jpg')] bg-cover bg-center text-white py-24 text-center px-4">
           <div className="absolute inset-0 bg-black bg-opacity-60"></div>
           <div className="relative max-w-4xl mx-auto">
-            <h1 className="text-5xl font-bold drop-shadow-lg">Integrated Facilities Management</h1>
+            <h1 className="text-5xl font-bold drop-shadow-lg">
+              Integrated Facilities Management
+            </h1>
             <p className="mt-4 text-xl drop-shadow-md">
               Streamlining Operations for Efficient and Sustainable Facilities
             </p>
@@ -34,16 +40,22 @@ export default function IntegratedFacilitiesManagement() {
           <div className="lg:col-span-3 space-y-16">
             {/* Introduction */}
             <div>
-              <h2 className="text-3xl font-bold mb-6 text-center">Comprehensive Facilities Management Solutions</h2>
+              <h2 className="text-3xl font-bold mb-6 text-center">
+                Comprehensive Facilities Management Solutions
+              </h2>
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="bg-gray-100 p-6 rounded-xl shadow-md">
                   <p>
-                    Our Integrated Facilities Management services provide a centralized approach to managing your property’s operations, maintenance, and support services.
+                    Our Integrated Facilities Management services provide a
+                    centralized approach to managing your property’s operations,
+                    maintenance, and support services.
                   </p>
                 </div>
                 <div className="bg-gray-100 p-6 rounded-xl shadow-md">
                   <p>
-                    We combine innovative technologies with expert teams to optimize efficiency, reduce costs, and enhance occupant satisfaction.
+                    We combine innovative technologies with expert teams to
+                    optimize efficiency, reduce costs, and enhance occupant
+                    satisfaction.
                   </p>
                 </div>
               </div>
@@ -51,17 +63,40 @@ export default function IntegratedFacilitiesManagement() {
 
             {/* Benefits */}
             <div className="bg-gray-50 py-8 px-4 rounded-xl shadow">
-              <h2 className="text-3xl font-bold mb-8 text-center">Why Choose Our Facilities Management</h2>
+              <h2 className="text-3xl font-bold mb-8 text-center">
+                Why Choose Our Facilities Management
+              </h2>
               <div className="grid md:grid-cols-3 gap-6">
                 {[
-                  { title: 'Centralized Operations', desc: 'Unified management of all facility services under one roof.' },
-                  { title: 'Preventive Maintenance', desc: 'Proactive upkeep to avoid costly repairs and downtime.' },
-                  { title: 'Sustainability Initiatives', desc: 'Energy efficiency and waste reduction programs.' },
-                  { title: 'Vendor & Contract Management', desc: 'Streamlined coordination with trusted suppliers and contractors.' },
-                  { title: 'Real-Time Data & Reporting', desc: 'Insights to drive smarter facility decisions.' },
-                  { title: 'Enhanced Occupant Experience', desc: 'Comfort, safety, and productivity improvements.' },
+                  {
+                    title: "Centralized Operations",
+                    desc: "Unified management of all facility services under one roof.",
+                  },
+                  {
+                    title: "Preventive Maintenance",
+                    desc: "Proactive upkeep to avoid costly repairs and downtime.",
+                  },
+                  {
+                    title: "Sustainability Initiatives",
+                    desc: "Energy efficiency and waste reduction programs.",
+                  },
+                  {
+                    title: "Vendor & Contract Management",
+                    desc: "Streamlined coordination with trusted suppliers and contractors.",
+                  },
+                  {
+                    title: "Real-Time Data & Reporting",
+                    desc: "Insights to drive smarter facility decisions.",
+                  },
+                  {
+                    title: "Enhanced Occupant Experience",
+                    desc: "Comfort, safety, and productivity improvements.",
+                  },
                 ].map(({ title, desc }, idx) => (
-                  <div key={idx} className="bg-white p-6 rounded-xl shadow flex items-start space-x-4">
+                  <div
+                    key={idx}
+                    className="bg-white p-6 rounded-xl shadow flex items-start space-x-4"
+                  >
                     <CheckCircle className="text-green-600 w-6 h-6 mt-1" />
                     <div>
                       <h3 className="font-semibold text-lg">{title}</h3>
@@ -74,16 +109,25 @@ export default function IntegratedFacilitiesManagement() {
 
             {/* Explore Section */}
             <div className="bg-white p-8 rounded-xl shadow">
-              <h2 className="text-4xl font-bold mb-6 text-center">Explore Our Facilities Management Expertise</h2>
+              <h2 className="text-4xl font-bold mb-6 text-center">
+                Explore Our Facilities Management Expertise
+              </h2>
               <p className="mb-10 text-lg text-gray-600 text-center">
-                Discover case studies, videos, and insights showcasing how we transform facility operations.
+                Discover case studies, videos, and insights showcasing how we
+                transform facility operations.
               </p>
               <div className="grid md:grid-cols-2 gap-6 text-left">
                 {[
-                  { text: 'View Facilities Management Case Study', icon: FaFileAlt },
-                  { text: 'Watch Our Services Overview Video', icon: FaPlayCircle },
-                  { text: 'Download Maintenance Checklist', icon: FaFileAlt },
-                  { text: 'Watch Sustainability Webinar', icon: FaPlayCircle },
+                  {
+                    text: "View Facilities Management Case Study",
+                    icon: FaFileAlt,
+                  },
+                  {
+                    text: "Watch Our Services Overview Video",
+                    icon: FaPlayCircle,
+                  },
+                  { text: "Download Maintenance Checklist", icon: FaFileAlt },
+                  { text: "Watch Sustainability Webinar", icon: FaPlayCircle },
                 ].map(({ text, icon: Icon }, idx) => (
                   <a
                     key={idx}
@@ -99,20 +143,36 @@ export default function IntegratedFacilitiesManagement() {
 
             {/* Contact Form */}
             <div className="bg-gray-100 py-10 px-6 rounded-xl shadow">
-              <h2 className="text-3xl font-bold mb-4 text-center">Contact Our Facilities Management Team</h2>
+              <h2 className="text-3xl font-bold mb-4 text-center">
+                Contact Our Facilities Management Team
+              </h2>
               <p className="text-center text-gray-600 mb-8">
-                Let us help you optimize your facility operations for greater efficiency and satisfaction.
+                Let us help you optimize your facility operations for greater
+                efficiency and satisfaction.
               </p>
               <form className="space-y-6 bg-white p-8 rounded-lg shadow-md">
                 <div className="grid md:grid-cols-3 gap-4">
-                  <input type="text" placeholder="Full Name" className="w-full px-4 py-2 border rounded" />
-                  <input type="email" placeholder="Email Address" className="w-full px-4 py-2 border rounded" />
-                  <input type="tel" placeholder="Phone Number" className="w-full px-4 py-2 border rounded" />
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    className="w-full px-4 py-2 border rounded"
+                  />
                 </div>
                 <label className="flex items-start gap-2">
                   <input type="checkbox" className="mt-1" />
                   <span className="text-sm">
-                    I consent to have Demand Recruitment Services Ltd store my submitted information for updates.
+                    I consent to have Demand Recruitment Services Ltd store my
+                    submitted information for updates.
                   </span>
                 </label>
                 <button
@@ -131,7 +191,9 @@ export default function IntegratedFacilitiesManagement() {
           {/* Sticky Sidebar */}
           <aside className="lg:sticky top-24 h-fit">
             <div className="bg-white border border-gray-200 rounded-xl shadow p-6 space-y-6">
-              <h3 className="text-lg font-semibold text-gray-800">Quick Access</h3>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Quick Access
+              </h3>
               <a
                 href="/requestEmployee"
                 className="block bg-teal-600 text-white text-center py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition"

@@ -16,6 +16,7 @@ import {
   FaHandsHelping,
 } from "react-icons/fa";
 import CountUp from "react-countup";
+import StickyHeader from "@/components/StickyHeader";
 
 const services = [
   {
@@ -55,7 +56,7 @@ export default function CommunityServices() {
   return (
     <>
       <Navbar />
-
+      <StickyHeader></StickyHeader>
       {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center justify-center text-center bg-gray-900 overflow-hidden">
         <Image

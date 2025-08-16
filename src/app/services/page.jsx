@@ -7,8 +7,17 @@ import "aos/dist/aos.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContactSection from "@/components/ContactHomePage";
-import { Briefcase, Building2, Users, Sparkles, Star, ShieldCheck, ArrowRight } from "lucide-react";
+import {
+  Briefcase,
+  Building2,
+  Users,
+  Sparkles,
+  Star,
+  ShieldCheck,
+  ArrowRight,
+} from "lucide-react";
 import CountUp from "react-countup";
+import StickyHeader from "@/components/StickyHeader";
 
 // --- Data -------------------------------------------------------
 const recruitmentServices = [
@@ -134,29 +143,57 @@ export default function Services() {
   return (
     <div className="bg-gray-50">
       <Navbar />
-
+      <StickyHeader></StickyHeader>
       {/* Banner / Hero */}
       <section className="relative overflow-hidden">
-        <div className="relative h-[520px] md:h-[560px] bg-cover bg-center" style={{ backgroundImage: "url('/services/med1.jpg')" }}>
+        <div
+          className="relative h-[520px] md:h-[560px] bg-cover bg-center"
+          style={{ backgroundImage: "url('/services/med1.jpg')" }}
+        >
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-gray-50 to-transparent" />
           <div className="relative z-10 h-full flex items-center">
             <div className="max-w-5xl mx-6 md:mx-10">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur text-white mb-4" data-aos="fade-up">
+              <div
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur text-white mb-4"
+                data-aos="fade-up"
+              >
                 <Sparkles size={16} />
-                <span className="text-sm font-medium">End‑to‑end Talent & Operations</span>
+                <span className="text-sm font-medium">
+                  End‑to‑end Talent & Operations
+                </span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight" data-aos="fade-up" data-aos-delay="100">
+              <h1
+                className="text-4xl md:text-6xl font-extrabold text-white leading-tight"
+                data-aos="fade-up"
+                data-aos-delay="100"
+              >
                 What We Offer
               </h1>
-              <p className="mt-4 max-w-2xl text-gray-200" data-aos="fade-up" data-aos-delay="200">
-                Discover recruitment, facility, and community services tailored to your organisation. Built for speed, compliance, and impact.
+              <p
+                className="mt-4 max-w-2xl text-gray-200"
+                data-aos="fade-up"
+                data-aos-delay="200"
+              >
+                Discover recruitment, facility, and community services tailored
+                to your organisation. Built for speed, compliance, and impact.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3" data-aos="fade-up" data-aos-delay="300">
-                <a href="#services" className="inline-flex items-center gap-2 rounded-xl bg-teal-600 text-white px-5 py-3 font-semibold shadow-lg shadow-teal-600/30 hover:bg-teal-700 transition">
+              <div
+                className="mt-6 flex flex-wrap gap-3"
+                data-aos="fade-up"
+                data-aos-delay="300"
+              >
+                <a
+                  href="#services"
+                  className="inline-flex items-center gap-2 rounded-xl bg-teal-600 text-white px-5 py-3 font-semibold shadow-lg shadow-teal-600/30 hover:bg-teal-700 transition"
+                >
                   Explore Services <ArrowRight size={18} />
                 </a>
-                <a href="/caseStudies" target="_blank" className="inline-flex items-center gap-2 rounded-xl bg-white/90 text-gray-900 px-5 py-3 font-semibold hover:bg-white transition">
+                <a
+                  href="/caseStudies"
+                  target="_blank"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white/90 text-gray-900 px-5 py-3 font-semibold hover:bg-white transition"
+                >
                   <ShieldCheck size={18} /> Case Studies (PDF)
                 </a>
               </div>
@@ -168,7 +205,10 @@ export default function Services() {
       {/* Tabs */}
       <section id="services" className="py-16 md:py-20 bg-gray-100">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-center gap-3 md:gap-4 mb-10 flex-wrap" data-aos="fade-up">
+          <div
+            className="flex justify-center gap-3 md:gap-4 mb-10 flex-wrap"
+            data-aos="fade-up"
+          >
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
@@ -182,7 +222,10 @@ export default function Services() {
                       : "bg-white text-gray-800 border-gray-200 hover:border-teal-300 hover:shadow-md"
                   }`}
                 >
-                  <Icon size={18} className={active ? "text-white" : "text-teal-600"} />
+                  <Icon
+                    size={18}
+                    className={active ? "text-white" : "text-teal-600"}
+                  />
                   {tab.label}
                 </button>
               );
@@ -196,7 +239,12 @@ export default function Services() {
               { value: 98, suffix: "%", label: "Client Satisfaction" },
               { value: 24, suffix: "/7", label: "Service Availability" },
             ].map((stat, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100" data-aos="fade-up" data-aos-delay={i * 100}>
+              <div
+                key={i}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                data-aos="fade-up"
+                data-aos-delay={i * 100}
+              >
                 <h2 className="text-3xl md:text-4xl font-extrabold text-teal-600">
                   <CountUp end={stat.value} suffix={stat.suffix} duration={2} />
                 </h2>
@@ -211,10 +259,16 @@ export default function Services() {
               <article
                 key={index}
                 className="group bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition duration-300"
-                data-aos="zoom-in-up" data-aos-delay={index * 100}
+                data-aos="zoom-in-up"
+                data-aos-delay={index * 100}
               >
                 <div className="relative h-52 w-full">
-                  <Image src={service.image} alt={service.name} fill className="object-cover" />
+                  <Image
+                    src={service.image}
+                    alt={service.name}
+                    fill
+                    className="object-cover"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-transparent" />
                   <div className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium">
                     <Star size={14} className="text-amber-500" /> Featured
@@ -224,14 +278,21 @@ export default function Services() {
                 <div className="p-6">
                   <div className="flex items-center gap-2 mb-2">
                     {service.icon}
-                    <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {service.name}
+                    </h3>
                   </div>
-                  <p className="text-gray-600 leading-relaxed">{service.description}</p>
+                  <p className="text-gray-600 leading-relaxed">
+                    {service.description}
+                  </p>
 
                   {/* Service-specific stats chips */}
                   <div className="mt-4 flex flex-wrap gap-2">
                     {service.stats?.map((chip, i) => (
-                      <span key={i} className="rounded-full bg-teal-50 text-teal-700 border border-teal-100 px-3 py-1 text-xs font-medium">
+                      <span
+                        key={i}
+                        className="rounded-full bg-teal-50 text-teal-700 border border-teal-100 px-3 py-1 text-xs font-medium"
+                      >
                         {chip}
                       </span>
                     ))}
@@ -250,18 +311,32 @@ export default function Services() {
           </div>
 
           {/* Trust Bar */}
-          <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6 items-center" data-aos="fade-up">
-            {["NHS-compliant", "ISO 9001", "DBS Checked", "UK Coverage"].map((badge, i) => (
-              <div key={i} className="flex items-center justify-center gap-2 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-                <ShieldCheck size={18} className="text-teal-600" />
-                <span className="text-sm font-medium text-gray-700">{badge}</span>
-              </div>
-            ))}
+          <div
+            className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6 items-center"
+            data-aos="fade-up"
+          >
+            {["NHS-compliant", "ISO 9001", "DBS Checked", "UK Coverage"].map(
+              (badge, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-center gap-2 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm"
+                >
+                  <ShieldCheck size={18} className="text-teal-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    {badge}
+                  </span>
+                </div>
+              )
+            )}
           </div>
 
           {/* Case Study Link */}
           <div className="mt-16 text-center" data-aos="fade-up">
-            <a href="/caseStudies" target="_blank" className="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-medium underline">
+            <a
+              href="/caseStudies"
+              target="_blank"
+              className="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-medium underline"
+            >
               📄 Download Full Case Study (PDF)
             </a>
           </div>
@@ -275,13 +350,23 @@ export default function Services() {
           <div className="rounded-3xl bg-gradient-to-r from-teal-600 to-emerald-600 p-1 shadow-xl">
             <div className="rounded-3xl bg-white p-8 md:p-10 grid md:grid-cols-2 gap-8 items-center">
               <div>
-                <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900">Ready to hire or streamline operations?</h3>
-                <p className="mt-2 text-gray-600">Speak with our team for a tailored plan in minutes.</p>
+                <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900">
+                  Ready to hire or streamline operations?
+                </h3>
+                <p className="mt-2 text-gray-600">
+                  Speak with our team for a tailored plan in minutes.
+                </p>
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <a href="contactUs" className="inline-flex items-center gap-2 rounded-xl bg-teal-600 text-white px-5 py-3 font-semibold shadow-lg shadow-teal-600/30 hover:bg-teal-700 transition">
+                  <a
+                    href="contactUs"
+                    className="inline-flex items-center gap-2 rounded-xl bg-teal-600 text-white px-5 py-3 font-semibold shadow-lg shadow-teal-600/30 hover:bg-teal-700 transition"
+                  >
                     Get a Proposal <ArrowRight size={18} />
                   </a>
-                  <a href="/caseStudies" className="inline-flex items-center gap-2 rounded-xl bg-gray-100 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-200 transition">
+                  <a
+                    href="/caseStudies"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gray-100 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-200 transition"
+                  >
                     View Proof & Results
                   </a>
                 </div>
@@ -292,7 +377,9 @@ export default function Services() {
                   "Transparent pricing & SLAs",
                   "Rapid deployment within days",
                 ].map((li, i) => (
-                  <li key={i} className="flex items-center gap-2 text-gray-700"><ShieldCheck className="text-teal-600" size={18} /> {li}</li>
+                  <li key={i} className="flex items-center gap-2 text-gray-700">
+                    <ShieldCheck className="text-teal-600" size={18} /> {li}
+                  </li>
                 ))}
               </ul>
             </div>

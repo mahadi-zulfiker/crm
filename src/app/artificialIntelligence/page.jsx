@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 // Import Lucide Icons
 import { Brain, TrendingUp, MessageSquareText, Lightbulb } from 'lucide-react';
+import StickyHeader from "@/components/StickyHeader";
 
 const ArtificialIntelligencePage = () => {
     // Dummy data for demonstration
@@ -58,6 +59,7 @@ const ArtificialIntelligencePage = () => {
     return (
         <div className="flex flex-col min-h-screen bg-gray-100">
             <Navbar /> {/* Include your Navbar component */}
+            <StickyHeader></StickyHeader>
 
             <main className="flex-grow container mx-auto px-6 py-12">
                 <h1 className="text-4xl font-bold text-gray-800 text-center mb-12">Artificial Intelligence</h1>
