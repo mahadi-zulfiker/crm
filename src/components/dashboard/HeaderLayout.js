@@ -19,6 +19,8 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 
 const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
+  const { data: session, status } = useSession();
+  const user = session?.user;
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
@@ -34,9 +36,6 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
       setIsFullscreen(false);
     }
   };
-
-  const { data: session, status } = useSession();
-  const user = session?.user;
 
   // Close profile menu when clicking outside
   useEffect(() => {

@@ -36,7 +36,6 @@ export async function PUT(req) {
   try {
     const db = await connectMongoDB();
     const { id, status } = await req.json();
-    console.log("PUT /api/applicationManagement" , id, status);
 
     // Convert `id` to ObjectId
     const objectId = new ObjectId(id);
