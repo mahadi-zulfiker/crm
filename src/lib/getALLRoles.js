@@ -197,42 +197,52 @@ export default function getALLRoles() {
         href: "/dashboard/admin",
       },
       {
-        title: "Attendance",
+        title: "User Management",
         icon: Users,
         items: [
-          {
-            name: "Attendance form",
-            href: "/dashboard/admin/attendance/form",
-          },
-          {
-            name: "Monthly attendance",
-            href: "/dashboard/admin/attendance/monthly",
-          },
-          {
-            name: "Missing attendance",
-            href: "/dashboard/admin/attendance/missing",
-          },
+          { name: "Manage Users", href: "/dashboard/admin/userManagement" },
         ],
       },
       {
-        title: "Award",
-        icon: Award,
+        title: "Job Management",
+        icon: Briefcase,
+        items: [
+          { name: "Manage Jobs", href: "/dashboard/admin/jobManagementAdmin" },
+          { name: "Job Progress", href: "/dashboard/admin/jobProgressAdmin" },
+          {
+            name: "Job Categories",
+            href: "/dashboard/admin/createJobCategory",
+          },
+          {
+            name: "Applications",
+            href: "/dashboard/admin/applicationManagementE",
+          },
+          { name: "Time Sheet", href: "/dashboard/admin/timeSheetJob" },
+        ],
+      },
+      // {
+      //   title: "Reports & Analytics",
+      //   icon: BarChart3,
+      //   href: "/dashboard/admin/reportsAnalyticsAdmin",
+      // },
+      {
+        title: "Content Management",
+        icon: FileText,
+        items: [
+          { name: "Post Blogs", href: "/dashboard/admin/postBlogs" },
+          { name: "Post Projects", href: "/dashboard/admin/postProjects" },
+          { name: "View Resumes", href: "/dashboard/admin/viewResumeAdmin" },
+        ],
       },
       {
-        title: "Department",
-        icon: Building2,
+        title: "Profile",
+        icon: User,
+        href: "/dashboard/admin/adminProfileManagement",
       },
       {
-        title: "Employee",
-        icon: Users,
-      },
-      {
-        title: "Leave",
-        icon: Calendar,
-      },
-      {
-        title: "Loan",
-        icon: CreditCard,
+        title: "Settings",
+        icon: Settings,
+        href: "/dashboard/admin/settings",
       },
     ],
   };
