@@ -2,7 +2,7 @@ import { connectMongoDB } from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
-// GET Client Profile
+// GET Employee Profile
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -16,7 +16,10 @@ export async function GET(req) {
     const client = await db.collection("users").findOne({ email });
 
     if (!client) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Employee not found" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(client);
@@ -26,7 +29,7 @@ export async function GET(req) {
   }
 }
 
-// UPDATE Client Profile
+// UPDATE Employee Profile
 export async function PUT(req) {
   try {
     const body = await req.json();
@@ -34,7 +37,7 @@ export async function PUT(req) {
 
     if (!_id) {
       return NextResponse.json(
-        { error: "Client ID is required" },
+        { error: "Employee ID is required" },
         { status: 400 }
       );
     }
