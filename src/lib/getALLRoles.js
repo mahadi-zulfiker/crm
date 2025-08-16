@@ -43,40 +43,6 @@ export default function getALLRoles() {
         ],
       },
       {
-        title: "Candidates",
-        icon: Users,
-        items: [
-          {
-            name: "All Applications",
-            href: "/dashboard/client/allCandidates",
-          },
-          // { name: "Candidate Pool", href: "/dashboard/employee/candidates" },
-          {
-            name: "Interview Schedule",
-            href: "/dashboard/client/interviews",
-          },
-          {
-            name: "Hired Candidates",
-            href: "/dashboard/client/hiredCandidatesClient",
-          },
-        ],
-      },
-      {
-        title: "Applications",
-        icon: FileText,
-        items: [
-          { name: "My Applications", href: "/dashboard/client/applications" },
-          {
-            name: "Application Status",
-            href: "/dashboard/client/applications/status",
-          },
-          {
-            name: "Interview Schedule",
-            href: "/dashboard/client/applications/interviews",
-          },
-        ],
-      },
-      {
         title: "Payment History",
         icon: WalletCards,
         href: "/dashboard/client/paymentHistory",
@@ -128,6 +94,21 @@ export default function getALLRoles() {
           { name: "Approved Jobs", href: "/dashboard/employee/approvedJobs" },
           { name: "Rejected Jobs", href: "/dashboard/employee/rejectedJobs" },
           { name: "Completed Jobs", href: "/dashboard/employee/completedJobs" },
+        ],
+      },
+      {
+        title: "Applications",
+        icon: FileText,
+        items: [
+          { name: "My Applications", href: "/dashboard/client/applications" },
+          {
+            name: "Application Status",
+            href: "/dashboard/client/applications/status",
+          },
+          {
+            name: "Interview Schedule",
+            href: "/dashboard/client/applications/interviews",
+          },
         ],
       },
       {
