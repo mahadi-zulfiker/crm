@@ -245,7 +245,7 @@ export default function JobListings() {
     e.stopPropagation();
     if (!session) {
       toast.error("Please login to apply for jobs");
-      router.push("/login");
+      router.push("/signIn");
       return;
     }
     router.push(`/singleJob/${jobId}`);
