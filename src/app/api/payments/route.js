@@ -39,12 +39,18 @@ export async function POST(request) {
       );
     }
 
+    // Get job details for additional context
+    const job = await db
+      .collection("jobs")
+      .findOne({ _id: new ObjectId(jobId) });
+
     // Create payment record
     const paymentData = {
       candidateId: candidateId,
       candidateEmail: candidate.email,
       candidateName: candidate.fullName,
       jobId: jobId,
+      jobTitle: job?.title || "Unknown Job",
       clientEmail: clientEmail,
       amount: Number.parseFloat(amount),
       description: description || "Payment for completed work",
@@ -61,23 +67,21 @@ export async function POST(request) {
       .collection("payments")
       .insertOne(paymentData);
 
-    // Update candidate's task status and payment info
-    const updateData = {
-      taskStatus: taskCompletion,
-      lastPaymentDate: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // Calculate total payments for this candidate
+    // Calculate total payments for this candidate after adding the new payment
     const allPayments = await db
       .collection("payments")
       .find({ candidateId: candidateId })
       .toArray();
-    const totalPayments =
-      allPayments.reduce((sum, p) => sum + p.amount, 0) + paymentData.amount;
+    const totalPayments = allPayments.reduce((sum, p) => sum + p.amount, 0);
 
-    updateData.totalPayments = totalPayments;
-    updateData.paymentStatus = "paid";
+    // Update candidate's task status and payment info
+    const updateData = {
+      taskStatus: taskCompletion,
+      lastPaymentDate: new Date(),
+      totalPayments: totalPayments,
+      paymentStatus: "paid",
+      updatedAt: new Date(),
+    };
 
     await db
       .collection("applications")
@@ -136,16 +140,28 @@ export async function GET(request) {
       .sort({ createdAt: -1 })
       .toArray();
 
+    // Calculate summary statistics
     const totalAmount = payments.reduce(
       (sum, payment) => sum + payment.amount,
       0
     );
+    const completedPayments = payments.filter((p) => p.status === "completed");
+    const pendingPayments = payments.filter((p) => p.status === "pending");
 
     return NextResponse.json({
       success: true,
       data: payments,
-      totalAmount: totalAmount,
-      count: payments.length,
+      summary: {
+        totalAmount: totalAmount,
+        totalCount: payments.length,
+        completedCount: completedPayments.length,
+        pendingCount: pendingPayments.length,
+        completedAmount: completedPayments.reduce(
+          (sum, p) => sum + p.amount,
+          0
+        ),
+        pendingAmount: pendingPayments.reduce((sum, p) => sum + p.amount, 0),
+      },
     });
   } catch (error) {
     console.error("Error fetching payments:", error);
