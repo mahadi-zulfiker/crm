@@ -13,6 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Table,
   TableBody,
   TableCell,
@@ -26,7 +32,6 @@ import {
   Edit,
   Trash2,
   FileText,
-  Filter,
   Download,
   MoreHorizontal,
   ChevronLeft,
@@ -34,10 +39,10 @@ import {
   Loader2,
   Building,
   Briefcase,
-  Tag,
   DollarSign,
   MapPin,
-  Clock,
+  Calendar,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -133,9 +138,26 @@ export default function PostedJobsPage() {
     }
   };
 
-  const handleDeleteJob = (jobId) => {
+  const handleDeleteJob = async (jobId) => {
+    console.log("Deleting job:", jobId);
     if (confirm("Are you sure you want to delete this job posting?")) {
-      setJobs(jobs.filter((job) => job._id !== jobId));
+      try {
+        const res = await fetch(`/api/applicationManagementClient/${jobId}`, {
+          method: "DELETE",
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert(`Deleted ${data.deletedCount} applications for this job`);
+          setJobs((prevJobs) => prevJobs.filter((job) => job._id !== jobId));
+        } else {
+          alert(`Failed to delete: ${data.error || "Unknown error"}`);
+        }
+      } catch (err) {
+        console.error("Delete job error:", err);
+        alert("Error deleting job. Please try again.");
+      }
     }
   };
 
@@ -160,11 +182,14 @@ export default function PostedJobsPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="text-gray-600 hover:bg-gray-100">
+          <Button
+            variant="outline"
+            className="text-gray-600 hover:bg-gray-100 bg-transparent"
+          >
             <Download className="w-4 h-4 mr-2" />
             Export Data
           </Button>
-          <Link href="/dashboard/client/createJobs">
+          <Link href="/dashboard/client/jobs/create">
             <Button className="bg-teal-600 hover:bg-teal-700 text-white">
               <FileText className="w-4 h-4 mr-2" />
               Post New Job
@@ -263,7 +288,6 @@ export default function PostedJobsPage() {
                   <TableHead className="text-gray-900 font-semibold">
                     Job Type
                   </TableHead>
-
                   <TableHead className="text-gray-900 font-semibold">
                     Salary
                   </TableHead>
@@ -303,7 +327,6 @@ export default function PostedJobsPage() {
                       <TableCell className="text-gray-600">
                         {job.jobType}
                       </TableCell>
-
                       <TableCell className="text-gray-600">
                         <div className="flex items-center gap-1 font-medium text-teal-600">
                           <DollarSign className="w-4 h-4" />
@@ -322,7 +345,7 @@ export default function PostedJobsPage() {
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Link
-                            href={`/dashboard/client/candidates?jobId=${job._id}`}
+                            href={`/dashboard/client/allCandidates?jobId=${job._id}`}
                           >
                             <Button
                               variant="outline"
@@ -339,7 +362,7 @@ export default function PostedJobsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-blue-600 hover:bg-blue-50"
+                              className="text-blue-600 hover:bg-blue-50 bg-transparent"
                               title="Edit Job"
                             >
                               <Edit className="w-4 h-4" />
@@ -354,14 +377,38 @@ export default function PostedJobsPage() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-gray-600 hover:bg-gray-50"
-                            title="More Options"
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-gray-600 hover:bg-gray-50 bg-transparent"
+                                title="More Options"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem asChild>
+                                <Link
+                                  href={`/dashboard/client/interviewScheduleClient?jobId=${job._id}`}
+                                  className="flex items-center gap-2 cursor-pointer"
+                                >
+                                  <Calendar className="w-4 h-4" />
+                                  Interview Schedule
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link
+                                  href={`/dashboard/client/hiredCandidatesClient?jobId=${job._id}`}
+                                  className="flex items-center gap-2 cursor-pointer"
+                                >
+                                  <Users className="w-4 h-4" />
+                                  Hired Candidates
+                                </Link>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
