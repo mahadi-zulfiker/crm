@@ -26,6 +26,7 @@ import {
 } from "react-icons/fa";
 import Link from "next/link";
 import { Loader2 } from "@/components/ui/loader2";
+import StickyHeader from "@/components/StickyHeader";
 
 function SingleJob() {
   const params = useParams();
@@ -83,6 +84,7 @@ function SingleJob() {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
+        <StickyHeader></StickyHeader>
         <div className="flex-1 flex items-center justify-center h-screen w-screen">
           <div className="text-center flex justify-center items-center  bg-white p-8 rounded-lg shadow-md h-screen w-screen">
             <div className="align-middle">

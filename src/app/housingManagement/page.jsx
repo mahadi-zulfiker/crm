@@ -1,6 +1,6 @@
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
-import Head from 'next/head';
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import Head from "next/head";
 import {
   CheckCircle,
   ArrowRight,
@@ -13,13 +13,15 @@ import {
   HeartHandshake,
   Database,
   BarChart,
-} from 'lucide-react';
-import { FaFileAlt, FaPlayCircle } from 'react-icons/fa';
+} from "lucide-react";
+import { FaFileAlt, FaPlayCircle } from "react-icons/fa";
+import StickyHeader from "@/components/StickyHeader";
 
 export default function HousingManagement() {
   return (
     <>
       <Navbar />
+      <StickyHeader></StickyHeader>
       <Head>
         <title>Housing Management | Demand Recruitment Services Ltd</title>
         <meta
@@ -37,8 +39,8 @@ export default function HousingManagement() {
               Housing Management
             </h1>
             <p className="mt-6 text-xl md:text-2xl font-light max-w-3xl mx-auto drop-shadow-md">
-              Efficient, Resident-Focused Property Solutions that build thriving, sustainable
-              communities for the future.
+              Efficient, Resident-Focused Property Solutions that build
+              thriving, sustainable communities for the future.
             </p>
           </div>
         </section>
@@ -60,12 +62,13 @@ export default function HousingManagement() {
                 </div>
                 <div className="md:col-span-2 bg-gray-50 p-8 rounded-2xl shadow-inner border border-gray-100 flex flex-col justify-center">
                   <p className="text-lg leading-relaxed text-gray-700">
-                    We deliver responsive and responsible housing management services, fostering
-                    safe, sustainable living environments for residents. Our approach is built on
-                    trust, transparency, and a commitment to excellence. Our team ensures full
-                    compliance with all regulatory standards while maintaining a people-first
-                    approach to tenant engagement and property upkeep. We're dedicated to your
-                    peace of mind.
+                    We deliver responsive and responsible housing management
+                    services, fostering safe, sustainable living environments
+                    for residents. Our approach is built on trust, transparency,
+                    and a commitment to excellence. Our team ensures full
+                    compliance with all regulatory standards while maintaining a
+                    people-first approach to tenant engagement and property
+                    upkeep. We're dedicated to your peace of mind.
                   </p>
                 </div>
               </div>
@@ -78,19 +81,48 @@ export default function HousingManagement() {
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[
-                  { icon: Users, title: 'Tenant-Focused Support', desc: '24/7 access to tenant services and responsive issue resolution.' },
-                  { icon: Clipboard, title: 'Lease & Compliance Management', desc: 'Regulatory adherence and seamless lease processing.' },
-                  { icon: Wrench, title: 'Property Maintenance', desc: 'Scheduled repairs, inspections, and contractor oversight.' },
-                  { icon: DollarSign, title: 'Rent Collection & Reporting', desc: 'Secure systems for rent, arrears, and financial accountability.' },
-                  { icon: HeartHandshake, title: 'Community Building', desc: 'Trust-driven resident interaction for housing harmony.' },
-                  { icon: Database, title: 'Data & Asset Management', desc: 'Centralized records and advanced property tracking tools.' },
+                  {
+                    icon: Users,
+                    title: "Tenant-Focused Support",
+                    desc: "24/7 access to tenant services and responsive issue resolution.",
+                  },
+                  {
+                    icon: Clipboard,
+                    title: "Lease & Compliance Management",
+                    desc: "Regulatory adherence and seamless lease processing.",
+                  },
+                  {
+                    icon: Wrench,
+                    title: "Property Maintenance",
+                    desc: "Scheduled repairs, inspections, and contractor oversight.",
+                  },
+                  {
+                    icon: DollarSign,
+                    title: "Rent Collection & Reporting",
+                    desc: "Secure systems for rent, arrears, and financial accountability.",
+                  },
+                  {
+                    icon: HeartHandshake,
+                    title: "Community Building",
+                    desc: "Trust-driven resident interaction for housing harmony.",
+                  },
+                  {
+                    icon: Database,
+                    title: "Data & Asset Management",
+                    desc: "Centralized records and advanced property tracking tools.",
+                  },
                 ].map(({ icon: Icon, title, desc }, idx) => (
-                  <div key={idx} className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 flex flex-col items-start space-y-3 transform transition-all hover:shadow-xl hover:scale-105 duration-300">
+                  <div
+                    key={idx}
+                    className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 flex flex-col items-start space-y-3 transform transition-all hover:shadow-xl hover:scale-105 duration-300"
+                  >
                     <div className="p-3 bg-teal-500 rounded-full text-white">
                       <Icon className="w-6 h-6" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-xl text-gray-900">{title}</h3>
+                      <h3 className="font-semibold text-xl text-gray-900">
+                        {title}
+                      </h3>
                       <p className="text-sm text-gray-600 mt-1">{desc}</p>
                     </div>
                   </div>
@@ -104,7 +136,8 @@ export default function HousingManagement() {
                 Unlock Our Featured Resources
               </h2>
               <p className="mb-12 text-lg text-gray-600 text-center">
-                Deepen your understanding of our comprehensive housing solutions.
+                Deepen your understanding of our comprehensive housing
+                solutions.
               </p>
               <div className="grid md:grid-cols-2 gap-8 text-left">
                 {/* Video Preview with actual video file */}
@@ -123,7 +156,8 @@ export default function HousingManagement() {
                       Watch Our Property Services Overview Video
                     </span>
                     <p className="text-sm text-gray-300">
-                      Learn how our solutions empower property owners and tenants.
+                      Learn how our solutions empower property owners and
+                      tenants.
                     </p>
                   </div>
                 </div>
@@ -160,14 +194,18 @@ export default function HousingManagement() {
                   className="flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-200 hover:bg-gray-100 transition duration-300"
                 >
                   <FaFileAlt className="text-3xl text-gray-700" />
-                  <span className="text-gray-800 font-medium">Explore Tenant Success Stories</span>
+                  <span className="text-gray-800 font-medium">
+                    Explore Tenant Success Stories
+                  </span>
                 </a>
                 <a
                   href="#"
                   className="flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-200 hover:bg-gray-100 transition duration-300"
                 >
                   <FaPlayCircle className="text-3xl text-gray-700" />
-                  <span className="text-gray-800 font-medium">Watch Our Compliance & Repairs Webinar</span>
+                  <span className="text-gray-800 font-medium">
+                    Watch Our Compliance & Repairs Webinar
+                  </span>
                 </a>
               </div>
             </div>
@@ -178,7 +216,8 @@ export default function HousingManagement() {
                 Talk to Our Housing Experts
               </h2>
               <p className="text-center text-gray-600 mb-10 text-lg">
-                Whether you're a housing provider or a tenant, we’re here to help.
+                Whether you're a housing provider or a tenant, we’re here to
+                help.
               </p>
               <form className="space-y-6 bg-white p-10 rounded-2xl shadow-xl">
                 <div className="grid md:grid-cols-2 gap-6">
@@ -209,10 +248,14 @@ export default function HousingManagement() {
                   className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
                 ></textarea>
                 <label className="flex items-start gap-3">
-                  <input type="checkbox" className="mt-1 w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300" />
+                  <input
+                    type="checkbox"
+                    className="mt-1 w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300"
+                  />
                   <span className="text-sm text-gray-600">
-                    I consent to have Demand Recruitment Services Ltd store my submitted information
-                    for updates and to contact me about my inquiry.
+                    I consent to have Demand Recruitment Services Ltd store my
+                    submitted information for updates and to contact me about my
+                    inquiry.
                   </span>
                 </label>
                 <div className="text-center">

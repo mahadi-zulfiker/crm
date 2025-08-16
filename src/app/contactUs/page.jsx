@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   ChevronDown,
 } from "lucide-react";
+import StickyHeader from "@/components/StickyHeader";
 
 // --- FAQ Content -------------------------------------------------
 const faqs = [
@@ -92,10 +93,10 @@ export default function ContactUs() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 text-gray-800">
       <Navbar />
-
+      <StickyHeader></StickyHeader>
       {/* Hero */}
       <header className="relative isolate overflow-hidden py-4">
-        <div className="absolute inset-0 bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-600 opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-600 opacity-70" />
 
         <div className="absolute inset-0 bg-[url('/contactUs.jpg')] bg-cover bg-center opacity-10" />
 

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { FaSearch } from 'react-icons/fa';
 import img from '../../../public/singleJob.jpg';
 import Link from 'next/link';
+import StickyHeader from '@/components/StickyHeader';
 
 function Blogs() {
     const [blogs, setBlogs] = useState([]);
@@ -52,6 +53,7 @@ function Blogs() {
     return (
         <div>
             <Navbar />
+            <StickyHeader></StickyHeader>
             <div className="bg-gray-50 min-h-screen text-gray-800">
                 {/* Header Section */}
                 <div className="relative text-white py-32 text-center">
