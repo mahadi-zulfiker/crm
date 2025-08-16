@@ -1,33 +1,51 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import img from "../../../../../public/Job.jpg";
 
-function CreateJobCategory() {
+export default function CreateJobCategory() {
   const [formData, setFormData] = useState({
     categoryName: "",
     description: "",
-    // Additional fields
     department: "",
     priorityLevel: "",
     isActive: false,
   });
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+  const handleChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.categoryName.trim()) {
-      toast.error("Category name is required.");
+      toast({
+        title: "Error",
+        description: "Category name is required.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -41,7 +59,10 @@ function CreateJobCategory() {
 
       const data = await response.json();
       if (response.ok) {
-        toast.success(data.message);
+        toast({
+          title: "Success",
+          description: data.message,
+        });
         setFormData({
           categoryName: "",
           description: "",
@@ -50,128 +71,150 @@ function CreateJobCategory() {
           isActive: false,
         });
       } else {
-        toast.error(data.error || "Something went wrong!");
+        toast({
+          title: "Error",
+          description: data.error || "Something went wrong!",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      toast.error("Failed to create category.");
+      toast({
+        title: "Error",
+        description: "Failed to create category.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
-      <div className="flex w-full max-w-6xl bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Image Section */}
-        <div className="w-1/2 relative">
-          <Image
-            src={img}
-            alt="Job Category"
-            layout="fill"
-            objectFit="cover"
-            className="rounded-l-xl"
-          />
-        </div>
-
-        {/* Form Section */}
-        <div className="w-1/2 p-8">
-          <h1 className="text-3xl font-bold mb-4 text-gray-800">
-            Create Job Category
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Fill out the form below to add a new job category.
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Category Name
-              </label>
-              <input
-                type="text"
-                name="categoryName"
-                value={formData.categoryName}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter category name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter category description (optional)"
-              />
-            </div>
-
-            {/* Additional Fields */}
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Department
-              </label>
-              <input
-                type="text"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter department"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                Priority Level
-              </label>
-              <select
-                name="priorityLevel"
-                value={formData.priorityLevel}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="">Select priority level</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="isActive"
-                checked={formData.isActive}
-                onChange={handleChange}
-                className="h-4 w-4 text-orange-500 focus:ring-orange-400 border-gray-300 rounded"
-              />
-              <label className="ml-2 block text-gray-700">
-                Active
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className={`w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-600 transition duration-300 ${
-                loading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Create Category"}
-            </button>
-          </form>
-        </div>
+    <div className="max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Create Job Category
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Add a new job category to organize job postings
+        </p>
       </div>
 
-      {/* Toast Container */}
-      <ToastContainer />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Image Section */}
+        <Card className="lg:order-2">
+          <CardContent className="p-0">
+            <div className="relative h-96 w-full">
+              <Image
+                src={img}
+                alt="Job Category"
+                fill
+                className="object-cover rounded-lg"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Form Section */}
+        <Card className="lg:order-1">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-teal-600" />
+              Category Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="categoryName">Category Name *</Label>
+                <Input
+                  id="categoryName"
+                  value={formData.categoryName}
+                  onChange={(e) => handleChange("categoryName", e.target.value)}
+                  placeholder="Enter category name"
+                  className="focus:ring-teal-500 focus:border-teal-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleChange("description", e.target.value)}
+                  placeholder="Enter category description (optional)"
+                  className="focus:ring-teal-500 focus:border-teal-500"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="department">Department</Label>
+                <Input
+                  id="department"
+                  value={formData.department}
+                  onChange={(e) => handleChange("department", e.target.value)}
+                  placeholder="Enter department"
+                  className="focus:ring-teal-500 focus:border-teal-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="priorityLevel">Priority Level</Label>
+                <Select
+                  value={formData.priorityLevel}
+                  onValueChange={(value) =>
+                    handleChange("priorityLevel", value)
+                  }
+                >
+                  <SelectTrigger className="focus:ring-teal-500 focus:border-teal-500">
+                    <SelectValue placeholder="Select priority level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-0.5">
+                  <Label htmlFor="isActive">Active Status</Label>
+                  <p className="text-sm text-gray-600">
+                    Enable this category for job postings
+                  </p>
+                </div>
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) =>
+                    handleChange("isActive", checked)
+                  }
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Category
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
-
-export default CreateJobCategory;

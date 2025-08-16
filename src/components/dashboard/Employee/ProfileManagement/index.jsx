@@ -272,7 +272,7 @@ export default function UserProfilePage() {
 
     try {
       const formData = new FormData();
-      formData.append("image", file); // imgbb expects "image" field
+      formData.append("image", file); 
 
       const res = await fetch("/api/uploadImage", {
         method: "POST",
