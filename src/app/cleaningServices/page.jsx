@@ -4,7 +4,15 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Head from "next/head";
 import { CheckCircle } from "lucide-react";
-import { FaFileAlt, FaPlayCircle, FaShieldAlt, FaLeaf, FaCalendarCheck, FaUsers } from "react-icons/fa";
+import {
+  FaFileAlt,
+  FaPlayCircle,
+  FaShieldAlt,
+  FaLeaf,
+  FaCalendarCheck,
+  FaUsers,
+  FaWhatsapp,
+} from "react-icons/fa";
 import StickyHeader from "@/components/StickyHeader";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
@@ -31,7 +39,8 @@ export default function CleaningServices() {
       <main className="text-gray-800">
         {/* Hero Section with softer overlay */}
         <section className="relative bg-[url('/services/10.jpg')] bg-cover bg-center text-white py-28 text-center px-4 overflow-hidden">
-          <div className="absolute inset-0 bg-teal-800 bg-opacity-40"></div> {/* Softer teal overlay */}
+          <div className="absolute inset-0 bg-teal-800 bg-opacity-40"></div>{" "}
+          {/* Softer teal overlay */}
           <div className="relative max-w-4xl mx-auto">
             <motion.h1
               className="text-5xl font-bold drop-shadow-lg"
@@ -50,7 +59,11 @@ export default function CleaningServices() {
               Clean, Safe, and Healthy Environments – Every Time
             </motion.p>
             {/* Trust Badges */}
-            <div className="flex justify-center gap-4 mt-6" data-aos="fade-up" data-aos-delay="400">
+            <div
+              className="flex justify-center gap-4 mt-6"
+              data-aos="fade-up"
+              data-aos-delay="400"
+            >
               <span className="flex items-center gap-2 bg-white text-gray-800 px-4 py-2 rounded-full shadow-md">
                 <FaShieldAlt className="text-green-500" /> CQC Certified
               </span>
@@ -97,7 +110,11 @@ export default function CleaningServices() {
             </div>
 
             {/* Benefits - Broken into themed clusters */}
-            <div className="bg-gray-50 py-8 px-4 rounded-xl shadow" data-aos="fade-up" data-aos-delay="200">
+            <div
+              className="bg-gray-50 py-8 px-4 rounded-xl shadow"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
               <h2 className="text-3xl font-bold mb-8 text-center">
                 Why Our Cleaning Services Stand Out
               </h2>
@@ -134,7 +151,8 @@ export default function CleaningServices() {
                 {/* Cluster 2: Compliance & Safety */}
                 <div>
                   <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2 justify-center">
-                    <FaShieldAlt className="text-blue-600" /> Compliance & Safety
+                    <FaShieldAlt className="text-blue-600" /> Compliance &
+                    Safety
                   </h3>
                   <div className="grid md:grid-cols-2 gap-6">
                     {[
@@ -207,7 +225,11 @@ export default function CleaningServices() {
             </div>
 
             {/* Explore with hover effects */}
-            <div className="bg-white p-8 rounded-xl shadow" data-aos="fade-up" data-aos-delay="300">
+            <div
+              className="bg-white p-8 rounded-xl shadow"
+              data-aos="fade-up"
+              data-aos-delay="300"
+            >
               <h2 className="text-4xl font-bold mb-6 text-center">
                 Explore Our Cleaning Capabilities
               </h2>
@@ -222,7 +244,11 @@ export default function CleaningServices() {
                     icon: FaFileAlt,
                     href: "#case-study",
                   },
-                  { text: "Watch Disinfection Demo Video", icon: FaPlayCircle, href: "#demo-video" },
+                  {
+                    text: "Watch Disinfection Demo Video",
+                    icon: FaPlayCircle,
+                    href: "#demo-video",
+                  },
                   {
                     text: "Download Cleaning Checklist Template",
                     icon: FaFileAlt,
@@ -249,8 +275,14 @@ export default function CleaningServices() {
             </div>
 
             {/* Customer Review */}
-            <div className="bg-teal-50 py-10 px-6 rounded-xl shadow" data-aos="fade-up" data-aos-delay="400">
-              <h2 className="text-3xl font-bold mb-6 text-center">What Our Clients Say</h2>
+            <div
+              className="bg-teal-50 py-10 px-6 rounded-xl shadow"
+              data-aos="fade-up"
+              data-aos-delay="400"
+            >
+              <h2 className="text-3xl font-bold mb-6 text-center">
+                What Our Clients Say
+              </h2>
               <motion.div
                 className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md"
                 initial={{ opacity: 0, y: 20 }}
@@ -258,7 +290,10 @@ export default function CleaningServices() {
                 transition={{ duration: 0.6 }}
               >
                 <p className="text-xl italic text-gray-700 mb-4">
-                  “Demand Recruitment's cleaning team transformed our clinic's hygiene standards. Their attention to detail and use of eco-friendly products have significantly reduced infection risks.”
+                  “Demand Recruitment's cleaning team transformed our clinic's
+                  hygiene standards. Their attention to detail and use of
+                  eco-friendly products have significantly reduced infection
+                  risks.”
                 </p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold">
@@ -266,14 +301,20 @@ export default function CleaningServices() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">John Matthews</p>
-                    <p className="text-sm text-gray-500">Clinic Manager, NHS Trust</p>
+                    <p className="text-sm text-gray-500">
+                      Clinic Manager, NHS Trust
+                    </p>
                   </div>
                 </div>
               </motion.div>
             </div>
 
             {/* Contact Form */}
-            <div className="bg-gray-100 py-10 px-6 rounded-xl shadow" data-aos="fade-up" data-aos-delay="500">
+            <div
+              className="bg-gray-100 py-10 px-6 rounded-xl shadow"
+              data-aos="fade-up"
+              data-aos-delay="500"
+            >
               <h2 className="text-3xl font-bold mb-4 text-center">
                 Talk to Our Cleaning Experts
               </h2>
@@ -318,6 +359,19 @@ export default function CleaningServices() {
               </form>
             </div>
           </div>
+
+          {/* WhatsApp Live Chat */}
+          <motion.a
+            href="https://wa.me/442038761531"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-6 right-6 bg-green-500 text-white rounded-full p-4 shadow-xl hover:bg-green-600 transition-all duration-300 z-50 transform hover:scale-110"
+            initial={{ scale: 0, rotate: 180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          >
+            <FaWhatsapp className="w-8 h-8" />
+          </motion.a>
 
           {/* Sticky Sidebar */}
           <aside className="lg:sticky top-24 h-fit">
