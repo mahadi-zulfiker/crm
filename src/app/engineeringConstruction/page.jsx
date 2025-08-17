@@ -5,7 +5,14 @@ import Navbar from "@/components/Navbar";
 import Head from "next/head";
 import StickyHeader from "@/components/StickyHeader";
 import { CheckCircle } from "lucide-react";
-import { FaFileAlt, FaPlayCircle, FaHardHat, FaBuilding, FaChartLine } from "react-icons/fa";
+import {
+  FaFileAlt,
+  FaPlayCircle,
+  FaHardHat,
+  FaBuilding,
+  FaChartLine,
+  FaWhatsapp,
+} from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -50,7 +57,10 @@ export default function EngineeringConstruction() {
       <Navbar />
       <StickyHeader />
       <Head>
-        <title>Engineering & Construction Recruitment | Demand Recruitment Services Ltd</title>
+        <title>
+          Engineering & Construction Recruitment | Demand Recruitment Services
+          Ltd
+        </title>
         <meta
           name="description"
           content="Specialized recruitment services for FM engineering and construction sectors, delivering safe, skilled, and reliable workforce solutions."
@@ -82,7 +92,8 @@ export default function EngineeringConstruction() {
             {/* KPI badges */}
             <div className="flex flex-wrap justify-center gap-4 mt-6">
               <span className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md font-semibold">
-                ⚡ Avg. Placement Speed: <span className="text-green-600">10 Days</span>
+                ⚡ Avg. Placement Speed:{" "}
+                <span className="text-green-600">10 Days</span>
               </span>
               <span className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md font-semibold">
                 🛡️ Safety Rating: <span className="text-green-600">95%</span>
@@ -97,24 +108,44 @@ export default function EngineeringConstruction() {
           <div className="lg:col-span-3 space-y-16">
             {/* Distinction Section */}
             <div>
-              <h2 className="text-3xl font-bold mb-6 text-center">Two Specialized Recruitment Streams</h2>
+              <h2 className="text-3xl font-bold mb-6 text-center">
+                Two Specialized Recruitment Streams
+              </h2>
               <div className="grid md:grid-cols-2 gap-8">
-                <motion.div whileHover={{ y: -5 }} className="bg-gray-100 p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                <motion.div
+                  whileHover={{ y: -5 }}
+                  className="bg-gray-100 p-6 rounded-xl shadow-md flex flex-col items-center text-center"
+                >
                   <FaHardHat className="text-teal-600 text-4xl mb-4" />
-                  <h3 className="font-semibold text-xl mb-2">FM Engineering Recruitment</h3>
-                  <p>Technical engineers, maintenance experts, and facilities specialists ensuring operational excellence.</p>
+                  <h3 className="font-semibold text-xl mb-2">
+                    FM Engineering Recruitment
+                  </h3>
+                  <p>
+                    Technical engineers, maintenance experts, and facilities
+                    specialists ensuring operational excellence.
+                  </p>
                 </motion.div>
-                <motion.div whileHover={{ y: -5 }} className="bg-gray-100 p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                <motion.div
+                  whileHover={{ y: -5 }}
+                  className="bg-gray-100 p-6 rounded-xl shadow-md flex flex-col items-center text-center"
+                >
                   <FaBuilding className="text-blue-600 text-4xl mb-4" />
-                  <h3 className="font-semibold text-xl mb-2">Construction Recruitment</h3>
-                  <p>Project managers, skilled trades, and laborers delivering construction success across the UK.</p>
+                  <h3 className="font-semibold text-xl mb-2">
+                    Construction Recruitment
+                  </h3>
+                  <p>
+                    Project managers, skilled trades, and laborers delivering
+                    construction success across the UK.
+                  </p>
                 </motion.div>
               </div>
             </div>
 
             {/* Capabilities Section */}
             <div className="bg-gray-50 py-10 px-6 rounded-xl shadow">
-              <h2 className="text-3xl font-bold mb-6 text-center">Our Engineering & Construction Capabilities</h2>
+              <h2 className="text-3xl font-bold mb-6 text-center">
+                Our Engineering & Construction Capabilities
+              </h2>
               {/* Tabs */}
               <div className="flex justify-center gap-4 mb-8">
                 {Object.keys(capabilities).map((tab) => (
@@ -152,10 +183,20 @@ export default function EngineeringConstruction() {
 
             {/* Showcase Projects */}
             <div className="bg-white p-8 rounded-xl shadow">
-              <h2 className="text-3xl font-bold mb-6 text-center">Trusted by Leading UK Projects</h2>
-              <p className="mb-10 text-lg text-gray-600 text-center">We’ve successfully staffed engineering & construction projects nationwide.</p>
+              <h2 className="text-3xl font-bold mb-6 text-center">
+                Trusted by Leading UK Projects
+              </h2>
+              <p className="mb-10 text-lg text-gray-600 text-center">
+                We’ve successfully staffed engineering & construction projects
+                nationwide.
+              </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
-                {["/clients/client1.png", "/clients/client2.png", "/clients/client3.png", "/clients/client4.png"].map((logo, idx) => (
+                {[
+                  "/clients/client1.png",
+                  "/clients/client2.png",
+                  "/clients/client3.png",
+                  "/clients/client4.png",
+                ].map((logo, idx) => (
                   <motion.img
                     key={idx}
                     src={logo}
@@ -169,16 +210,31 @@ export default function EngineeringConstruction() {
 
             {/* Explore Section */}
             <div className="bg-gray-100 p-8 rounded-xl shadow">
-              <h2 className="text-4xl font-bold mb-6 text-center">Explore Our Recruitment Expertise</h2>
+              <h2 className="text-4xl font-bold mb-6 text-center">
+                Explore Our Recruitment Expertise
+              </h2>
               <p className="mb-10 text-lg text-gray-600 text-center">
-                Learn how we’ve successfully placed talent in engineering and construction projects of all scales.
+                Learn how we’ve successfully placed talent in engineering and
+                construction projects of all scales.
               </p>
               <div className="grid md:grid-cols-2 gap-6 text-left">
                 {[
-                  { text: "View Engineering Recruitment Case Study", icon: FaFileAlt },
-                  { text: "Watch Construction Staffing Overview Video", icon: FaPlayCircle },
-                  { text: "Download Project Staffing Checklist", icon: FaFileAlt },
-                  { text: "Watch Our Safety & Compliance Webinar", icon: FaPlayCircle },
+                  {
+                    text: "View Engineering Recruitment Case Study",
+                    icon: FaFileAlt,
+                  },
+                  {
+                    text: "Watch Construction Staffing Overview Video",
+                    icon: FaPlayCircle,
+                  },
+                  {
+                    text: "Download Project Staffing Checklist",
+                    icon: FaFileAlt,
+                  },
+                  {
+                    text: "Watch Our Safety & Compliance Webinar",
+                    icon: FaPlayCircle,
+                  },
                 ].map(({ text, icon: Icon }, idx) => (
                   <motion.a
                     key={idx}
@@ -195,30 +251,70 @@ export default function EngineeringConstruction() {
 
             {/* Contact Form */}
             <div className="bg-gray-50 py-10 px-6 rounded-xl shadow">
-              <h2 className="text-3xl font-bold mb-4 text-center">Get in Touch with Our Recruitment Team</h2>
-              <p className="text-center text-gray-600 mb-8">Whether you need skilled engineers or construction specialists, we’re here to help you build success.</p>
+              <h2 className="text-3xl font-bold mb-4 text-center">
+                Get in Touch with Our Recruitment Team
+              </h2>
+              <p className="text-center text-gray-600 mb-8">
+                Whether you need skilled engineers or construction specialists,
+                we’re here to help you build success.
+              </p>
               <form className="space-y-6 bg-white p-8 rounded-lg shadow-md">
                 <div className="grid md:grid-cols-3 gap-4">
-                  <input type="text" placeholder="Full Name" className="w-full px-4 py-2 border rounded" />
-                  <input type="email" placeholder="Email Address" className="w-full px-4 py-2 border rounded" />
-                  <input type="tel" placeholder="Phone Number" className="w-full px-4 py-2 border rounded" />
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    className="w-full px-4 py-2 border rounded"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    className="w-full px-4 py-2 border rounded"
+                  />
                 </div>
                 <label className="flex items-start gap-2">
                   <input type="checkbox" className="mt-1" />
-                  <span className="text-sm">I consent to have Demand Recruitment Services Ltd store my submitted information for updates.</span>
+                  <span className="text-sm">
+                    I consent to have Demand Recruitment Services Ltd store my
+                    submitted information for updates.
+                  </span>
                 </label>
-                <button type="submit" className="px-6 py-3 bg-teal-600 text-white rounded hover:bg-teal-700 transition w-full md:w-auto">
+                <button
+                  type="submit"
+                  className="px-6 py-3 bg-teal-600 text-white rounded hover:bg-teal-700 transition w-full md:w-auto"
+                >
                   Request a Call Back
                 </button>
-                <p className="text-sm text-gray-600 text-center">Let’s build your perfect team together.</p>
+                <p className="text-sm text-gray-600 text-center">
+                  Let’s build your perfect team together.
+                </p>
               </form>
             </div>
           </div>
 
+          {/* WhatsApp Live Chat */}
+          <motion.a
+            href="https://wa.me/442038761531"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-6 right-6 bg-green-500 text-white rounded-full p-4 shadow-xl hover:bg-green-600 transition-all duration-300 z-50 transform hover:scale-110"
+            initial={{ scale: 0, rotate: 180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          >
+            <FaWhatsapp className="w-8 h-8" />
+          </motion.a>
+
           {/* Sidebar */}
           <aside className="lg:sticky top-24 h-fit">
             <div className="bg-white border border-gray-200 rounded-xl shadow p-6 space-y-6">
-              <h3 className="text-lg font-semibold text-gray-800">Quick Access</h3>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Quick Access
+              </h3>
               <a
                 href="/requestEmployee"
                 className="block bg-teal-600 text-white text-center py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition"
