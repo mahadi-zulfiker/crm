@@ -1,29 +1,32 @@
 // app/net-zero-navigator-2025/page.jsx
+"use client";
+
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
-// Import Lucide Icons relevant to net-zero, environment, and progress
-import {
-  Globe, // Global impact, environment
-  Target, // Goals, objectives
-  Leaf, // Sustainability, green
-  BarChart2, // Data, progress, analytics
-  Rocket, // Acceleration, launch
-  CheckCircle, // Success, verification
-  Zap, // Efficiency, energy
-  Scale, // Balance, measurement, standards
-} from "lucide-react";
 import StickyHeader from "@/components/StickyHeader";
+import { motion } from "framer-motion";
+
+// Import Lucide Icons
+import {
+  Globe,
+  Target,
+  Leaf,
+  BarChart2,
+  Rocket,
+  CheckCircle,
+  Zap,
+  Scale,
+} from "lucide-react";
 
 const NetZeroNavigator2025Page = () => {
-  // Dummy data for demonstration
   const navigatorFeatures = [
     {
       id: 1,
       title: "Baseline Carbon Assessment",
       summary:
         "Comprehensive analysis of your current emissions across all scopes (1, 2, & 3) to establish your starting point.",
-      icon: BarChart2, // Icon for data/assessment
+      icon: BarChart2,
       link: "/net-zero-navigator/baseline-assessment",
     },
     {
@@ -31,7 +34,7 @@ const NetZeroNavigator2025Page = () => {
       title: "Tailored Decarbonization Roadmaps",
       summary:
         "Custom-built strategies with actionable steps and timelines to achieve your net-zero targets by 2025.",
-      icon: Target, // Icon for goals/roadmap
+      icon: Target,
       link: "/net-zero-navigator/roadmaps",
     },
     {
@@ -39,7 +42,7 @@ const NetZeroNavigator2025Page = () => {
       title: "Renewable Energy Integration",
       summary:
         "Guidance and support for transitioning to 100% renewable energy sources, including solar, wind, and green power purchasing.",
-      icon: Zap, // Icon for energy/efficiency
+      icon: Zap,
       link: "/net-zero-navigator/renewable-energy",
     },
     {
@@ -47,7 +50,7 @@ const NetZeroNavigator2025Page = () => {
       title: "Supply Chain Engagement",
       summary:
         "Tools and methodologies to work with your suppliers and reduce Scope 3 emissions across your entire value chain.",
-      icon: Globe, // Icon for global/supply chain
+      icon: Globe,
       link: "/net-zero-navigator/supply-chain",
     },
     {
@@ -55,7 +58,7 @@ const NetZeroNavigator2025Page = () => {
       title: "Offsetting & Carbon Removal Strategies",
       summary:
         "Expert advice on selecting credible carbon offsetting projects and implementing carbon removal technologies for residual emissions.",
-      icon: Leaf, // Icon for sustainability/offsets
+      icon: Leaf,
       link: "/net-zero-navigator/offsetting",
     },
     {
@@ -63,7 +66,7 @@ const NetZeroNavigator2025Page = () => {
       title: "Compliance & Reporting Frameworks",
       summary:
         "Ensuring adherence to international standards and providing robust reporting for transparency and stakeholder trust.",
-      icon: Scale, // Icon for compliance/standards
+      icon: Scale,
       link: "/net-zero-navigator/reporting",
     },
   ];
@@ -99,103 +102,120 @@ const NetZeroNavigator2025Page = () => {
     },
   ];
 
+  const quotes = [
+    "“Sustainability is no longer about doing less harm. It’s about doing more good.”",
+    "“The future will be green, or not at all.”",
+    "“Net Zero is not a goal — it’s a journey we must accelerate.”",
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <Navbar /> {/* Include your Navbar component */}
-      <StickyHeader></StickyHeader>
-      <main className="flex-grow container mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold text-gray-800 text-center mb-12">
-          Net Zero Navigator 2025
-        </h1>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <Navbar />
+      <StickyHeader />
 
-        {/* Hero Section */}
-        <section className="text-center mb-16 bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-3xl font-semibold text-gray-700 mb-4">
-            Your Accelerated Path to a Sustainable Future
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-6">
-            The **Net Zero Navigator 2025** is our comprehensive program
-            designed to guide organizations like yours in achieving ambitious
-            net-zero emissions targets by the year 2025. With a focus on
-            practical strategies and measurable outcomes, we help you transform
-            your environmental impact into a competitive advantage.
+      {/* Hero Banner */}
+      <section className="relative h-[70vh] flex items-center justify-center text-center text-white">
+        <img
+          src="/singleJob.jpg"
+          alt="Net Zero Banner"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-teal-900/60" />
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="relative z-10 max-w-3xl px-6"
+        >
+          <h1 className="text-5xl font-bold mb-6 drop-shadow-lg">
+            Net Zero Navigator 2025
+          </h1>
+          <p className="text-lg md:text-xl mb-6 opacity-90">
+            Guiding organizations to achieve ambitious net-zero targets with
+            clarity, confidence, and measurable results.
           </p>
-          <Link
-            href="/contact"
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors duration-300"
-          >
-            Enroll in Net Zero Navigator 2025
-          </Link>
-        </section>
+          <p className="italic text-teal-100 font-medium">
+            {quotes[Math.floor(Math.random() * quotes.length)]}
+          </p>
+        </motion.div>
+      </section>
 
-        {/* Key Features/Modules Section */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-semibold text-gray-700 mb-8 text-center">
+      <main className="flex-grow container mx-auto px-6 py-16">
+        {/* Features */}
+        <section className="mb-20">
+          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
             Program Features & Modules
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {navigatorFeatures.map((feature) => (
-              <div
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {navigatorFeatures.map((feature, index) => (
+              <motion.div
                 key={feature.id}
-                className="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.15, duration: 0.6 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-2xl shadow-md p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
               >
-                <feature.icon className="w-16 h-16 mx-auto mb-4 text-orange-500" />
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                <feature.icon className="w-16 h-16 mx-auto mb-6 text-teal-600" />
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{feature.summary}</p>
+                <p className="text-gray-600 mb-6">{feature.summary}</p>
                 <Link
                   href={feature.link}
-                  className="text-orange-500 hover:text-orange-600 font-medium transition-colors"
+                  className="text-teal-600 font-medium hover:underline"
                 >
-                  Learn More &rarr;
+                  Learn More →
                 </Link>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
 
-        {/* Why Net Zero Navigator 2025? Section */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-semibold text-gray-700 mb-8 text-center">
+        {/* Benefits */}
+        <section className="mb-20">
+          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
             Why Choose Net Zero Navigator 2025?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {programBenefits.map((benefit) => (
-              <div
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {programBenefits.map((benefit, index) => (
+              <motion.div
                 key={benefit.id}
-                className="bg-white rounded-lg shadow-md p-6 flex items-start space-x-4 hover:shadow-lg transition-shadow duration-300"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-2xl shadow-md p-8 flex items-start space-x-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
-                <benefit.icon className="w-10 h-10 text-orange-500 flex-shrink-0 mt-1" />
+                <benefit.icon className="w-12 h-12 text-teal-600 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
                     {benefit.title}
                   </h3>
                   <p className="text-gray-600">{benefit.description}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
 
-        {/* Call to Action/Get Started */}
-        <section className="text-center bg-gray-200 p-8 rounded-lg">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-            Join the Race to Net Zero!
-          </h2>
-          <p className="text-gray-600 mb-6">
+        {/* Call to Action */}
+        <section className="text-center bg-gradient-to-r from-teal-600 to-teal-800 text-white p-12 rounded-2xl shadow-lg">
+          <h2 className="text-3xl font-bold mb-4">Join the Race to Net Zero!</h2>
+          <p className="text-lg mb-6 opacity-90">
             The clock is ticking. Act now to secure your organization's
             sustainable future and lead the way in environmental stewardship.
           </p>
           <Link
             href="/contact"
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors duration-300"
+            className="bg-white text-teal-700 font-bold py-3 px-8 rounded-lg shadow-md hover:bg-teal-50 transition-all duration-300"
           >
             Get Started Today
           </Link>
         </section>
       </main>
-      <Footer /> {/* Include your Footer component */}
+
+      <Footer />
     </div>
   );
 };
