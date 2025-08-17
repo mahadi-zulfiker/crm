@@ -62,6 +62,9 @@ export default function JobListings() {
   const [error, setError] = useState(null);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const jobsPerPage = 10;
 
   // Fetch jobs data
   useEffect(() => {
@@ -97,6 +100,19 @@ export default function JobListings() {
 
     fetchJobs();
   }, []);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    selectedCategory,
+    selectedLocation,
+    selectedJobType,
+    selectedExperience,
+    salaryRange,
+    isRemote,
+  ]);
 
   // Simulate async processing for search/filter
   const simulateAsync = (fn) => {
@@ -297,6 +313,17 @@ export default function JobListings() {
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+  const startIndex = (currentPage - 1) * jobsPerPage;
+  const endIndex = startIndex + jobsPerPage;
+  const paginatedJobs = filteredJobs.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading) {
@@ -804,139 +831,180 @@ export default function JobListings() {
                 </Button>
               </motion.div>
             ) : (
-              <div className="space-y-6">
-                <AnimatePresence>
-                  {filteredJobs.map((job, index) => (
-                    <motion.div
-                      key={job._id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      whileHover={{ y: -2 }}
-                      className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer border border-gray-100"
-                      onClick={() => handleJobClick(job._id)}
-                    >
-                      <div className="p-6">
-                        {/* Header */}
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex-1">
-                            <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-2">
-                              {job.title}
-                            </h3>
-                            <div className="flex items-center text-gray-600 mb-2">
-                              <Building className="w-4 h-4 mr-2" />
-                              <span className="font-medium">{job.company}</span>
-                            </div>
-                            <div className="flex items-center text-gray-600">
-                              <MapPin className="w-4 h-4 mr-2" />
-                              <span>{job.location}</span>
-                              {job.workType && (
-                                <Badge
-                                  className="ml-2 bg-gray-100 text-gray-700"
-                                  size="sm"
-                                >
-                                  {job.workType}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => handleBookmark(job._id, e)}
-                            className={`${
-                              bookmarkedJobs.has(job._id)
-                                ? "text-red-500"
-                                : "text-gray-400"
-                            } hover:text-red-500`}
-                          >
-                            <Heart
-                              className={`w-5 h-5 ${
-                                bookmarkedJobs.has(job._id)
-                                  ? "fill-current"
-                                  : ""
-                              }`}
-                            />
-                          </Button>
-                        </div>
-
-                        {/* Badges */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {job.jobType && (
-                            <Badge className={getJobTypeColor(job.jobType)}>
-                              {job.jobType}
-                            </Badge>
-                          )}
-                          {job.experienceLevel && (
-                            <Badge
-                              className={getExperienceColor(
-                                job.experienceLevel
-                              )}
-                            >
-                              {job.experienceLevel}
-                            </Badge>
-                          )}
-                          {job.category && (
-                            <Badge className="bg-blue-100 text-blue-800">
-                              <Briefcase className="w-3 h-3 mr-1" />
-                              {job.category}
-                            </Badge>
-                          )}
-                          {job.urgent && (
-                            <Badge className="bg-red-100 text-red-800">
-                              <Target className="w-3 h-3 mr-1" />
-                              Urgent
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Description */}
-                        <p className="text-gray-700 mb-4 line-clamp-3">
-                          {job.description}
-                        </p>
-
-                        {/* Footer */}
-                        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                          <div className="flex items-center space-x-4">
-                            {job.salary && (
-                              <div className="flex items-center text-green-600 font-semibold">
-                                <DollarSign className="w-4 h-4 mr-1" />
-                                {job.salary}
+              <>
+                <div className="space-y-6">
+                  <AnimatePresence>
+                    {paginatedJobs.map((job, index) => (
+                      <motion.div
+                        key={job._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                        whileHover={{ y: -2 }}
+                        className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer border border-gray-100"
+                        onClick={() => handleJobClick(job._id)}
+                      >
+                        <div className="p-6">
+                          {/* Header */}
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex-1">
+                              <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-2">
+                                {job.title}
+                              </h3>
+                              <div className="flex items-center text-gray-600 mb-2">
+                                <Building className="w-4 h-4 mr-2" />
+                                <span className="font-medium">{job.company}</span>
                               </div>
-                            )}
-                            <div className="flex items-center text-gray-500 text-sm">
-                              <Clock className="w-4 h-4 mr-1" />
-                              {new Date(
-                                job.postedAt || job.createdAt
-                              ).toLocaleDateString()}
+                              <div className="flex items-center text-gray-600">
+                                <MapPin className="w-4 h-4 mr-2" />
+                                <span>{job.location}</span>
+                                {job.workType && (
+                                  <Badge
+                                    className="ml-2 bg-gray-100 text-gray-700"
+                                    size="sm"
+                                  >
+                                    {job.workType}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => handleBookmark(job._id, e)}
+                              className={`${
+                                bookmarkedJobs.has(job._id)
+                                  ? "text-red-500"
+                                  : "text-gray-400"
+                              } hover:text-red-500`}
+                            >
+                              <Heart
+                                className={`w-5 h-5 ${
+                                  bookmarkedJobs.has(job._id)
+                                    ? "fill-current"
+                                    : ""
+                                }`}
+                              />
+                            </Button>
                           </div>
 
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => handleShare(job, e)}
-                            >
-                              <Share2 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              onClick={(e) =>
-                                handleApply(job._id, job.title, e)
-                              }
-                              className="bg-teal-400 hover:bg-teal-700 text-white"
-                              size="sm"
-                            >
-                              Apply Now
-                            </Button>
+                          {/* Badges */}
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {job.jobType && (
+                              <Badge className={getJobTypeColor(job.jobType)}>
+                                {job.jobType}
+                              </Badge>
+                            )}
+                            {job.experienceLevel && (
+                              <Badge
+                                className={getExperienceColor(
+                                  job.experienceLevel
+                                )}
+                              >
+                                {job.experienceLevel}
+                              </Badge>
+                            )}
+                            {job.category && (
+                              <Badge className="bg-blue-100 text-blue-800">
+                                <Briefcase className="w-3 h-3 mr-1" />
+                                {job.category}
+                              </Badge>
+                            )}
+                            {job.urgent && (
+                              <Badge className="bg-red-100 text-red-800">
+                                <Target className="w-3 h-3 mr-1" />
+                                Urgent
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Description */}
+                          <p className="text-gray-700 mb-4 line-clamp-3">
+                            {job.description}
+                          </p>
+
+                          {/* Footer */}
+                          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                            <div className="flex items-center space-x-4">
+                              {job.salary && (
+                                <div className="flex items-center text-green-600 font-semibold">
+                                  <DollarSign className="w-4 h-4 mr-1" />
+                                  {job.salary}
+                                </div>
+                              )}
+                              <div className="flex items-center text-gray-500 text-sm">
+                                <Clock className="w-4 h-4 mr-1" />
+                                {new Date(
+                                  job.postedAt || job.createdAt
+                                ).toLocaleDateString()}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => handleShare(job, e)}
+                              >
+                                <Share2 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={(e) =>
+                                  handleApply(job._id, job.title, e)
+                                }
+                                className="bg-teal-400 hover:bg-teal-700 text-white"
+                                size="sm"
+                              >
+                                Apply Now
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="mt-6 flex justify-center items-center space-x-2">
+                    <Button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Previous
+                    </Button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <Button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          className={
+                            currentPage === page
+                              ? "bg-teal-400 text-white hover:bg-teal-700"
+                              : ""
+                          }
+                        >
+                          {page}
+                        </Button>
+                      )
+                    )}
+                    <Button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
