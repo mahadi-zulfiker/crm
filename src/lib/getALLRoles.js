@@ -199,9 +199,7 @@ export default function getALLRoles() {
       {
         title: "User Management",
         icon: Users,
-        items: [
-          { name: "Manage Users", href: "/dashboard/admin/userManagement" },
-        ],
+        href: "/dashboard/admin/userManagement",
       },
       {
         title: "Job Management",
