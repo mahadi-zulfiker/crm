@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StickyHeader from '@/components/StickyHeader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarDays, Clock, MapPin, ArrowRight, Search, Quote, X } from 'lucide-react';
+import { CalendarDays, Clock, MapPin, ArrowRight, Search, Quote, X, CalendarPlus } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 const NewsEventsPage = () => {
@@ -18,30 +18,33 @@ const NewsEventsPage = () => {
         title: 'Demand Recruitment Hosts Annual Charity Drive',
         date: 'May 20, 2025',
         summary:
-          'Our team successfully organized and executed its annual charity drive, raising significant funds for local community projects.',
+          'Our team successfully organized and executed its annual charity drive, raising significant funds for local community projects. This year’s event saw record participation and impactful contributions.',
         imageUrl: '/services/3.jpg',
         link: '#',
         tags: ['Community', 'CSR'],
+        author: 'Jane Doe',
       },
       {
         id: 2,
         title: 'New Partnership Announcement: Expanding Our Reach',
         date: 'May 15, 2025',
         summary:
-          'We are thrilled to announce a strategic partnership that will allow us to offer an even wider range of services to our clients.',
+          'We are thrilled to announce a strategic partnership that will allow us to offer an even wider range of services to our clients. This collaboration marks a significant milestone for our growth.',
         imageUrl: '/services/4.jpg',
         link: '#',
         tags: ['Partnership', 'Growth'],
+        author: 'John Smith',
       },
       {
         id: 3,
         title: 'Industry Insight: The Future of Remote Work',
         date: 'May 10, 2025',
         summary:
-          'Our latest article delves into the evolving landscape of remote work and its implications for the modern workforce.',
+          'Our latest article delves into the evolving landscape of remote work and its implications for the modern workforce. Explore key trends and predictions shaping the future.',
         imageUrl: '/services/5.jpg',
         link: '#',
         tags: ['Insight', 'Remote Work'],
+        author: 'Emily Carter',
       },
     ],
     []
@@ -56,8 +59,11 @@ const NewsEventsPage = () => {
         time: '10:00 AM GMT',
         location: 'Online',
         summary:
-          'Join our experts for a discussion on sustainable practices and opportunities in the burgeoning green economy.',
+          'Join our experts for a discussion on sustainable practices and opportunities in the burgeoning green economy. Limited seats available!',
         link: '#',
+        isLimited: true,
+        speakerImage: '/speakers/expert1.jpg',
+        calendarLink: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Webinar:+Navigating+the+Green+Economy&dates=20250615T100000Z/20250615T120000Z&details=Join+our+experts+for+a+discussion+on+sustainable+practices+and+opportunities+in+the+burgeoning+green+economy.+Limited+seats+available!&location=Online',
       },
       {
         id: 2,
@@ -66,8 +72,11 @@ const NewsEventsPage = () => {
         time: '09:00 AM - 05:00 PM',
         location: 'London Convention Centre',
         summary:
-          'Discover exciting career opportunities and network with our recruitment specialists.',
+          'Discover exciting career opportunities and network with our recruitment specialists. Don’t miss this chance to connect!',
         link: '#',
+        isLimited: false,
+        speakerImage: '/speakers/team.jpg',
+        calendarLink: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Career+Fair+2025:+Meet+Our+Team&dates=20250701T090000Z/20250701T170000Z&details=Discover+exciting+career+opportunities+and+network+with+our+recruitment+specialists.+Don’t+miss+this+chance+to+connect!&location=London+Convention+Centre',
       },
     ],
     []
@@ -102,7 +111,7 @@ const NewsEventsPage = () => {
     if (!query.trim()) return recentNews;
     const q = query.toLowerCase();
     return recentNews.filter((n) =>
-      [n.title, n.summary, ...(n.tags || [])].join(' ').toLowerCase().includes(q)
+      [n.title, n.summary, n.author, ...(n.tags || [])].join(' ').toLowerCase().includes(q)
     );
   }, [query, recentNews]);
 
@@ -115,12 +124,17 @@ const NewsEventsPage = () => {
     );
   }, [eventsQuery, upcomingEvents]);
 
-  // Pick one card with image as the banner hero background (as requested)
+  // Pick one card with image as the banner hero background
   const featured = recentNews[0];
 
   // Clear search query for news
   const handleClearSearch = () => {
     setQuery('');
+  };
+
+  // Clear search query for events
+  const handleClearEventsSearch = () => {
+    setEventsQuery('');
   };
 
   // --- ANIMATION VARIANTS --------------------------------------
@@ -139,7 +153,7 @@ const NewsEventsPage = () => {
       <Navbar />
       <StickyHeader />
 
-      {/* --- Decorative background pattern (pinterest/dribbble vibes) --- */}
+      {/* --- Decorative background pattern --- */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,theme(colors.teal.100)_0,transparent_40%),radial-gradient(ellipse_at_bottom,theme(colors.teal.100)_0,transparent_40%)]"
@@ -154,7 +168,7 @@ const NewsEventsPage = () => {
             transition={{ duration: 0.8 }}
             className="relative h-[46vh] w-full"
           >
-            {/* Banner Image (picked from a card image) */}
+            {/* Banner Image */}
             <img
               src={featured.imageUrl}
               alt={featured.title}
@@ -256,12 +270,13 @@ const NewsEventsPage = () => {
                     className="h-48 w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   />
                   <span className="absolute left-3 top-3 rounded-full bg-teal-600/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow">
-                    {newsItem.date}
+                    <CalendarDays className="inline-block h-3.5 w-3.5 mr-1" /> {newsItem.date}
                   </span>
                 </div>
                 <div className="space-y-3 p-5">
                   <h3 className="line-clamp-2 text-lg font-semibold text-teal-900">{newsItem.title}</h3>
                   <p className="line-clamp-3 text-sm leading-relaxed text-teal-700/80">{newsItem.summary}</p>
+                  <p className="text-xs text-teal-600">By {newsItem.author}</p>
                   {newsItem.tags?.length ? (
                     <div className="flex flex-wrap gap-2">
                       {newsItem.tags.map((t) => (
@@ -276,13 +291,13 @@ const NewsEventsPage = () => {
                       href={newsItem.link}
                       className="inline-flex items-center gap-2 rounded-full bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-teal-500/30 transition-transform hover:scale-[1.02] hover:bg-teal-600 focus:outline-none focus:ring-4 focus:ring-teal-300"
                     >
-                      Coming Soon <ArrowRight className="h-4 w-4" />
+                      Read More <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
                 </div>
 
                 {/* Subtle hover glow */}
-                <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ boxShadow: '0 0 0 1px rgba(13,148,136,0.25), 0 20px 60px rgba(13,148,136,0.25)' }} />
+                <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity- downloaded from the web or a file system.100" style={{ boxShadow: '0 0 0 1px rgba(13,148,136,0.25), 0 20px 60px rgba(13,148,136,0.25)' }} />
               </motion.article>
             ))}
           </motion.div>
@@ -294,15 +309,26 @@ const NewsEventsPage = () => {
         {/* --- CONTROLS (Events) ------------------------------------------ */}
         <section className="mt-14 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <h2 className="text-2xl font-semibold text-teal-800">Upcoming Events</h2>
-          <div className="relative w-full max-w-md">
-            <input
-              value={eventsQuery}
-              onChange={(e) => setEventsQuery(e.target.value)}
-              className="w-full rounded-2xl border border-teal-200 bg-white/80 px-4 py-2.5 pl-10 text-sm text-teal-900 shadow-sm outline-none ring-0 placeholder:text-teal-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-300"
-              placeholder="Search events..."
-              aria-label="Search events"
-            />
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-400" />
+          <div className="relative w-full max-w-md flex items-center">
+            <div className="relative flex-grow">
+              <input
+                value={eventsQuery}
+                onChange={(e) => setEventsQuery(e.target.value)}
+                className="w-full rounded-2xl border border-teal-200 bg-white/80 px-4 py-2.5 pl-10 text-sm text-teal-900 shadow-sm outline-none ring-0 placeholder:text-teal-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-300"
+                placeholder="Search events..."
+                aria-label="Search events"
+              />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-400" />
+            </div>
+            {eventsQuery && (
+              <button
+                onClick={handleClearEventsSearch}
+                className="ml-2 rounded-full p-2 text-teal-600 hover:text-teal-700 focus:outline-none"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </section>
 
@@ -325,23 +351,46 @@ const NewsEventsPage = () => {
                   {/* Timeline dot */}
                   <div className="absolute -left-1 top-7 hidden h-3 w-3 -translate-x-1/2 rounded-full bg-teal-500 ring-4 ring-white sm:block" />
 
+                  {/* Limited space ribbon */}
+                  {event.isLimited && (
+                    <span className="absolute right-0 top-0 rounded-bl-lg rounded-tr-3xl bg-red-500 px-3 py-1 text-xs font-semibold text-white">
+                      Limited Seats
+                    </span>
+                  )}
+
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:items-center sm:justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-teal-900">{event.title}</h3>
-                      <p className="mt-1 max-w-2xl text-sm text-teal-700/80">{event.summary}</p>
-                      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-teal-800/90">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1 ring-1 ring-teal-100"><CalendarDays className="h-4 w-4" /> {event.date}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1 ring-1 ring-teal-100"><Clock className="h-4 w-4" /> {event.time}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1 ring-1 ring-teal-100"><MapPin className="h-4 w-4" /> {event.location}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-teal-900">{event.title}</h3>
+                        <p className="mt-1 max-w-2xl text-sm text-teal-700/80 line-clamp-3">{event.summary}</p>
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-teal-800/90">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1 ring-1 ring-teal-100">
+                            <CalendarDays className="h-4 w-4" /> {event.date}
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1 ring-1 ring-teal-100">
+                            <Clock className="h-4 w-4" /> {event.time}
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1 ring-1 ring-teal-100">
+                            <MapPin className="h-4 w-4" /> {event.location}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="pt-1">
+                    <div className="pt-1 flex flex-col gap-2">
                       <Link
                         href={event.link}
                         className="inline-flex items-center gap-2 rounded-full bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-teal-500/30 transition-transform hover:scale-[1.02] hover:bg-teal-600 focus:outline-none focus:ring-4 focus:ring-teal-300"
                       >
-                        Coming Soon <ArrowRight className="h-4 w-4" />
+                        Read More <ArrowRight className="h-4 w-4" />
                       </Link>
+                      <a
+                        href={event.calendarLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-teal-600 shadow-sm border border-teal-200 hover:bg-teal-50 focus:outline-none focus:ring-4 focus:ring-teal-300"
+                      >
+                        <CalendarPlus className="h-4 w-4" /> Add to Calendar
+                      </a>
                     </div>
                   </div>
                 </motion.div>
@@ -369,7 +418,7 @@ const NewsEventsPage = () => {
                     text: 'Thanks for subscribing to our newsletter!',
                     icon: 'success',
                     confirmButtonText: 'OK',
-                    confirmButtonColor: '#0d9488', // Matches teal-500
+                    confirmButtonColor: '#0d9488',
                     background: '#fff',
                     customClass: {
                       popup: 'rounded-3xl',

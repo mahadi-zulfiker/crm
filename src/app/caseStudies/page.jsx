@@ -1,4 +1,3 @@
-// app/case-studies/page.jsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -23,6 +22,10 @@ const CaseStudiesPage = () => {
         "Reduced time-to-hire by 30% and improved candidate quality by 25%.",
       imageUrl: "/services/56.jpg",
       link: "#",
+      date: "2023-01-01",
+      impact: 30,
+      clientSize: "Large",
+      clientSizeNum: 3,
     },
     {
       id: 2,
@@ -35,6 +38,10 @@ const CaseStudiesPage = () => {
         "Ensured 95% staffing coverage and enhanced patient care continuity.",
       imageUrl: "/services/med1.jpg",
       link: "#",
+      date: "2023-02-01",
+      impact: 95,
+      clientSize: "Medium",
+      clientSizeNum: 2,
     },
     {
       id: 3,
@@ -48,6 +55,10 @@ const CaseStudiesPage = () => {
         "Increased volunteer participation by 40% and expanded program reach within the community.",
       imageUrl: "/services/58.jpg",
       link: "#",
+      date: "2023-03-01",
+      impact: 40,
+      clientSize: "Small",
+      clientSizeNum: 1,
     },
     {
       id: 4,
@@ -60,6 +71,10 @@ const CaseStudiesPage = () => {
       result: "Reduced operational costs by 15% and improved store uptime.",
       imageUrl: "/services/60.jpg",
       link: "#",
+      date: "2023-04-01",
+      impact: 15,
+      clientSize: "Large",
+      clientSizeNum: 3,
     },
   ];
 
@@ -80,12 +95,21 @@ const CaseStudiesPage = () => {
   // UI State ------------------------------------------------------------------
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
+  const [sort, setSort] = useState("newest");
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {
       setQuoteIndex((i) => (i + 1) % quotes.length);
     }, 4500);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTestimonialIndex((i) => (i + 1) % quotes.length);
+    }, 5000);
     return () => clearInterval(id);
   }, []);
 
@@ -107,6 +131,18 @@ const CaseStudiesPage = () => {
       return matchesQuery && matchesFilter;
     });
   }, [caseStudies, query, filter]);
+
+  const displayed = useMemo(() => {
+    let arr = [...filtered];
+    if (sort === "newest") {
+      arr.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (sort === "impactful") {
+      arr.sort((a, b) => b.impact - a.impact);
+    } else if (sort === "clientSize") {
+      arr.sort((a, b) => b.clientSizeNum - a.clientSizeNum);
+    }
+    return arr;
+  }, [filtered, sort]);
 
   // Pick one existing image for banner
   const featured = caseStudies[0];
@@ -212,24 +248,41 @@ const CaseStudiesPage = () => {
             </div>
 
             <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
               className="w-full rounded-2xl border border-teal-200 bg-white/80 px-4 py-2.5 text-sm text-teal-900 shadow-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-300 sm:w-56"
-              aria-label="Filter by industry"
+              aria-label="Sort by"
             >
-              {industries.map((ind) => (
-                <option key={ind} value={ind}>
-                  {ind}
-                </option>
-              ))}
+              <option value="newest">Newest</option>
+              <option value="impactful">Most Impactful</option>
+              <option value="clientSize">Client Size</option>
             </select>
+          </div>
+        </section>
+
+        {/* Industry Tabs ------------------------------------------------------ */}
+        <section className="mt-4 overflow-x-auto">
+          <div className="flex gap-2 pb-2">
+            {industries.map((ind) => (
+              <button
+                key={ind}
+                onClick={() => setFilter(ind)}
+                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  filter === ind
+                    ? "bg-teal-500 text-white shadow-md"
+                    : "bg-white text-teal-700 ring-1 ring-teal-200 hover:bg-teal-50"
+                }`}
+              >
+                {ind}
+              </button>
+            ))}
           </div>
         </section>
 
         {/* Grid --------------------------------------------------------------- */}
         <section id="grid" className="mt-8">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {filtered.map((study, idx) => (
+            {displayed.map((study, idx) => (
               <motion.article
                 key={study.id}
                 variants={fadeUp}
@@ -248,6 +301,10 @@ const CaseStudiesPage = () => {
                   <span className="absolute left-3 top-3 rounded-full bg-teal-600/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow">
                     {study.industry}
                   </span>
+                  {/* Stat overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 transition-opacity duration-300 group-hover:opacity-100 opacity-80">
+                    <p className="text-sm font-bold text-white leading-tight">{study.result}</p>
+                  </div>
                 </div>
 
                 <div className="space-y-3 p-6">
@@ -268,14 +325,12 @@ const CaseStudiesPage = () => {
 
                   <div className="flex flex-wrap gap-3 pt-1">
                     <Link
-                      // href={study.link}
                       href="#"
                       className="inline-flex items-center gap-2 rounded-full bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-teal-500/30 transition-transform hover:scale-[1.02] hover:bg-teal-600 focus:outline-none focus:ring-4 focus:ring-teal-300"
                     >
                       Coming Soon
                     </Link>
 
-                    {/* Fixed: correct template string for the download link */}
                     <a
                       href={`/downloads/case-study-${study.id}.pdf`}
                       target="_blank"
@@ -299,7 +354,7 @@ const CaseStudiesPage = () => {
             ))}
           </div>
 
-          {filtered.length === 0 && (
+          {displayed.length === 0 && (
             <p className="mt-8 text-center text-sm text-teal-700">
               No results. Try a different search or filter.
             </p>
@@ -313,21 +368,49 @@ const CaseStudiesPage = () => {
           </h2>
           <div className="flex flex-wrap justify-center items-center gap-8 px-4">
             {logos.map((logo, index) => (
-              <motion.div
-                key={logo}
-                whileHover={{ scale: 1.06 }}
-                transition={{ type: "spring", stiffness: 240, damping: 14 }}
-                className="p-3 rounded-xl ring-1 ring-teal-100 bg-white"
-              >
-                <Image
-                  src={logo}
-                  alt={`Client ${index + 1}`} // Fixed: proper alt text
-                  width={120}
-                  height={60}
-                  className="object-contain grayscale hover:grayscale-0 transition duration-300"
-                />
-              </motion.div>
+              <Link key={logo} href="#grid">
+                <motion.div
+                  whileHover={{ scale: 1.06 }}
+                  transition={{ type: "spring", stiffness: 240, damping: 14 }}
+                  className="p-3 rounded-xl ring-1 ring-teal-100 bg-white cursor-pointer"
+                >
+                  <Image
+                    src={logo}
+                    alt={`Client ${index + 1}`}
+                    width={120}
+                    height={60}
+                    className="object-contain grayscale hover:grayscale-0 transition duration-300"
+                  />
+                </motion.div>
+              </Link>
             ))}
+          </div>
+
+          {/* Testimonial Slider */}
+          <div className="mt-10 max-w-2xl mx-auto px-4">
+            <h3 className="text-xl font-semibold text-center text-teal-800 mb-4">What Our Clients Say</h3>
+            <AnimatePresence mode="wait">
+              <motion.blockquote
+                key={testimonialIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.4 }}
+                className="rounded-2xl bg-teal-50 p-6 text-teal-800 ring-1 ring-teal-200"
+              >
+                <p className="text-base leading-relaxed">“{quotes[testimonialIndex].text}”</p>
+                <footer className="mt-2 text-sm opacity-80">— {quotes[testimonialIndex].author}</footer>
+              </motion.blockquote>
+            </AnimatePresence>
+            <div className="flex justify-center gap-2 mt-4">
+              {quotes.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setTestimonialIndex(i)}
+                  className={`w-3 h-3 rounded-full transition ${i === testimonialIndex ? "bg-teal-500" : "bg-teal-200"}`}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -344,10 +427,10 @@ const CaseStudiesPage = () => {
               <h3 className="text-2xl font-bold">Want to See More Success Stories?</h3>
               <p className="mt-2 text-teal-50">
                 Request our full case study pack and explore how we’ve helped
-                businesses across industries.
+                businesses across industries. Join 1,200 HR leaders already using our guides.
               </p>
               <Link href="/contactUs" className="inline-block mt-5">
-                <span className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-teal-700 shadow-lg transition hover:bg-teal-50">
+                <span className="rounded-full bg-white px-8 py-4 text-base font-semibold text-teal-700 shadow-lg transition hover:bg-teal-50 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-white/50">
                   Request Case Study Pack
                 </span>
               </Link>
@@ -364,6 +447,17 @@ const CaseStudiesPage = () => {
                 “We connect ambition with opportunity — thoughtfully, transparently, and at scale.”
               </p>
               <div className="mt-3 text-xs text-teal-100/90">— Demand Recruitment</div>
+              {/* Thumbnails preview */}
+              <div className="flex justify-center gap-3 mt-6 flex-wrap">
+                {caseStudies.map((study) => (
+                  <img
+                    key={study.id}
+                    src={study.imageUrl}
+                    alt={study.title}
+                    className="w-16 h-16 object-cover rounded-lg shadow-md opacity-80 hover:opacity-100 transition duration-300"
+                  />
+                ))}
+              </div>
               <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
               <div className="pointer-events-none absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
             </motion.div>
