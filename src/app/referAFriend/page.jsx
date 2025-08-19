@@ -1,20 +1,31 @@
-'use client';
+"use client";
 
-import React, { useEffect, useMemo, useState, useRef } from 'react';
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
-import StickyHeader from '@/components/StickyHeader';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Gift, Phone, Mail, User, FileUp, CheckCircle2, ChevronDown, Sparkles, Stars } from 'lucide-react';
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import StickyHeader from "@/components/StickyHeader";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ShieldCheck,
+  Gift,
+  Phone,
+  Mail,
+  User,
+  FileUp,
+  CheckCircle2,
+  ChevronDown,
+  Sparkles,
+  Stars,
+} from "lucide-react";
 
 export default function ReferAFriendPage() {
   const [form, setForm] = useState({
-    yourName: '',
-    yourEmail: '',
-    yourPhone: '',
-    friendName: '',
-    friendPhone: '',
-    comments: '',
+    yourName: "",
+    yourEmail: "",
+    yourPhone: "",
+    friendName: "",
+    friendPhone: "",
+    comments: "",
     consent: false,
     cvFile: null,
   });
@@ -26,10 +37,10 @@ export default function ReferAFriendPage() {
 
   const quotes = useMemo(
     () => [
-      '“Great teams are built one referral at a time.”',
-      '“Talent recognizes talent — refer someone brilliant.”',
-      '“A referral is a compliment to both your friend and us.”',
-      '“When you grow, we all grow. Refer & rise.”',
+      "“Great teams are built one referral at a time.”",
+      "“Talent recognizes talent — refer someone brilliant.”",
+      "“A referral is a compliment to both your friend and us.”",
+      "“When you grow, we all grow. Refer & rise.”",
     ],
     []
   );
@@ -44,22 +55,32 @@ export default function ReferAFriendPage() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
+    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
     // Real-time validation
-    validateField(name, type === 'checkbox' ? checked : value);
+    validateField(name, type === "checkbox" ? checked : value);
   };
 
   const handleFile = (e) => {
     const file = e.target.files?.[0] || null;
     if (file) {
       // Validate file type and size
-      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const validTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
       if (!validTypes.includes(file.type)) {
-        setErrors((e) => ({ ...e, cvFile: 'Please upload a PDF or DOC file.' }));
+        setErrors((e) => ({
+          ...e,
+          cvFile: "Please upload a PDF or DOC file.",
+        }));
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        setErrors((e) => ({ ...e, cvFile: 'File size must be less than 5MB.' }));
+        setErrors((e) => ({
+          ...e,
+          cvFile: "File size must be less than 5MB.",
+        }));
         return;
       }
     }
@@ -69,33 +90,33 @@ export default function ReferAFriendPage() {
 
   const validateField = (name, value) => {
     const next = { ...errors };
-    if (name === 'yourName' && !value.trim()) {
-      next.yourName = 'Your name is required.';
+    if (name === "yourName" && !value.trim()) {
+      next.yourName = "Your name is required.";
     } else {
       delete next.yourName;
     }
-    if (name === 'yourEmail' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      next.yourEmail = 'Please enter a valid email.';
+    if (name === "yourEmail" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      next.yourEmail = "Please enter a valid email.";
     } else {
       delete next.yourEmail;
     }
-    if (name === 'yourPhone' && !/^[0-9+\-()\s]{7,20}$/.test(value)) {
-      next.yourPhone = 'Please enter a valid phone number.';
+    if (name === "yourPhone" && !/^[0-9+\-()\s]{7,20}$/.test(value)) {
+      next.yourPhone = "Please enter a valid phone number.";
     } else {
       delete next.yourPhone;
     }
-    if (name === 'friendName' && !value.trim()) {
+    if (name === "friendName" && !value.trim()) {
       next.friendName = "Friend's name is required.";
     } else {
       delete next.friendName;
     }
-    if (name === 'friendPhone' && !/^[0-9+\-()\s]{7,20}$/.test(value)) {
+    if (name === "friendPhone" && !/^[0-9+\-()\s]{7,20}$/.test(value)) {
       next.friendPhone = "Please enter your friend's valid phone number.";
     } else {
       delete next.friendPhone;
     }
-    if (name === 'consent' && !value) {
-      next.consent = 'Consent is required to submit.';
+    if (name === "consent" && !value) {
+      next.consent = "Consent is required to submit.";
     } else {
       delete next.consent;
     }
@@ -104,12 +125,15 @@ export default function ReferAFriendPage() {
 
   const validate = () => {
     const next = {};
-    if (!form.yourName.trim()) next.yourName = 'Your name is required.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.yourEmail)) next.yourEmail = 'Please enter a valid email.';
-    if (!/^[0-9+\-()\s]{7,20}$/.test(form.yourPhone)) next.yourPhone = 'Please enter a valid phone number.';
+    if (!form.yourName.trim()) next.yourName = "Your name is required.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.yourEmail))
+      next.yourEmail = "Please enter a valid email.";
+    if (!/^[0-9+\-()\s]{7,20}$/.test(form.yourPhone))
+      next.yourPhone = "Please enter a valid phone number.";
     if (!form.friendName.trim()) next.friendName = "Friend's name is required.";
-    if (!/^[0-9+\-()\s]{7,20}$/.test(form.friendPhone)) next.friendPhone = "Please enter your friend's valid phone number.";
-    if (!form.consent) next.consent = 'Consent is required to submit.';
+    if (!/^[0-9+\-()\s]{7,20}$/.test(form.friendPhone))
+      next.friendPhone = "Please enter your friend's valid phone number.";
+    if (!form.consent) next.consent = "Consent is required to submit.";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -123,17 +147,17 @@ export default function ReferAFriendPage() {
       await new Promise((res) => setTimeout(res, 800));
       setSubmitted(true);
       setForm({
-        yourName: '',
-        yourEmail: '',
-        yourPhone: '',
-        friendName: '',
-        friendPhone: '',
-        comments: '',
+        yourName: "",
+        yourEmail: "",
+        yourPhone: "",
+        friendName: "",
+        friendPhone: "",
+        comments: "",
         consent: false,
         cvFile: null,
       });
       if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // Reset file input
+        fileInputRef.current.value = ""; // Reset file input
       }
       setErrors({});
     } finally {
@@ -141,8 +165,9 @@ export default function ReferAFriendPage() {
     }
   };
 
-  const fieldClass = 'w-full rounded-xl border border-teal-200 bg-white/80 p-3 outline-none transition focus:ring-4 focus:ring-teal-200 focus:border-teal-400 placeholder:text-gray-400';
-  const labelClass = 'mb-1 block font-medium text-gray-800';
+  const fieldClass =
+    "w-full rounded-xl border border-teal-200 bg-white/80 p-3 outline-none transition focus:ring-4 focus:ring-teal-200 focus:border-teal-400 placeholder:text-gray-400";
+  const labelClass = "mb-1 block font-medium text-gray-800";
 
   return (
     <div className="bg-white text-gray-800">
@@ -151,25 +176,30 @@ export default function ReferAFriendPage() {
 
       {/* Hero / Banner */}
       <section className="relative isolate">
-        <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 -z-10 overflow-hidden">
           <motion.img
-            initial={{ scale: 1.12 }}
+            initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
-            transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse' }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
             src="/recruitment.jpg"
             alt="Refer great people banner"
-            className="h-[68vh] w-full object-cover"
+            className="h-[60vh] w-full object-cover sm:h-[65vh] md:h-[70vh]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-teal-900/80 via-teal-800/70 to-teal-700/60" />
           <div className="absolute inset-0 bg-[radial-gradient(55rem_30rem_at_top_right,rgba(255,255,255,0.12),transparent)]" />
         </div>
 
-        <div className="mx-auto flex h-[68vh] max-w-6xl flex-col items-center justify-center px-6 text-center text-white">
+        {/* Text content */}
+        <div className="mx-auto flex h-[60vh] sm:h-[65vh] md:h-[70vh] max-w-6xl flex-col items-center justify-center px-6 text-center text-white">
           <motion.h1
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6 }}
-            className="text-4xl font-bold sm:text-5xl md:text-6xl"
+            className="text-3xl font-bold sm:text-5xl md:text-6xl"
           >
             Refer a Friend
           </motion.h1>
@@ -177,13 +207,14 @@ export default function ReferAFriendPage() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="mt-4 max-w-2xl text-lg/7 text-teal-50"
+            className="mt-4 max-w-2xl text-base sm:text-lg text-teal-50"
           >
-            We’re always looking for good people. Help us meet them — and earn rewards.
+            We’re always looking for good people. Help us meet them — and earn
+            rewards.
           </motion.p>
 
           {/* Rotating Quote */}
-          <div className="mt-8 h-10">
+          <div className="mt-6 sm:mt-8 h-10">
             <AnimatePresence mode="wait">
               <motion.p
                 key={quoteIndex}
@@ -191,7 +222,7 @@ export default function ReferAFriendPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.35 }}
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur"
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs sm:text-sm backdrop-blur"
               >
                 <Stars className="h-4 w-4" />
                 {quotes[quoteIndex]}
@@ -201,21 +232,24 @@ export default function ReferAFriendPage() {
         </div>
 
         {/* Floating Cards */}
-        <div className="pointer-events-none absolute inset-x-0 -bottom-16 mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-4 px-6">
+        <div className="pointer-events-none absolute inset-x-0 -bottom-10 sm:-bottom-16 mx-auto flex max-w-6xl flex-col sm:flex-row items-center justify-center gap-4 px-6">
           <motion.div
             initial={{ y: 30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
-            className="pointer-events-auto group w-full max-w-md flex-1 rounded-2xl border border-teal-200 bg-white p-5 shadow-lg backdrop-blur sm:w-auto"
+            className="pointer-events-auto group w-full sm:max-w-md flex-1 rounded-2xl border border-teal-200 bg-white p-5 shadow-lg backdrop-blur"
           >
             <div className="flex items-start gap-3">
               <div className="rounded-xl bg-teal-50 p-3 ring-1 ring-teal-100 transition group-hover:scale-105">
                 <Gift className="h-6 w-6 text-teal-600" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-teal-700">Reward Highlight</p>
+                <p className="text-sm font-semibold text-teal-700">
+                  Reward Highlight
+                </p>
                 <p className="mt-1 text-gray-700">
-                  Earn <span className="font-semibold text-teal-700">£50</span> for every successful referral — no limits.
+                  Earn <span className="font-semibold text-teal-700">£50</span>{" "}
+                  for every successful referral — no limits.
                 </p>
               </div>
             </div>
@@ -226,15 +260,19 @@ export default function ReferAFriendPage() {
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.05 }}
             viewport={{ once: true }}
-            className="pointer-events-auto group w-full max-w-md flex-1 rounded-2xl border border-teal-200 bg-white p-5 shadow-lg backdrop-blur sm:w-auto"
+            className="pointer-events-auto group w-full sm:max-w-md flex-1 rounded-2xl border border-teal-200 bg-white p-5 shadow-lg backdrop-blur"
           >
             <div className="flex items-start gap-3">
               <div className="rounded-xl bg-teal-50 p-3 ring-1 ring-teal-100 transition group-hover:scale-105">
                 <ShieldCheck className="h-6 w-6 text-teal-600" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-teal-700">Data Protected</p>
-                <p className="mt-1 text-gray-700">Fully GDPR-compliant process with explicit consent.</p>
+                <p className="text-sm font-semibold text-teal-700">
+                  Data Protected
+                </p>
+                <p className="mt-1 text-gray-700">
+                  Fully GDPR-compliant process with explicit consent.
+                </p>
               </div>
             </div>
           </motion.div>
@@ -249,8 +287,9 @@ export default function ReferAFriendPage() {
               Know someone amazing?
             </h2>
             <p className="mt-4 text-gray-600">
-              Some of our best hires come from referrals. If you know someone who would be a good fit,
-              we’d love to talk to them. You could earn a reward for every successful referral.
+              Some of our best hires come from referrals. If you know someone
+              who would be a good fit, we’d love to talk to them. You could earn
+              a reward for every successful referral.
             </p>
             <ul className="mt-6 space-y-3 text-sm text-gray-700">
               <li className="flex items-start gap-3">
@@ -275,14 +314,26 @@ export default function ReferAFriendPage() {
             viewport={{ once: true }}
             className="relative overflow-hidden rounded-3xl border border-teal-200 shadow-xl"
           >
-            <img src="/recruitment.jpg" alt="Top referrers" className="h-72 w-full object-cover" />
+            <img
+              src="/recruitment.jpg"
+              alt="Top referrers"
+              className="h-72 w-full object-cover"
+            />
             <div className="absolute inset-0 bg-gradient-to-tr from-black/60 to-black/10" />
             <div className="absolute bottom-4 left-4 right-4">
               <div className="rounded-2xl bg-white/90 p-4 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Community highlight</p>
-                <p className="mt-1 text-sm text-gray-700">Top Referrer This Month</p>
-                <p className="text-2xl font-bold text-gray-900">Ayesha K. — 6 referrals</p>
-                <p className="text-xs text-gray-500">Join the leaderboard and earn more.</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
+                  Community highlight
+                </p>
+                <p className="mt-1 text-sm text-gray-700">
+                  Top Referrer This Month
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  Ayesha K. — 6 referrals
+                </p>
+                <p className="text-xs text-gray-500">
+                  Join the leaderboard and earn more.
+                </p>
               </div>
             </div>
           </motion.div>
@@ -295,12 +346,22 @@ export default function ReferAFriendPage() {
           <div className="grid grid-cols-1 gap-10 md:grid-cols-5">
             <div className="md:col-span-3">
               <div className="rounded-3xl border border-teal-200 bg-white p-6 shadow-xl">
-                <h2 className="text-center text-2xl font-bold text-gray-900">Referral Form</h2>
-                <p className="mt-2 text-center text-sm text-gray-600">Fields marked * are required</p>
+                <h2 className="text-center text-2xl font-bold text-gray-900">
+                  Referral Form
+                </h2>
+                <p className="mt-2 text-center text-sm text-gray-600">
+                  Fields marked * are required
+                </p>
 
-                <form onSubmit={onSubmit} className="mt-6 grid grid-cols-1 gap-5" noValidate>
+                <form
+                  onSubmit={onSubmit}
+                  className="mt-6 grid grid-cols-1 gap-5"
+                  noValidate
+                >
                   <div>
-                    <label htmlFor="yourName" className={labelClass}>Your Name *</label>
+                    <label htmlFor="yourName" className={labelClass}>
+                      Your Name *
+                    </label>
                     <div className="relative">
                       <User className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-teal-500" />
                       <input
@@ -317,11 +378,19 @@ export default function ReferAFriendPage() {
                         required
                       />
                     </div>
-                    <p id="yourName-error" className="mt-1 text-sm text-red-600" aria-live="polite">{errors.yourName}</p>
+                    <p
+                      id="yourName-error"
+                      className="mt-1 text-sm text-red-600"
+                      aria-live="polite"
+                    >
+                      {errors.yourName}
+                    </p>
                   </div>
 
                   <div>
-                    <label htmlFor="yourEmail" className={labelClass}>Your Email *</label>
+                    <label htmlFor="yourEmail" className={labelClass}>
+                      Your Email *
+                    </label>
                     <div className="relative">
                       <Mail className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-teal-500" />
                       <input
@@ -338,11 +407,19 @@ export default function ReferAFriendPage() {
                         required
                       />
                     </div>
-                    <p id="yourEmail-error" className="mt-1 text-sm text-red-600" aria-live="polite">{errors.yourEmail}</p>
+                    <p
+                      id="yourEmail-error"
+                      className="mt-1 text-sm text-red-600"
+                      aria-live="polite"
+                    >
+                      {errors.yourEmail}
+                    </p>
                   </div>
 
                   <div>
-                    <label htmlFor="yourPhone" className={labelClass}>Your Phone *</label>
+                    <label htmlFor="yourPhone" className={labelClass}>
+                      Your Phone *
+                    </label>
                     <div className="relative">
                       <Phone className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-teal-500" />
                       <input
@@ -359,12 +436,20 @@ export default function ReferAFriendPage() {
                         required
                       />
                     </div>
-                    <p id="yourPhone-error" className="mt-1 text-sm text-red-600" aria-live="polite">{errors.yourPhone}</p>
+                    <p
+                      id="yourPhone-error"
+                      className="mt-1 text-sm text-red-600"
+                      aria-live="polite"
+                    >
+                      {errors.yourPhone}
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="friendName" className={labelClass}>Friend's Name *</label>
+                      <label htmlFor="friendName" className={labelClass}>
+                        Friend's Name *
+                      </label>
                       <input
                         id="friendName"
                         name="friendName"
@@ -377,11 +462,19 @@ export default function ReferAFriendPage() {
                         aria-describedby="friendName-error"
                         required
                       />
-                      <p id="friendName-error" className="mt-1 text-sm text-red-600" aria-live="polite">{errors.friendName}</p>
+                      <p
+                        id="friendName-error"
+                        className="mt-1 text-sm text-red-600"
+                        aria-live="polite"
+                      >
+                        {errors.friendName}
+                      </p>
                     </div>
 
                     <div>
-                      <label htmlFor="friendPhone" className={labelClass}>Friend's Phone *</label>
+                      <label htmlFor="friendPhone" className={labelClass}>
+                        Friend's Phone *
+                      </label>
                       <input
                         id="friendPhone"
                         name="friendPhone"
@@ -394,12 +487,20 @@ export default function ReferAFriendPage() {
                         aria-describedby="friendPhone-error"
                         required
                       />
-                      <p id="friendPhone-error" className="mt-1 text-sm text-red-600" aria-live="polite">{errors.friendPhone}</p>
+                      <p
+                        id="friendPhone-error"
+                        className="mt-1 text-sm text-red-600"
+                        aria-live="polite"
+                      >
+                        {errors.friendPhone}
+                      </p>
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="comments" className={labelClass}>Questions / Comments</label>
+                    <label htmlFor="comments" className={labelClass}>
+                      Questions / Comments
+                    </label>
                     <textarea
                       id="comments"
                       name="comments"
@@ -412,7 +513,9 @@ export default function ReferAFriendPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="cvFile" className={labelClass}>Upload CV / Resume (optional)</label>
+                    <label htmlFor="cvFile" className={labelClass}>
+                      Upload CV / Resume (optional)
+                    </label>
                     <div className="flex items-center gap-3">
                       <label className="group inline-flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-teal-300 px-4 py-2 text-sm text-teal-700 transition hover:bg-teal-50">
                         <FileUp className="h-4 w-4" />
@@ -427,9 +530,20 @@ export default function ReferAFriendPage() {
                           aria-describedby="cvFile-description cvFile-error"
                         />
                       </label>
-                      <span id="cvFile-description" className="text-sm text-gray-600">{form.cvFile ? form.cvFile.name : 'PDF or DOC, max 5MB'}</span>
+                      <span
+                        id="cvFile-description"
+                        className="text-sm text-gray-600"
+                      >
+                        {form.cvFile ? form.cvFile.name : "PDF or DOC, max 5MB"}
+                      </span>
                     </div>
-                    <p id="cvFile-error" className="mt-1 text-sm text-red-600" aria-live="polite">{errors.cvFile}</p>
+                    <p
+                      id="cvFile-error"
+                      className="mt-1 text-sm text-red-600"
+                      aria-live="polite"
+                    >
+                      {errors.cvFile}
+                    </p>
                   </div>
 
                   <div className="flex items-start gap-3">
@@ -445,10 +559,17 @@ export default function ReferAFriendPage() {
                       aria-describedby="consent-error"
                     />
                     <label htmlFor="consent" className="text-sm text-gray-700">
-                      I confirm I have permission to share my friend’s details and agree to be contacted regarding this referral.
+                      I confirm I have permission to share my friend’s details
+                      and agree to be contacted regarding this referral.
                     </label>
                   </div>
-                  <p id="consent-error" className="-mt-2 text-sm text-red-600" aria-live="polite">{errors.consent}</p>
+                  <p
+                    id="consent-error"
+                    className="-mt-2 text-sm text-red-600"
+                    aria-live="polite"
+                  >
+                    {errors.consent}
+                  </p>
 
                   <div className="flex items-center justify-center">
                     <button
@@ -457,7 +578,7 @@ export default function ReferAFriendPage() {
                       className="group relative inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-300 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       <Sparkles className="h-5 w-5 transition group-hover:rotate-12" />
-                      {submitting ? 'Submitting…' : 'Submit Referral'}
+                      {submitting ? "Submitting…" : "Submit Referral"}
                     </button>
                   </div>
 
@@ -483,7 +604,9 @@ export default function ReferAFriendPage() {
             <div className="md:col-span-2">
               <div className="sticky top-24 space-y-4">
                 <div className="rounded-3xl border border-teal-200 bg-teal-50 p-6">
-                  <h3 className="text-lg font-semibold text-teal-900">How it works</h3>
+                  <h3 className="text-lg font-semibold text-teal-900">
+                    How it works
+                  </h3>
                   <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-teal-900/90">
                     <li>Submit your referral using this form.</li>
                     <li>We reach out, assess fit, and keep you updated.</li>
@@ -494,16 +617,16 @@ export default function ReferAFriendPage() {
                 <Accordion
                   items={[
                     {
-                      q: 'Who qualifies for the reward?',
-                      a: 'Any referral who gets successfully placed and completes the qualifying period (if applicable) qualifies for the payout.',
+                      q: "Who qualifies for the reward?",
+                      a: "Any referral who gets successfully placed and completes the qualifying period (if applicable) qualifies for the payout.",
                     },
                     {
-                      q: 'Is there a limit to referrals?',
-                      a: 'No limits — refer as many people as you like. Rewards are uncapped.',
+                      q: "Is there a limit to referrals?",
+                      a: "No limits — refer as many people as you like. Rewards are uncapped.",
                     },
                     {
-                      q: 'How will I be notified?',
-                      a: 'We will email or text you with status updates after you submit a referral.',
+                      q: "How will I be notified?",
+                      a: "We will email or text you with status updates after you submit a referral.",
                     },
                   ]}
                 />
@@ -516,9 +639,10 @@ export default function ReferAFriendPage() {
       {/* Legal Notice */}
       <section className="px-6 pb-16">
         <div className="mx-auto max-w-6xl rounded-3xl border border-teal-100 bg-white p-6 text-center text-sm text-gray-600 shadow">
-          By providing your phone number, you agree to receive text messages for updates, promotions and important
-          information. Message and data rates may apply. You can opt out at any time by replying ‘STOP’. For more information,
-          please refer to our Privacy Policy.
+          By providing your phone number, you agree to receive text messages for
+          updates, promotions and important information. Message and data rates
+          may apply. You can opt out at any time by replying ‘STOP’. For more
+          information, please refer to our Privacy Policy.
         </div>
       </section>
 
@@ -541,14 +665,18 @@ function Accordion({ items }) {
             aria-controls={`acc-panel-${i}`}
           >
             <span className="font-medium text-gray-900">{it.q}</span>
-            <ChevronDown className={`h-5 w-5 shrink-0 transition ${open === i ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`h-5 w-5 shrink-0 transition ${
+                open === i ? "rotate-180" : ""
+              }`}
+            />
           </button>
           <AnimatePresence initial={false}>
             {open === i && (
               <motion.div
                 id={`acc-panel-${i}`}
                 initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
+                animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
