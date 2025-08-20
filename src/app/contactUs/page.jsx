@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Swal from "sweetalert2";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   MapPin,
   Phone,
@@ -15,6 +15,9 @@ import {
   Clock,
   ArrowRight,
   ShieldCheck,
+  HelpCircle,
+  CheckCircle2,
+  XCircle,
   ChevronDown,
 } from "lucide-react";
 import StickyHeader from "@/components/StickyHeader";
@@ -22,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FaChevronDown } from "react-icons/fa";
 
+/* ------------------------- FAQ (unchanged data) ------------------------- */
 const faqs = [
   {
     question: "What industries do you specialize in for recruitment services?",
@@ -55,18 +59,69 @@ const faqs = [
   },
 ];
 
+/* ----------------------------- UI Helpers ------------------------------ */
+const fadeUp = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const cardHover = {
+  scale: 1.02,
+  y: -3,
+  boxShadow: "0 18px 40px rgba(13,148,136,0.18)",
+};
+
+function Tooltip({ text, id }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        aria-describedby={open ? id : undefined}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-teal-50 ring-1 ring-teal-200 hover:bg-teal-100"
+      >
+        <HelpCircle className="h-3.5 w-3.5 text-teal-700" />
+      </button>
+      {open && (
+        <motion.div
+          id={id}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          role="tooltip"
+          className="absolute z-20 mt-2 w-64 rounded-xl bg-gray-900 px-3 py-2 text-xs text-white shadow-xl"
+        >
+          {text}
+        </motion.div>
+      )}
+    </span>
+  );
+}
+
+/* --------------------------- Main Component ---------------------------- */
 export default function ContactUs() {
-  const [openIdx, setOpenIdx] = useState(null);
+  const [openIndex, setOpenIndex] = useState(null);
   const [sending, setSending] = useState(false);
+
   const [form, setForm] = useState({
+    inquiryType: "general", // general | hiring | jobseeker
     name: "",
     email: "",
     subject: "",
     message: "",
+    companyName: "",
+    jobType: "", // Permanent | Temporary | Contract
+    experience: "", // Entry | Mid | Senior
+    preferredContact: "email", // email | phone | whatsapp
+    phone: "",
+    consent: false,
   });
-  const [errors, setErrors] = useState({});
 
-  const [openIndex, setOpenIndex] = useState(null);
+  const [touched, setTouched] = useState({});
+  const [errors, setErrors] = useState({});
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -93,42 +148,133 @@ export default function ContactUs() {
   };
 
   useEffect(() => {
-    AOS.init({ duration: 700, once: true, disable: window.innerWidth < 640 });
+    AOS.init({
+      duration: 700,
+      once: true,
+      disable: typeof window !== "undefined" ? window.innerWidth < 640 : true,
+    });
   }, []);
 
-  const validate = () => {
-    const e = {};
-    if (!form.name.trim()) e.name = "Please enter your name";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email))
-      e.email = "Enter a valid email";
-    if (!form.subject.trim()) e.subject = "Please add a subject";
-    if (form.message.trim().length < 10)
-      e.message = "Message must be at least 10 characters";
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  /* ------------------------- Live Validation -------------------------- */
+  const validators = useMemo(
+    () => ({
+      inquiryType: (v) => (!v ? "Please select an inquiry type" : ""),
+      name: (v) => (!v.trim() ? "Please enter your name" : ""),
+      email: (v) =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? "" : "Enter a valid email",
+      subject: (v) => (!v.trim() ? "Please add a subject" : ""),
+      message: (v) =>
+        v.trim().length < 10 ? "Message must be at least 10 characters" : "",
+      companyName: (v, f) =>
+        f.inquiryType === "hiring" && !v.trim()
+          ? "Company name is required"
+          : "",
+      jobType: (v, f) =>
+        f.inquiryType === "hiring" && !v ? "Select a job type" : "",
+      experience: (v, f) =>
+        f.inquiryType === "jobseeker" && !v
+          ? "Select your experience level"
+          : "",
+      phone: (v, f) =>
+        f.preferredContact !== "email" && !/^[\d+\-\s()]{6,}$/.test(v.trim())
+          ? "Provide a valid phone/WhatsApp number"
+          : "",
+      consent: (v) => (!v ? "Please accept data processing consent" : ""),
+    }),
+    []
+  );
+
+  const validateAll = (data = form) => {
+    const newErrors = {};
+    Object.entries(validators).forEach(([key, fn]) => {
+      const err = fn(data[key], data);
+      if (err) newErrors[key] = err;
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    // live validation small UX touch
-    if (errors[e.target.name])
-      setErrors({ ...errors, [e.target.name]: undefined });
+    const { name, type } = e.target;
+    const value = type === "checkbox" ? e.target.checked : e.target.value;
+    const updated = { ...form, [name]: value };
+
+    // Reset dependent fields when inquiry type changes
+    if (name === "inquiryType") {
+      if (value === "hiring") {
+        updated.experience = "";
+      } else if (value === "jobseeker") {
+        updated.companyName = "";
+        updated.jobType = "";
+      } else {
+        updated.companyName = "";
+        updated.jobType = "";
+        updated.experience = "";
+      }
+    }
+
+    setForm(updated);
+
+    if (touched[name] || name === "inquiryType") {
+      const err = validators[name]?.(updated[name], updated);
+      setErrors((prev) => ({ ...prev, [name]: err || undefined }));
+    }
+
+    // live validate phone when switching preferred contact
+    if (name === "preferredContact") {
+      const err = validators.phone?.(updated.phone, updated);
+      setErrors((prev) => ({ ...prev, phone: err || undefined }));
+    }
+  };
+
+  const markTouched = (e) => {
+    const { name } = e.target;
+    setTouched((t) => ({ ...t, [name]: true }));
+    const err = validators[name]?.(form[name], form);
+    setErrors((prev) => ({ ...prev, [name]: err || undefined }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validateAll()) return;
+
     try {
       setSending(true);
-      // simulate request
+
+      // Simulate API call
       await new Promise((res) => setTimeout(res, 900));
-      Swal.fire({
+
+      const result = await Swal.fire({
         icon: "success",
         title: "Message sent!",
         text: "We’ll be in touch within 24 hours.",
         confirmButtonColor: "#0d9488",
+        confirmButtonText: "Go to Jobs",
+        showCancelButton: true,
+        cancelButtonText: "Stay here",
+        cancelButtonColor: "#134e4a",
+        background: "#f0fdfa",
       });
-      setForm({ name: "", email: "", subject: "", message: "" });
+
+      setForm({
+        inquiryType: "general",
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+        companyName: "",
+        jobType: "",
+        experience: "",
+        preferredContact: "email",
+        phone: "",
+        consent: false,
+      });
+      setTouched({});
+      setErrors({});
+
+      if (result.isConfirmed) {
+        router.push("/allJobs");
+      }
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -141,23 +287,23 @@ export default function ContactUs() {
     }
   };
 
-  // Motion variants
-  const cardHover = {
-    scale: 1.02,
-    y: -4,
-    boxShadow: "0 10px 30px rgba(16, 185, 129, .12)",
-  };
-  const fadeUp = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
+  const fieldStatusIcon = (field) => {
+    if (!touched[field]) return null;
+    const isError = !!errors[field];
+    return isError ? (
+      <XCircle className="h-4 w-4 text-red-500" />
+    ) : (
+      <CheckCircle2 className="h-4 w-4 text-teal-600" />
+    );
   };
 
+  /* ------------------------------- Render ------------------------------- */
   return (
     <div className="flex flex-col bg-gray-50 text-gray-800">
       <Navbar />
       <StickyHeader />
 
-      {/* Hero / Banner (teal theme, recruitment.jpg) */}
+      {/* ====== Banner (left as-is per instruction) ====== */}
       <header className="relative isolate overflow-hidden">
         {/* Stronger gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-teal-800/80 to-emerald-700/75" />
@@ -206,7 +352,6 @@ export default function ContactUs() {
                 </button>
               </div>
 
-              {/* Inspirational quotes banner */}
               <motion.blockquote
                 className="mt-8 rounded-2xl bg-white/10 p-4 text-sm italic text-white/95 backdrop-blur drop-shadow-md"
                 whileHover={{ scale: 1.01 }}
@@ -265,88 +410,413 @@ export default function ContactUs() {
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-gray-50/0 to-gray-50" />
       </header>
 
-      {/* Main Content */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 py-10 sm:py-12 md:py-16">
+      {/* ============================== Main ============================== */}
+      <main
+        id="contactUs"
+        className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 py-10 sm:py-12 md:py-16"
+      >
         <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.1fr_0.9fr]">
-          {/* Form */}
+          {/* ------------------------------ Form ------------------------------ */}
           <section
-            className="rounded-3xl border border-gray-100 bg-white p-5 sm:p-6 md:p-8 shadow-sm"
+            className="rounded-3xl border border-teal-100 bg-white shadow-sm p-5 sm:p-7 md:p-9"
             data-aos="fade-right"
           >
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Get in touch
-            </h2>
-            <p className="mt-1 text-gray-600 text-sm sm:text-base">
-              Send us a message and we’ll reply promptly.
-            </p>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  Get in touch
+                </h2>
+                <p className="mt-1 text-gray-600 text-sm sm:text-base">
+                  Send us a message and we’ll reply promptly.
+                </p>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-teal-800 text-xs ring-1 ring-teal-200">
+                <ShieldCheck className="h-3.5 w-3.5" /> Secure form
+              </div>
+            </div>
 
             <form
               onSubmit={handleSubmit}
               noValidate
-              className="mt-6 grid grid-cols-1 gap-5"
+              className="mt-8 grid grid-cols-1 gap-5 sm:gap-6"
             >
-              {[
-                { field: "name", placeholder: "Jane Doe" },
-                { field: "email", placeholder: "you@company.com" },
-                { field: "subject", placeholder: "How can we help?" },
-              ].map(({ field, placeholder }) => (
-                <div key={field}>
+              {/* Inquiry Type */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
                   <label
-                    htmlFor={field}
-                    className="mb-1 block text-sm font-medium capitalize"
+                    htmlFor="inquiryType"
+                    className="mb-1.5 flex items-center text-sm font-medium"
                   >
-                    {field}
+                    Inquiry type
+                    <Tooltip
+                      id="tip-inquiry"
+                      text="Choose 'Hiring' if you're recruiting, 'Job seeker' if you're looking for a role, or 'General' for other questions."
+                    />
                   </label>
-                  <input
-                    id={field}
-                    name={field}
-                    type={field === "email" ? "email" : "text"}
-                    value={form[field]}
-                    onChange={handleChange}
-                    className={`w-full rounded-xl border px-3 py-2 sm:px-4 sm:py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
-                      errors[field] ? "border-red-400" : "border-gray-300"
-                    }`}
-                    placeholder={placeholder}
-                    aria-invalid={!!errors[field]}
-                    aria-describedby={
-                      errors[field] ? `${field}-error` : undefined
-                    }
-                    required
-                  />
-                  {errors[field] && (
-                    <p
-                      id={`${field}-error`}
-                      className="mt-1 text-sm text-red-600"
+                  <div className="relative">
+                    <select
+                      id="inquiryType"
+                      name="inquiryType"
+                      value={form.inquiryType}
+                      onChange={handleChange}
+                      onBlur={markTouched}
+                      className={`w-full appearance-none rounded-xl border px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
+                        errors.inquiryType
+                          ? "border-red-400"
+                          : "border-teal-200"
+                      }`}
                     >
-                      {errors[field]}
+                      <option value="general">General</option>
+                      <option value="hiring">Hiring (employer)</option>
+                      <option value="jobseeker">Job seeker</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <div className="absolute right-9 top-1/2 -translate-y-1/2">
+                      {fieldStatusIcon("inquiryType")}
+                    </div>
+                  </div>
+                  {errors.inquiryType && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.inquiryType}
                     </p>
                   )}
                 </div>
-              ))}
 
+                {/* Preferred Contact */}
+                <div>
+                  <label
+                    htmlFor="preferredContact"
+                    className="mb-1.5 flex items-center text-sm font-medium"
+                  >
+                    Preferred contact
+                    <Tooltip
+                      id="tip-contact"
+                      text="If you pick Phone or WhatsApp, please provide a reachable number."
+                    />
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="preferredContact"
+                      name="preferredContact"
+                      value={form.preferredContact}
+                      onChange={handleChange}
+                      onBlur={markTouched}
+                      className="w-full appearance-none rounded-xl border border-teal-200 px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500"
+                    >
+                      <option value="email">Email</option>
+                      <option value="phone">Phone</option>
+                      <option value="whatsapp">WhatsApp</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Name + Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {[
+                  { field: "name", placeholder: "Jane Doe", label: "Name" },
+                  {
+                    field: "email",
+                    placeholder: "you@company.com",
+                    label: "Email",
+                  },
+                ].map(({ field, placeholder, label }) => (
+                  <div key={field}>
+                    <label
+                      htmlFor={field}
+                      className="mb-1.5 flex items-center text-sm font-medium"
+                    >
+                      {label}
+                      {field === "email" && (
+                        <Tooltip
+                          id="tip-email"
+                          text="We’ll only use your email to respond to your inquiry."
+                        />
+                      )}
+                    </label>
+                    <div className="relative">
+                      <input
+                        id={field}
+                        name={field}
+                        type={field === "email" ? "email" : "text"}
+                        value={form[field]}
+                        onChange={handleChange}
+                        onBlur={markTouched}
+                        className={`w-full rounded-xl border px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
+                          errors[field] ? "border-red-400" : "border-teal-200"
+                        }`}
+                        placeholder={placeholder}
+                        aria-invalid={!!errors[field]}
+                        aria-describedby={
+                          errors[field] ? `${field}-error` : undefined
+                        }
+                        required
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        {fieldStatusIcon(field)}
+                      </div>
+                    </div>
+                    {errors[field] && (
+                      <p
+                        id={`${field}-error`}
+                        className="mt-1 text-sm text-red-600"
+                      >
+                        {errors[field]}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Phone (conditional usefulness) + Subject */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label
+                    htmlFor="phone"
+                    className="mb-1.5 flex items-center text-sm font-medium"
+                  >
+                    Phone / WhatsApp
+                    <Tooltip
+                      id="tip-phone"
+                      text="If you chose Phone or WhatsApp, add a number we can reach quickly."
+                    />
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="text"
+                      value={form.phone}
+                      onChange={handleChange}
+                      onBlur={markTouched}
+                      className={`w-full rounded-xl border px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
+                        errors.phone ? "border-red-400" : "border-teal-200"
+                      }`}
+                      placeholder="+44 1234 567890"
+                      aria-invalid={!!errors.phone}
+                      aria-describedby={
+                        errors.phone ? "phone-error" : undefined
+                      }
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {fieldStatusIcon("phone")}
+                    </div>
+                  </div>
+                  {errors.phone && (
+                    <p id="phone-error" className="mt-1 text-sm text-red-600">
+                      {errors.phone}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="subject"
+                    className="mb-1.5 flex items-center text-sm font-medium"
+                  >
+                    Subject
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="subject"
+                      name="subject"
+                      type="text"
+                      value={form.subject}
+                      onChange={handleChange}
+                      onBlur={markTouched}
+                      className={`w-full rounded-xl border px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
+                        errors.subject ? "border-red-400" : "border-teal-200"
+                      }`}
+                      placeholder="How can we help?"
+                      aria-invalid={!!errors.subject}
+                      aria-describedby={
+                        errors.subject ? "subject-error" : undefined
+                      }
+                      required
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {fieldStatusIcon("subject")}
+                    </div>
+                  </div>
+                  {errors.subject && (
+                    <p id="subject-error" className="mt-1 text-sm text-red-600">
+                      {errors.subject}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Conditional: Hiring */}
+              {form.inquiryType === "hiring" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-5"
+                >
+                  <div>
+                    <label
+                      htmlFor="companyName"
+                      className="mb-1.5 flex items-center text-sm font-medium"
+                    >
+                      Company name
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="companyName"
+                        name="companyName"
+                        type="text"
+                        value={form.companyName}
+                        onChange={handleChange}
+                        onBlur={markTouched}
+                        className={`w-full rounded-xl border px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
+                          errors.companyName
+                            ? "border-red-400"
+                            : "border-teal-200"
+                        }`}
+                        placeholder="Acme Ltd."
+                        required
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        {fieldStatusIcon("companyName")}
+                      </div>
+                    </div>
+                    {errors.companyName && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.companyName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="jobType"
+                      className="mb-1.5 flex items-center text-sm font-medium"
+                    >
+                      Job type
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="jobType"
+                        name="jobType"
+                        value={form.jobType}
+                        onChange={handleChange}
+                        onBlur={markTouched}
+                        className={`w-full appearance-none rounded-xl border px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
+                          errors.jobType ? "border-red-400" : "border-teal-200"
+                        }`}
+                        required
+                      >
+                        <option value="" disabled>
+                          Select type…
+                        </option>
+                        <option value="Permanent">Permanent</option>
+                        <option value="Temporary">Temporary</option>
+                        <option value="Contract">Contract</option>
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <div className="absolute right-9 top-1/2 -translate-y-1/2">
+                        {fieldStatusIcon("jobType")}
+                      </div>
+                    </div>
+                    {errors.jobType && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.jobType}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Conditional: Job seeker */}
+              {form.inquiryType === "jobseeker" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-5"
+                >
+                  <div>
+                    <label
+                      htmlFor="experience"
+                      className="mb-1.5 flex items-center text-sm font-medium"
+                    >
+                      Experience level
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="experience"
+                        name="experience"
+                        value={form.experience}
+                        onChange={handleChange}
+                        onBlur={markTouched}
+                        className={`w-full appearance-none rounded-xl border px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
+                          errors.experience
+                            ? "border-red-400"
+                            : "border-teal-200"
+                        }`}
+                        required
+                      >
+                        <option value="" disabled>
+                          Select level…
+                        </option>
+                        <option value="Entry">Entry</option>
+                        <option value="Mid">Mid</option>
+                        <option value="Senior">Senior</option>
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <div className="absolute right-9 top-1/2 -translate-y-1/2">
+                        {fieldStatusIcon("experience")}
+                      </div>
+                    </div>
+                    {errors.experience && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.experience}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="hidden sm:block">
+                    <div className="mt-8 text-xs text-gray-500">
+                      Tip: You can also attach your CV when we reply.
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Message */}
               <div>
                 <label
                   htmlFor="message"
-                  className="mb-1 block text-sm font-medium"
+                  className="mb-1.5 flex items-center text-sm font-medium"
                 >
                   Message
+                  <Tooltip
+                    id="tip-message"
+                    text="Tell us about your needs, timelines, and any must-have requirements."
+                  />
                 </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={5}
-                  value={form.message}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl border px-3 py-2 sm:px-4 sm:py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
-                    errors.message ? "border-red-400" : "border-gray-300"
-                  }`}
-                  placeholder="Share a few details about your needs..."
-                  aria-invalid={!!errors.message}
-                  aria-describedby={
-                    errors.message ? "message-error" : undefined
-                  }
-                  required
-                />
+                <div className="relative">
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={6}
+                    value={form.message}
+                    onChange={handleChange}
+                    onBlur={markTouched}
+                    className={`w-full rounded-2xl border px-4 py-3 outline-none transition focus:ring-2 focus:ring-teal-500 ${
+                      errors.message ? "border-red-400" : "border-teal-200"
+                    }`}
+                    placeholder="Share a few details about your needs..."
+                    aria-invalid={!!errors.message}
+                    aria-describedby={
+                      errors.message ? "message-error" : undefined
+                    }
+                    required
+                  />
+                  <div className="absolute right-3 top-3">
+                    {fieldStatusIcon("message")}
+                  </div>
+                </div>
                 {errors.message && (
                   <p id="message-error" className="mt-1 text-sm text-red-600">
                     {errors.message}
@@ -354,36 +824,63 @@ export default function ContactUs() {
                 )}
               </div>
 
-              <button
-                type="submit"
-                disabled={sending}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 sm:px-6 sm:py-3 font-semibold text-white shadow-lg shadow-teal-600/30 transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-80"
-              >
-                {sending ? "Sending..." : "Send Message"}{" "}
-                <ArrowRight size={18} />
-              </button>
+              {/* Consent */}
+              <div className="flex items-start gap-3 rounded-2xl bg-teal-50 px-4 py-3 ring-1 ring-teal-100">
+                <input
+                  id="consent"
+                  name="consent"
+                  type="checkbox"
+                  checked={form.consent}
+                  onChange={handleChange}
+                  onBlur={markTouched}
+                  className="mt-1 h-4 w-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500"
+                />
+                <label htmlFor="consent" className="text-sm text-teal-900">
+                  I agree to the processing of my data in line with your privacy
+                  policy.
+                </label>
+              </div>
+              {errors.consent && (
+                <p className="mt-1 -mb-2 text-sm text-red-600">
+                  {errors.consent}
+                </p>
+              )}
 
-              <p className="text-xs sm:text-sm text-gray-500">
-                Prefer email or phone?{" "}
-                <a
-                  className="text-teal-700 underline"
-                  href="mailto:info@demandrecruitmentservices.co.uk"
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-2">
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white shadow-lg shadow-teal-600/30 transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-80"
                 >
-                  info@demandrecruitmentservices.co.uk
-                </a>{" "}
-                ·{" "}
-                <a className="text-teal-700 underline" href="tel:+442038761531">
-                  +44 0203 876 1531
-                </a>
-              </p>
+                  {sending ? "Sending..." : "Send Message"}{" "}
+                  <ArrowRight size={18} />
+                </button>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  Prefer email or phone?{" "}
+                  <a
+                    className="text-teal-700 underline"
+                    href="mailto:info@demandrecruitmentservices.co.uk"
+                  >
+                    info@demandrecruitmentservices.co.uk
+                  </a>{" "}
+                  ·{" "}
+                  <a
+                    className="text-teal-700 underline"
+                    href="tel:+442038761531"
+                  >
+                    +44 0203 876 1531
+                  </a>
+                </p>
+              </div>
             </form>
           </section>
 
-          {/* Contact Info (card with image + hover interaction) */}
+          {/* --------------------------- Contact Card --------------------------- */}
           <aside className="grid gap-6 self-start" data-aos="fade-left">
             <motion.div
               whileHover={cardHover}
-              className="rounded-3xl border border-gray-100 bg-white p-0 shadow-sm overflow-hidden"
+              className="rounded-3xl border border-teal-100 bg-white p-0 shadow-sm overflow-hidden"
             >
               <div className="relative h-36">
                 <img
@@ -405,7 +902,7 @@ export default function ContactUs() {
                   <a
                     href="https://maps.google.com/?q=120%20Staffing,%20London,%20UK"
                     target="_blank"
-                    className="flex items-start gap-3 rounded-xl border border-gray-100 p-3 sm:p-4 hover:border-teal-200"
+                    className="flex items-start gap-3 rounded-2xl border border-teal-100 p-4 hover:border-teal-300 hover:bg-teal-50/50 transition"
                   >
                     <MapPin className="mt-0.5 text-teal-600" size={20} />
                     <div>
@@ -421,7 +918,7 @@ export default function ContactUs() {
 
                   <a
                     href="tel:+442038761531"
-                    className="flex items-start gap-3 rounded-xl border border-gray-100 p-3 sm:p-4 hover:border-teal-200"
+                    className="flex items-start gap-3 rounded-2xl border border-teal-100 p-4 hover:border-teal-300 hover:bg-teal-50/50 transition"
                   >
                     <Phone className="mt-0.5 text-teal-600" size={20} />
                     <div>
@@ -435,7 +932,7 @@ export default function ContactUs() {
 
                   <a
                     href="mailto:info@demandrecruitmentservices.co.uk"
-                    className="flex items-start gap-3 rounded-xl border border-gray-100 p-3 sm:p-4 hover:border-teal-200"
+                    className="flex items-start gap-3 rounded-2xl border border-teal-100 p-4 hover:border-teal-300 hover:bg-teal-50/50 transition"
                   >
                     <Mail className="mt-0.5 text-teal-600" size={20} />
                     <div>
@@ -450,7 +947,7 @@ export default function ContactUs() {
                   </a>
                 </div>
 
-                <div className="mt-6 flex items-center gap-2 rounded-xl bg-teal-50 p-3 sm:p-4 text-teal-800">
+                <div className="mt-6 flex items-center gap-2 rounded-xl bg-teal-50 p-3 sm:p-4 text-teal-800 ring-1 ring-teal-100">
                   <Clock size={18} /> 24/7 urgent support available
                 </div>
 
@@ -471,8 +968,11 @@ export default function ContactUs() {
                 (t) => (
                   <motion.div
                     key={t}
-                    whileHover={{ y: -4 }}
-                    className="rounded-2xl border border-gray-100 bg-white p-3 sm:p-4 text-center text-xs sm:text-sm font-medium shadow-sm"
+                    whileHover={{
+                      y: -4,
+                      boxShadow: "0 10px 24px rgba(13,148,136,0.16)",
+                    }}
+                    className="rounded-2xl border border-teal-100 bg-white p-3 sm:p-4 text-center text-xs sm:text-sm font-medium shadow-sm"
                   >
                     <ShieldCheck
                       className="mx-auto mb-1 text-teal-600"
@@ -486,7 +986,7 @@ export default function ContactUs() {
           </aside>
         </div>
 
-        {/* FAQ Section */}
+        {/* ------------------------------- FAQ ------------------------------- */}
         <div className="my-20">
           <h2
             data-aos="fade-up"
@@ -545,7 +1045,7 @@ export default function ContactUs() {
           </div>
         </div>
 
-        {/* Map */}
+        {/* ------------------------------- Map ------------------------------- */}
         <section className="mt-14 sm:mt-16" data-aos="fade-up">
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
             Find us
@@ -553,7 +1053,7 @@ export default function ContactUs() {
           <p className="mt-1 text-gray-600 text-sm sm:text-base">
             120 Staffing, London, UK
           </p>
-          <div className="mt-4 h-56 sm:h-72 md:h-80 w-full overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+          <div className="mt-4 h-56 sm:h-72 md:h-80 w-full overflow-hidden rounded-2xl border border-teal-200 shadow-sm">
             <iframe
               title="Demand Recruitment Location"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d19889.03529285766!2d-0.127758!3d51.507351!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sLondon%2C%20UK!5e0!3m2!1sen!2suk!4v1611818997208"
@@ -573,7 +1073,7 @@ export default function ContactUs() {
           </a>
         </section>
 
-        {/* CTA */}
+        {/* ------------------------------- CTA ------------------------------- */}
         <section
           className="mt-14 sm:mt-16 rounded-3xl bg-gradient-to-r from-teal-600 to-emerald-600 p-1 shadow-xl"
           data-aos="zoom-in"
@@ -591,19 +1091,19 @@ export default function ContactUs() {
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 md:justify-end">
                 <a
                   href="/allJobs"
-                  className="w-full sm:w-auto rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700 text-center"
+                  className="w-full sm:w-auto rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white hover:bg-teal-700 text-center"
                 >
                   Find a Job
                 </a>
-                <a
-                  href="/postJob"
-                  className="w-full sm:w-auto rounded-xl bg-indigo-100 px-5 py-3 font-semibold text-indigo-700 hover:bg-indigo-200 text-center"
+                <button
+                  onClick={handlePostJob}
+                  className="w-full sm:w-auto rounded-xl bg-teal-50 px-5 py-3 font-semibold text-teal-700 hover:bg-teal-100 text-center ring-1 ring-teal-200"
                 >
                   Hire Talent
-                </a>
+                </button>
                 <a
                   href="/signUp"
-                  className="w-full sm:w-auto rounded-xl bg-green-500 px-5 py-3 font-semibold text-white hover:bg-green-600 text-center"
+                  className="w-full sm:w-auto rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-white hover:bg-emerald-600 text-center"
                 >
                   Work for Us
                 </a>
