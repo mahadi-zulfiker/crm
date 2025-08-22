@@ -255,7 +255,7 @@ const EnvironmentPage = () => {
             transition={{ duration: 0.6, delay: 0.8 }}
           >
             <Link
-              href="/reports/sustainability"
+              href="/caseStudies"
               className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 px-12 rounded-full shadow-xl transition-all transform hover:scale-110 hover:shadow-2xl"
             >
               View Our Sustainability Report
