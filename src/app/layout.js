@@ -20,6 +20,9 @@ const robotoMono = Roboto_Mono({
 export const metadata = {
   title: "Demand Recruitment Service",
   description: "CRM",
+  icons: {
+    icon: "/drWhiteLogo.png",
+  },
 };
 
 export default function RootLayout({ children }) {
