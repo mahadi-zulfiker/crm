@@ -82,7 +82,7 @@ const Stat = ({ value, label }) => (
     <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-teal-400">
       {value}
     </div>
-    <div className="text-teal-50/80 mt-1">{label}</div>
+    <div className="text-teal-300 mt-1">{label}</div>
   </motion.div>
 );
 
