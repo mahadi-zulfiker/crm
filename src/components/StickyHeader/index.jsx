@@ -182,10 +182,10 @@ const StickyHeader = ({ thresholdHeight }) => {
                 onMouseEnter={() => handleMouseEnter("whyDemandRecruitment")}
                 onMouseLeave={handleMouseLeave}
               >
-                <button className="px-3 py-2 rounded-md text-white hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                <Link href="/whyDemand" className="px-3 py-2 rounded-md text-white hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
                   <span>Why Demand Recruitment</span>
                   <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
-                </button>
+                </Link>
                 {isWhyDemandRecruitmentMenuOpen && (
                   <div className="absolute top-full left-1/2 -translate-x-1/2 bg-white text-gray-800 shadow-2xl mt-2 p-6 rounded-lg z-50 w-[600px] grid grid-cols-2 gap-6 border border-gray-200 transform opacity-100 scale-100 transition-all duration-300 animate-in slide-in-from-top-2">
                     <div>
@@ -450,9 +450,9 @@ const StickyHeader = ({ thresholdHeight }) => {
 
                   {/* Services Section */}
                   <div className="space-y-3">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    <Link href="/services" className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                       Services
-                    </h3>
+                    </Link>
                     <Link
                       href="/recruitment"
                       className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform"
@@ -475,9 +475,9 @@ const StickyHeader = ({ thresholdHeight }) => {
 
                   {/* Why Demand Recruitment */}
                   <div className="space-y-3">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    <Link href="/whyDemand" className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                       Why Demand Recruitment
-                    </h3>
+                    </Link>
                     <div className="pl-4 space-y-2">
                       <h4 className="text-xs font-medium text-gray-400">
                         INSIGHTS & NEWS
