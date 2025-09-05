@@ -80,7 +80,7 @@ const ContactSection = () => {
   };
 
   return (
-    <div className="bg-gradient-to-b from-teal-50 via-white to-teal-50 font-sans text-gray-800">
+    <div className="bg-gray-100 font-sans text-gray-800">
       <section className="py-20 px-6 md:px-10 lg:px-20 max-w-7xl mx-auto">
         {/* FAQ Section */}
         <div className="mb-20">
