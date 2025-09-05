@@ -15,6 +15,7 @@ import {
   CreditCard,
   HomeIcon,
   WalletCards,
+  Search,
 } from "lucide-react";
 
 export default function getALLRoles() {
@@ -40,6 +41,21 @@ export default function getALLRoles() {
           //   name: "Job Templates",
           //   href: "/dashboard/client/templates",
           // },
+        ],
+      },
+      {
+        title: "Applications",
+        icon: FileText,
+        items: [
+          { name: "My Applications", href: "/dashboard/client/applications" },
+          {
+            name: "Application Status",
+            href: "/dashboard/client/applications/status",
+          },
+          {
+            name: "Interview Schedule",
+            href: "/dashboard/client/applications/interviews",
+          },
         ],
       },
       {
@@ -77,37 +93,24 @@ export default function getALLRoles() {
 
       {
         title: "Job Search",
-        icon: Briefcase,
-        items: [
-          { name: "Browse Jobs", href: "/allJobs" },
-          // {
-          //   name: "Recommendations",
-          //   href: "/dashboard/client/jobs/recommendations",
-          // },
-        ],
+        icon: Search,
+        href: "/allJobs",
       },
       {
         title: "My Jobs",
         icon: Briefcase,
         items: [
           { name: "Applied Jobs", href: "/dashboard/employee/appliedJobs" },
+          {
+            name: "Interviewed Jobs",
+            href: "/dashboard/employee/interviewedJobs",
+          },
           { name: "Approved Jobs", href: "/dashboard/employee/approvedJobs" },
           { name: "Rejected Jobs", href: "/dashboard/employee/rejectedJobs" },
           { name: "Completed Jobs", href: "/dashboard/employee/completedJobs" },
-        ],
-      },
-      {
-        title: "Applications",
-        icon: FileText,
-        items: [
-          { name: "My Applications", href: "/dashboard/client/applications" },
           {
-            name: "Application Status",
-            href: "/dashboard/client/applications/status",
-          },
-          {
-            name: "Interview Schedule",
-            href: "/dashboard/client/applications/interviews",
+            name: "All Applications",
+            href: "/dashboard/employee/allJobApplications",
           },
         ],
       },

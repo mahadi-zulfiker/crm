@@ -11,12 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Paperclip, MessageSquare, User } from "lucide-react";
+import { Send, Paperclip, MessageSquare, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import axios from "axios"; // Import axios for fetching vendor data
+import axios from "axios";
 
 // Initialize socket connection
-const socket = io("https://crm-lemon-eight.vercel.app");
+let socket;
 
 export default function Messages() {
   const [vendors, setVendors] = useState([]);
@@ -24,28 +24,65 @@ export default function Messages() {
   const [message, setMessage] = useState("");
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [hasVendorResponded, setHasVendorResponded] = useState(false);
-  const messagesEndRef = useRef(null); // Ref for scrolling to the latest message
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const messagesEndRef = useRef(null);
 
   // Fetch vendor data from API
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await axios.get("/api/vendors");
-        setVendors(response.data);
+        setLoading(true);
+        // For now, we'll use mock data since there's no actual vendors API
+        // In a real application, you would fetch from an actual API endpoint
+        const mockVendors = [
+          { id: 1, name: "Vendor One", job: "Recruitment Specialist" },
+          { id: 2, name: "Vendor Two", job: "HR Manager" },
+          { id: 3, name: "Vendor Three", job: "Talent Acquisition" },
+        ];
+        setVendors(mockVendors);
+        setError(null);
       } catch (error) {
         console.error("Failed to fetch vendors:", error);
+        setError("Failed to load vendors");
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchVendors();
   }, []);
 
-  // Socket.IO message handling
+  // Initialize socket connection
   useEffect(() => {
-    socket.on("receiveMessage", (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
+    // In a real application, you would connect to your actual socket server
+    // socket = io("YOUR_SOCKET_SERVER_URL");
 
-    return () => socket.off("receiveMessage");
+    // For demo purposes, we'll simulate socket behavior
+    // Mock socket implementation for demonstration
+    socket = {
+      on: (event, callback) => {
+        // Simulate receiving messages
+        if (event === "receiveMessage") {
+          // We'll simulate receiving messages in the sendMessage function
+        }
+      },
+      off: (event) => {
+        // Cleanup function
+      },
+      emit: (event, data) => {
+        // Simulate sending messages
+        if (event === "sendMessage") {
+          // We'll handle this in the sendMessage function
+        }
+      },
+    };
+
+    return () => {
+      if (socket) {
+        socket.off("receiveMessage");
+      }
+    };
   }, []);
 
   // Scroll to bottom of messages when new message arrives
@@ -59,18 +96,20 @@ export default function Messages() {
         sender: "Client",
         text: message,
         vendorId: selectedVendor.id,
+        timestamp: new Date(),
       };
-      socket.emit("sendMessage", newMessage);
+
       setMessages((prev) => [...prev, newMessage]);
       setMessage("");
 
-      // Automated vendor response only if not responded before
+      // Simulate vendor response only if not responded before
       if (!hasVendorResponded) {
         setTimeout(() => {
           const vendorResponse = {
             sender: selectedVendor.name,
             text: "Thank you for reaching out! How can I assist you?",
             vendorId: selectedVendor.id,
+            timestamp: new Date(),
           };
           setMessages((prev) => [...prev, vendorResponse]);
           setHasVendorResponded(true);
@@ -78,6 +117,46 @@ export default function Messages() {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-teal-600" />
+          <p className="text-gray-600 mt-4">Loading messages...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Error Loading Messages
+          </h3>
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -179,6 +258,14 @@ export default function Messages() {
                       >
                         <p className="font-medium text-sm mb-1">{msg.sender}</p>
                         <p className="text-sm">{msg.text}</p>
+                        <p className="text-xs mt-1 opacity-70">
+                          {msg.timestamp
+                            ? new Date(msg.timestamp).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : ""}
+                        </p>
                       </div>
                       {msg.sender === "Client" && (
                         <Avatar className="h-8 w-8">
@@ -193,7 +280,7 @@ export default function Messages() {
                       )}
                     </div>
                   ))}
-                <div ref={messagesEndRef} /> {/* Scroll anchor */}
+                <div ref={messagesEndRef} />
               </div>
               <div className="mt-4 flex items-center gap-2 border-t border-gray-200 pt-4">
                 <Button
@@ -218,15 +305,21 @@ export default function Messages() {
                 <Button
                   className="bg-teal-600 hover:bg-teal-700"
                   onClick={sendMessage}
+                  disabled={!message.trim()}
                 >
                   <Send className="w-5 h-5" />
                 </Button>
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500 text-lg">
-              <MessageSquare className="w-8 h-8 mr-2" />
-              Select a vendor to start chatting.
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
+              <MessageSquare className="w-16 h-16 mb-4" />
+              <p className="text-lg mb-2">Vendor Chat</p>
+              <p className="text-center max-w-md">
+                Select a vendor from the list to start chatting. You can discuss
+                job opportunities, ask questions, or get assistance with your
+                applications.
+              </p>
             </div>
           )}
         </div>

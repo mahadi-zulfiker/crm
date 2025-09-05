@@ -272,7 +272,7 @@ export default function UserProfilePage() {
 
     try {
       const formData = new FormData();
-      formData.append("image", file); 
+      formData.append("image", file);
 
       const res = await fetch("/api/uploadImage", {
         method: "POST",
@@ -290,6 +290,7 @@ export default function UserProfilePage() {
           },
         }));
 
+        // Update the client object with the new profile photo URL
         const updatedClient = {
           ...client,
           personalInfo: {
@@ -301,6 +302,7 @@ export default function UserProfilePage() {
 
         setClient(updatedClient);
 
+        // Save the updated profile
         await axios.put("/api/employeeProfile", updatedClient);
 
         toast({
@@ -331,7 +333,7 @@ export default function UserProfilePage() {
   const handleFileUpload = (e, fieldName) => {
     const file = e.target.files[0];
     if (file) {
-      // In a real app, you'd upload this to Vercel Blob and get a URL
+      // In a real app, you'd upload this to a storage service and get a URL
       // For now, we'll just store a mock URL or file name
       const mockUrl = `/uploads/${fieldName}-${file.name}`;
       setClient((prev) => ({ ...prev, [fieldName]: mockUrl }));
@@ -344,20 +346,50 @@ export default function UserProfilePage() {
 
   const handleSave = async () => {
     try {
-      await axios.put("/api/employeeProfile", client);
-      setMessage("Profile updated successfully");
-      setEditing(false);
-      setError("");
-      toast({
-        title: "Profile updated successfully!",
-        description: "Your changes have been saved.",
-      });
+      // Validate required fields before saving
+      if (!client.personalInfo?.username) {
+        setError("Full name is required");
+        return;
+      }
+
+      if (!client.personalInfo?.contact?.email) {
+        setError("Email is required");
+        return;
+      }
+
+      // Make sure we have the user ID for the update
+      if (!client._id) {
+        setError("User ID is missing");
+        return;
+      }
+
+      // Send the updated profile data to the API
+      const response = await axios.put("/api/employeeProfile", client);
+
+      if (response.status === 200) {
+        setMessage("Profile updated successfully");
+        setEditing(false);
+        setError("");
+        toast({
+          title: "Profile updated successfully!",
+          description: "Your changes have been saved.",
+        });
+      } else {
+        throw new Error("Failed to update profile");
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
-      setError("Failed to update profile.");
+      setError(
+        error.response?.data?.error ||
+          error.message ||
+          "Failed to update profile."
+      );
       toast({
         title: "Failed to update profile.",
-        description: "There was an error saving your changes.",
+        description:
+          error.response?.data?.error ||
+          error.message ||
+          "There was an error saving your changes.",
         variant: "destructive",
       });
     }
@@ -998,7 +1030,7 @@ export default function UserProfilePage() {
                           handleArrayItemChange(
                             "education",
                             index,
-                            e.target.name,
+                            "degree",
                             e.target.value
                           )
                         }
@@ -1007,7 +1039,7 @@ export default function UserProfilePage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={`institution-${index}`}>
-                        Institution Name
+                        Institution / University
                       </Label>
                       <Input
                         id={`institution-${index}`}
@@ -1021,7 +1053,7 @@ export default function UserProfilePage() {
                           handleArrayItemChange(
                             "education",
                             index,
-                            e.target.name,
+                            "institution",
                             e.target.value
                           )
                         }
@@ -1029,18 +1061,19 @@ export default function UserProfilePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`startYear-${index}`}>Start Year</Label>
+                      <Label htmlFor={`startDate-${index}`}>Start Date</Label>
                       <Input
-                        id={`startYear-${index}`}
-                        name="startYear"
+                        id={`startDate-${index}`}
+                        name="startDate"
+                        type="date"
                         value={
-                          editing ? edu.startYear || "" : edu.startYear || "N/A"
+                          editing ? edu.startDate || "" : edu.startDate || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "education",
                             index,
-                            e.target.name,
+                            "startDate",
                             e.target.value
                           )
                         }
@@ -1048,54 +1081,19 @@ export default function UserProfilePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`endYear-${index}`}>End Year</Label>
+                      <Label htmlFor={`endDate-${index}`}>End Date</Label>
                       <Input
-                        id={`endYear-${index}`}
-                        name="endYear"
+                        id={`endDate-${index}`}
+                        name="endDate"
+                        type="date"
                         value={
-                          editing ? edu.endYear || "" : edu.endYear || "N/A"
+                          editing ? edu.endDate || "" : edu.endDate || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "education",
                             index,
-                            e.target.name,
-                            e.target.value
-                          )
-                        }
-                        disabled={!editing}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`major-${index}`}>
-                        Major / Field of Study
-                      </Label>
-                      <Input
-                        id={`major-${index}`}
-                        name="major"
-                        value={editing ? edu.major || "" : edu.major || "N/A"}
-                        onChange={(e) =>
-                          handleArrayItemChange(
-                            "education",
-                            index,
-                            e.target.name,
-                            e.target.value
-                          )
-                        }
-                        disabled={!editing}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`grades-${index}`}>Grades / CGPA</Label>
-                      <Input
-                        id={`grades-${index}`}
-                        name="grades"
-                        value={editing ? edu.grades || "" : edu.grades || "N/A"}
-                        onChange={(e) =>
-                          handleArrayItemChange(
-                            "education",
-                            index,
-                            e.target.name,
+                            "endDate",
                             e.target.value
                           )
                         }
@@ -1103,25 +1101,51 @@ export default function UserProfilePage() {
                       />
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`description-${index}`}>Description</Label>
+                    <Textarea
+                      id={`description-${index}`}
+                      name="description"
+                      value={
+                        editing
+                          ? edu.description || ""
+                          : edu.description || "N/A"
+                      }
+                      onChange={(e) =>
+                        handleArrayItemChange(
+                          "education",
+                          index,
+                          "description",
+                          e.target.value
+                        )
+                      }
+                      disabled={!editing}
+                      rows={3}
+                    />
+                  </div>
                 </div>
               ))}
               {editing && (
                 <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
                   onClick={() =>
                     addArrayItem("education", {
                       degree: "",
                       institution: "",
-                      startYear: "",
-                      endYear: "",
-                      major: "",
-                      grades: "",
+                      startDate: "",
+                      endDate: "",
+                      description: "",
                     })
                   }
+                  className="w-full bg-teal-600 hover:bg-teal-700"
                 >
-                  <Plus className="h-4 w-4 mr-2" /> Add Education
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Education
                 </Button>
+              )}
+              {!editing && client.education?.length === 0 && (
+                <p className="text-gray-500 text-center py-4">
+                  No education information added yet.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -1137,9 +1161,9 @@ export default function UserProfilePage() {
               <CardDescription>Your professional work history.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {client.workExperience?.map((work, index) => (
+              {client.workExperience?.map((exp, index) => (
                 <div
-                  key={work.id}
+                  key={exp.id}
                   className="border p-4 rounded-lg space-y-4 relative"
                 >
                   {editing && (
@@ -1147,7 +1171,7 @@ export default function UserProfilePage() {
                       variant="ghost"
                       size="icon"
                       className="absolute top-2 right-2 text-red-500 hover:bg-red-50"
-                      onClick={() => removeArrayItem("workExperience", work.id)}
+                      onClick={() => removeArrayItem("workExperience", exp.id)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -1159,13 +1183,13 @@ export default function UserProfilePage() {
                         id={`jobTitle-${index}`}
                         name="jobTitle"
                         value={
-                          editing ? work.jobTitle || "" : work.jobTitle || "N/A"
+                          editing ? exp.jobTitle || "" : exp.jobTitle || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "workExperience",
                             index,
-                            e.target.name,
+                            "jobTitle",
                             e.target.value
                           )
                         }
@@ -1173,22 +1197,18 @@ export default function UserProfilePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`companyName-${index}`}>
-                        Company Name
-                      </Label>
+                      <Label htmlFor={`company-${index}`}>Company</Label>
                       <Input
-                        id={`companyName-${index}`}
-                        name="companyName"
+                        id={`company-${index}`}
+                        name="company"
                         value={
-                          editing
-                            ? work.companyName || ""
-                            : work.companyName || "N/A"
+                          editing ? exp.company || "" : exp.company || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "workExperience",
                             index,
-                            e.target.name,
+                            "company",
                             e.target.value
                           )
                         }
@@ -1202,15 +1222,13 @@ export default function UserProfilePage() {
                         name="startDate"
                         type="date"
                         value={
-                          editing
-                            ? work.startDate || ""
-                            : work.startDate || "N/A"
+                          editing ? exp.startDate || "" : exp.startDate || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "workExperience",
                             index,
-                            e.target.name,
+                            "startDate",
                             e.target.value
                           )
                         }
@@ -1224,87 +1242,65 @@ export default function UserProfilePage() {
                         name="endDate"
                         type="date"
                         value={
-                          editing ? work.endDate || "" : work.endDate || "N/A"
+                          editing ? exp.endDate || "" : exp.endDate || "N/A"
                         }
                         onChange={(e) =>
                           handleArrayItemChange(
                             "workExperience",
                             index,
-                            e.target.name,
+                            "endDate",
                             e.target.value
                           )
                         }
                         disabled={!editing}
                       />
                     </div>
-                    <div className="space-y-2 col-span-full">
-                      <Label htmlFor={`jobLocation-${index}`}>
-                        Job Location
-                      </Label>
-                      <Input
-                        id={`jobLocation-${index}`}
-                        name="jobLocation"
-                        value={
-                          editing
-                            ? work.jobLocation || ""
-                            : work.jobLocation || "N/A"
-                        }
-                        onChange={(e) =>
-                          handleArrayItemChange(
-                            "workExperience",
-                            index,
-                            e.target.name,
-                            e.target.value
-                          )
-                        }
-                        disabled={!editing}
-                      />
-                    </div>
-                    <div className="space-y-2 col-span-full">
-                      <Label htmlFor={`responsibilities-${index}`}>
-                        Responsibilities / Achievements
-                      </Label>
-                      <Textarea
-                        id={`responsibilities-${index}`}
-                        name="responsibilities"
-                        value={
-                          editing
-                            ? work.responsibilities || ""
-                            : work.responsibilities || "N/A"
-                        }
-                        onChange={(e) =>
-                          handleArrayItemChange(
-                            "workExperience",
-                            index,
-                            e.target.name,
-                            e.target.value
-                          )
-                        }
-                        disabled={!editing}
-                        rows={5}
-                      />
-                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`description-${index}`}>Description</Label>
+                    <Textarea
+                      id={`description-${index}`}
+                      name="description"
+                      value={
+                        editing
+                          ? exp.description || ""
+                          : exp.description || "N/A"
+                      }
+                      onChange={(e) =>
+                        handleArrayItemChange(
+                          "workExperience",
+                          index,
+                          "description",
+                          e.target.value
+                        )
+                      }
+                      disabled={!editing}
+                      rows={3}
+                    />
                   </div>
                 </div>
               ))}
               {editing && (
                 <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
                   onClick={() =>
                     addArrayItem("workExperience", {
                       jobTitle: "",
-                      companyName: "",
+                      company: "",
                       startDate: "",
                       endDate: "",
-                      jobLocation: "",
-                      responsibilities: "",
-                      achievements: "",
+                      description: "",
                     })
                   }
+                  className="w-full bg-teal-600 hover:bg-teal-700"
                 >
-                  <Plus className="h-4 w-4 mr-2" /> Add Work Experience
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Work Experience
                 </Button>
+              )}
+              {!editing && client.workExperience?.length === 0 && (
+                <p className="text-gray-500 text-center py-4">
+                  No work experience added yet.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -1319,100 +1315,106 @@ export default function UserProfilePage() {
               </CardTitle>
               <CardDescription>Your technical and soft skills.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               {client.skills?.map((skill, index) => (
                 <div
                   key={skill.id}
-                  className="flex items-center gap-4 relative"
+                  className="border p-4 rounded-lg space-y-4 relative"
                 >
-                  <div className="flex-1 space-y-2">
-                    <Label htmlFor={`skillName-${index}`} className="sr-only">
-                      Skill Name
-                    </Label>
-                    <Input
-                      id={`skillName-${index}`}
-                      name="name"
-                      value={editing ? skill.name || "" : skill.name || "N/A"}
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "skills",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                      placeholder="Skill Name"
-                    />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <Label htmlFor={`proficiency-${index}`} className="sr-only">
-                      Proficiency
-                    </Label>
-                    <Select
-                      value={
-                        editing
-                          ? skill.proficiency || ""
-                          : skill.proficiency || ""
-                      }
-                      onValueChange={(value) =>
-                        handleArrayItemChange(
-                          "skills",
-                          index,
-                          "proficiency",
-                          value
-                        )
-                      }
-                      disabled={!editing}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Proficiency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Beginner">Beginner</SelectItem>
-                        <SelectItem value="Intermediate">
-                          Intermediate
-                        </SelectItem>
-                        <SelectItem value="Advanced">Advanced</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                   {editing && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-red-500 hover:bg-red-50"
+                      className="absolute top-2 right-2 text-red-500 hover:bg-red-50"
                       onClick={() => removeArrayItem("skills", skill.id)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor={`skillName-${index}`}>Skill Name</Label>
+                      <Input
+                        id={`skillName-${index}`}
+                        name="name"
+                        value={editing ? skill.name || "" : skill.name || "N/A"}
+                        onChange={(e) =>
+                          handleArrayItemChange(
+                            "skills",
+                            index,
+                            "name",
+                            e.target.value
+                          )
+                        }
+                        disabled={!editing}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`proficiency-${index}`}>
+                        Proficiency Level
+                      </Label>
+                      <Select
+                        value={
+                          editing
+                            ? skill.level?.toString() || ""
+                            : skill.level?.toString() || ""
+                        }
+                        onValueChange={(value) =>
+                          handleArrayItemChange(
+                            "skills",
+                            index,
+                            "level",
+                            parseInt(value)
+                          )
+                        }
+                        disabled={!editing}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Proficiency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">Beginner</SelectItem>
+                          <SelectItem value="40">Intermediate</SelectItem>
+                          <SelectItem value="70">Advanced</SelectItem>
+                          <SelectItem value="90">Expert</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
               ))}
               {editing && (
                 <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
                   onClick={() =>
-                    addArrayItem("skills", { name: "", proficiency: "" })
+                    addArrayItem("skills", {
+                      name: "",
+                      level: 50,
+                    })
                   }
+                  className="w-full bg-teal-600 hover:bg-teal-700"
                 >
-                  <Plus className="h-4 w-4 mr-2" /> Add Skill
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Skill
                 </Button>
+              )}
+              {!editing && client.skills?.length === 0 && (
+                <p className="text-gray-500 text-center py-4">
+                  No skills added yet.
+                </p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Projects / Portfolio Tab */}
+        {/* Projects Tab */}
         <TabsContent value="projects">
           <Card className="bg-white shadow-sm border-0">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900">
-                Projects / Portfolio
+                Projects
               </CardTitle>
               <CardDescription>
-                Showcase your personal or professional projects.
+                Your personal and professional projects.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -1431,46 +1433,67 @@ export default function UserProfilePage() {
                       <X className="h-4 w-4" />
                     </Button>
                   )}
-                  <div className="space-y-2">
-                    <Label htmlFor={`projectTitle-${index}`}>
-                      Project Title
-                    </Label>
-                    <Input
-                      id={`projectTitle-${index}`}
-                      name="projectTitle"
-                      value={
-                        editing
-                          ? project.projectTitle || ""
-                          : project.projectTitle || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "projects",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor={`projectName-${index}`}>
+                        Project Name
+                      </Label>
+                      <Input
+                        id={`projectName-${index}`}
+                        name="name"
+                        value={
+                          editing ? project.name || "" : project.name || "N/A"
+                        }
+                        onChange={(e) =>
+                          handleArrayItemChange(
+                            "projects",
+                            index,
+                            "name",
+                            e.target.value
+                          )
+                        }
+                        disabled={!editing}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`projectLink-${index}`}>
+                        Project Link
+                      </Label>
+                      <Input
+                        id={`projectLink-${index}`}
+                        name="link"
+                        value={
+                          editing ? project.link || "" : project.link || "N/A"
+                        }
+                        onChange={(e) =>
+                          handleArrayItemChange(
+                            "projects",
+                            index,
+                            "link",
+                            e.target.value
+                          )
+                        }
+                        disabled={!editing}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor={`projectDescription-${index}`}>
-                      Short Description
+                      Description
                     </Label>
                     <Textarea
                       id={`projectDescription-${index}`}
-                      name="shortDescription"
+                      name="description"
                       value={
                         editing
-                          ? project.shortDescription || ""
-                          : project.shortDescription || "N/A"
+                          ? project.description || ""
+                          : project.description || "N/A"
                       }
                       onChange={(e) =>
                         handleArrayItemChange(
                           "projects",
                           index,
-                          e.target.name,
+                          "description",
                           e.target.value
                         )
                       }
@@ -1478,109 +1501,41 @@ export default function UserProfilePage() {
                       rows={3}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`technologiesUsed-${index}`}>
-                      Technologies Used
-                    </Label>
-                    <Input
-                      id={`technologiesUsed-${index}`}
-                      name="technologiesUsed"
-                      value={
-                        editing
-                          ? project.technologiesUsed || ""
-                          : project.technologiesUsed || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "projects",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor={`liveDemoLink-${index}`}>
-                        Link to Live Demo
-                      </Label>
-                      <Input
-                        id={`liveDemoLink-${index}`}
-                        name="liveDemoLink"
-                        value={
-                          editing
-                            ? project.liveDemoLink || ""
-                            : project.liveDemoLink || "N/A"
-                        }
-                        onChange={(e) =>
-                          handleArrayItemChange(
-                            "projects",
-                            index,
-                            e.target.name,
-                            e.target.value
-                          )
-                        }
-                        disabled={!editing}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`githubRepository-${index}`}>
-                        GitHub Repository
-                      </Label>
-                      <Input
-                        id={`githubRepository-${index}`}
-                        name="githubRepository"
-                        value={
-                          editing
-                            ? project.githubRepository || ""
-                            : project.githubRepository || "N/A"
-                        }
-                        onChange={(e) =>
-                          handleArrayItemChange(
-                            "projects",
-                            index,
-                            e.target.name,
-                            e.target.value
-                          )
-                        }
-                        disabled={!editing}
-                      />
-                    </div>
-                  </div>
                 </div>
               ))}
               {editing && (
                 <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
                   onClick={() =>
                     addArrayItem("projects", {
-                      projectTitle: "",
-                      shortDescription: "",
-                      technologiesUsed: "",
-                      liveDemoLink: "",
-                      githubRepository: "",
+                      name: "",
+                      link: "",
+                      description: "",
                     })
                   }
+                  className="w-full bg-teal-600 hover:bg-teal-700"
                 >
-                  <Plus className="h-4 w-4 mr-2" /> Add Project
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Project
                 </Button>
+              )}
+              {!editing && client.projects?.length === 0 && (
+                <p className="text-gray-500 text-center py-4">
+                  No projects added yet.
+                </p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Certifications / Training Tab */}
+        {/* Certifications Tab */}
         <TabsContent value="certifications">
           <Card className="bg-white shadow-sm border-0">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900">
-                Certifications / Training
+                Certifications
               </CardTitle>
               <CardDescription>
-                List your professional certifications and training programs.
+                Your professional certifications.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -1599,57 +1554,51 @@ export default function UserProfilePage() {
                       <X className="h-4 w-4" />
                     </Button>
                   )}
-                  <div className="space-y-2">
-                    <Label htmlFor={`certificationName-${index}`}>
-                      Certification Name
-                    </Label>
-                    <Input
-                      id={`certificationName-${index}`}
-                      name="certificationName"
-                      value={
-                        editing
-                          ? cert.certificationName || ""
-                          : cert.certificationName || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "certifications",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`issuingOrganization-${index}`}>
-                      Issuing Organization
-                    </Label>
-                    <Input
-                      id={`issuingOrganization-${index}`}
-                      name="issuingOrganization"
-                      value={
-                        editing
-                          ? cert.issuingOrganization || ""
-                          : cert.issuingOrganization || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "certifications",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor={`issueDate-${index}`}>Issue Date</Label>
+                      <Label htmlFor={`certName-${index}`}>
+                        Certification Name
+                      </Label>
                       <Input
-                        id={`issueDate-${index}`}
+                        id={`certName-${index}`}
+                        name="name"
+                        value={editing ? cert.name || "" : cert.name || "N/A"}
+                        onChange={(e) =>
+                          handleArrayItemChange(
+                            "certifications",
+                            index,
+                            "name",
+                            e.target.value
+                          )
+                        }
+                        disabled={!editing}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`certIssuer-${index}`}>
+                        Issuing Organization
+                      </Label>
+                      <Input
+                        id={`certIssuer-${index}`}
+                        name="issuer"
+                        value={
+                          editing ? cert.issuer || "" : cert.issuer || "N/A"
+                        }
+                        onChange={(e) =>
+                          handleArrayItemChange(
+                            "certifications",
+                            index,
+                            "issuer",
+                            e.target.value
+                          )
+                        }
+                        disabled={!editing}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`certDate-${index}`}>Issue Date</Label>
+                      <Input
+                        id={`certDate-${index}`}
                         name="issueDate"
                         type="date"
                         value={
@@ -1661,7 +1610,7 @@ export default function UserProfilePage() {
                           handleArrayItemChange(
                             "certifications",
                             index,
-                            e.target.name,
+                            "issueDate",
                             e.target.value
                           )
                         }
@@ -1669,11 +1618,11 @@ export default function UserProfilePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`expiryDate-${index}`}>
-                        Expiry Date (if applicable)
+                      <Label htmlFor={`certExpiry-${index}`}>
+                        Expiration Date
                       </Label>
                       <Input
-                        id={`expiryDate-${index}`}
+                        id={`certExpiry-${index}`}
                         name="expiryDate"
                         type="date"
                         value={
@@ -1685,7 +1634,110 @@ export default function UserProfilePage() {
                           handleArrayItemChange(
                             "certifications",
                             index,
-                            e.target.name,
+                            "expiryDate",
+                            e.target.value
+                          )
+                        }
+                        disabled={!editing}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {editing && (
+                <Button
+                  onClick={() =>
+                    addArrayItem("certifications", {
+                      name: "",
+                      issuer: "",
+                      issueDate: "",
+                      expiryDate: "",
+                    })
+                  }
+                  className="w-full bg-teal-600 hover:bg-teal-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Certification
+                </Button>
+              )}
+              {!editing && client.certifications?.length === 0 && (
+                <p className="text-gray-500 text-center py-4">
+                  No certifications added yet.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Achievements Tab */}
+        <TabsContent value="achievements">
+          <Card className="bg-white shadow-sm border-0">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-900">
+                Achievements
+              </CardTitle>
+              <CardDescription>
+                Your professional achievements and awards.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {client.achievements?.map((achievement, index) => (
+                <div
+                  key={achievement.id}
+                  className="border p-4 rounded-lg space-y-4 relative"
+                >
+                  {editing && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 text-red-500 hover:bg-red-50"
+                      onClick={() =>
+                        removeArrayItem("achievements", achievement.id)
+                      }
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor={`achievementTitle-${index}`}>
+                        Achievement Title
+                      </Label>
+                      <Input
+                        id={`achievementTitle-${index}`}
+                        name="title"
+                        value={
+                          editing
+                            ? achievement.title || ""
+                            : achievement.title || "N/A"
+                        }
+                        onChange={(e) =>
+                          handleArrayItemChange(
+                            "achievements",
+                            index,
+                            "title",
+                            e.target.value
+                          )
+                        }
+                        disabled={!editing}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`achievementDate-${index}`}>Date</Label>
+                      <Input
+                        id={`achievementDate-${index}`}
+                        name="date"
+                        type="date"
+                        value={
+                          editing
+                            ? achievement.date || ""
+                            : achievement.date || "N/A"
+                        }
+                        onChange={(e) =>
+                          handleArrayItemChange(
+                            "achievements",
+                            index,
+                            "date",
                             e.target.value
                           )
                         }
@@ -1694,157 +1746,22 @@ export default function UserProfilePage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor={`certificateUrl-${index}`}>
-                      Certificate URL or ID
-                    </Label>
-                    <Input
-                      id={`certificateUrl-${index}`}
-                      name="certificateUrl"
-                      value={
-                        editing
-                          ? cert.certificateUrl || ""
-                          : cert.certificateUrl || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "certifications",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
-                </div>
-              ))}
-              {editing && (
-                <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
-                  onClick={() =>
-                    addArrayItem("certifications", {
-                      certificationName: "",
-                      issuingOrganization: "",
-                      issueDate: "",
-                      expiryDate: "",
-                      certificateUrl: "",
-                    })
-                  }
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Add Certification
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Achievements & Awards Tab */}
-        <TabsContent value="achievements">
-          <Card className="bg-white shadow-sm border-0">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900">
-                Achievements & Awards
-              </CardTitle>
-              <CardDescription>
-                Highlight your notable accomplishments.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {client.achievements?.map((award, index) => (
-                <div
-                  key={award.id}
-                  className="border p-4 rounded-lg space-y-4 relative"
-                >
-                  {editing && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 text-red-500 hover:bg-red-50"
-                      onClick={() => removeArrayItem("achievements", award.id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <div className="space-y-2">
-                    <Label htmlFor={`awardName-${index}`}>Award Name</Label>
-                    <Input
-                      id={`awardName-${index}`}
-                      name="awardName"
-                      value={
-                        editing
-                          ? award.awardName || ""
-                          : award.awardName || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "achievements",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`awardIssuingOrganization-${index}`}>
-                      Issuing Organization
-                    </Label>
-                    <Input
-                      id={`awardIssuingOrganization-${index}`}
-                      name="issuingOrganization"
-                      value={
-                        editing
-                          ? award.issuingOrganization || ""
-                          : award.issuingOrganization || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "achievements",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`awardDate-${index}`}>Date</Label>
-                    <Input
-                      id={`awardDate-${index}`}
-                      name="date"
-                      type="date"
-                      value={editing ? award.date || "" : award.date || "N/A"}
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "achievements",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`awardDescription-${index}`}>
+                    <Label htmlFor={`achievementDescription-${index}`}>
                       Description
                     </Label>
                     <Textarea
-                      id={`awardDescription-${index}`}
+                      id={`achievementDescription-${index}`}
                       name="description"
                       value={
                         editing
-                          ? award.description || ""
-                          : award.description || "N/A"
+                          ? achievement.description || ""
+                          : achievement.description || "N/A"
                       }
                       onChange={(e) =>
                         handleArrayItemChange(
                           "achievements",
                           index,
-                          e.target.name,
+                          "description",
                           e.target.value
                         )
                       }
@@ -1856,19 +1773,23 @@ export default function UserProfilePage() {
               ))}
               {editing && (
                 <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
                   onClick={() =>
                     addArrayItem("achievements", {
-                      awardName: "",
-                      issuingOrganization: "",
+                      title: "",
                       date: "",
                       description: "",
                     })
                   }
+                  className="w-full bg-teal-600 hover:bg-teal-700"
                 >
-                  <Plus className="h-4 w-4 mr-2" /> Add Achievement
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Achievement
                 </Button>
+              )}
+              {!editing && client.achievements?.length === 0 && (
+                <p className="text-gray-500 text-center py-4">
+                  No achievements added yet.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -1882,113 +1803,13 @@ export default function UserProfilePage() {
                 Languages
               </CardTitle>
               <CardDescription>
-                List the languages you are proficient in.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {client.languages?.map((lang, index) => (
-                <div key={lang.id} className="flex items-center gap-4 relative">
-                  <div className="flex-1 space-y-2">
-                    <Label
-                      htmlFor={`languageName-${index}`}
-                      className="sr-only"
-                    >
-                      Language Name
-                    </Label>
-                    <Input
-                      id={`languageName-${index}`}
-                      name="name"
-                      value={editing ? lang.name || "" : lang.name || "N/A"}
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "languages",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                      placeholder="Language Name"
-                    />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <Label
-                      htmlFor={`languageProficiency-${index}`}
-                      className="sr-only"
-                    >
-                      Proficiency
-                    </Label>
-                    <Select
-                      value={
-                        editing
-                          ? lang.proficiency || ""
-                          : lang.proficiency || ""
-                      }
-                      onValueChange={(value) =>
-                        handleArrayItemChange(
-                          "languages",
-                          index,
-                          "proficiency",
-                          value
-                        )
-                      }
-                      disabled={!editing}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Proficiency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Basic">Basic</SelectItem>
-                        <SelectItem value="Conversational">
-                          Conversational
-                        </SelectItem>
-                        <SelectItem value="Fluent">Fluent</SelectItem>
-                        <SelectItem value="Native">Native</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {editing && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:bg-red-50"
-                      onClick={() => removeArrayItem("languages", lang.id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              {editing && (
-                <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
-                  onClick={() =>
-                    addArrayItem("languages", { name: "", proficiency: "" })
-                  }
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Add Language
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* References Tab */}
-        <TabsContent value="references">
-          <Card className="bg-white shadow-sm border-0">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900">
-                References (Optional)
-              </CardTitle>
-              <CardDescription>
-                Contact details for your professional references.
+                Languages you speak and your proficiency level.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {client.references?.map((ref, index) => (
+              {client.languages?.map((language, index) => (
                 <div
-                  key={ref.id}
+                  key={language.id}
                   className="border p-4 rounded-lg space-y-4 relative"
                 >
                   {editing && (
@@ -1996,94 +1817,83 @@ export default function UserProfilePage() {
                       variant="ghost"
                       size="icon"
                       className="absolute top-2 right-2 text-red-500 hover:bg-red-50"
-                      onClick={() => removeArrayItem("references", ref.id)}
+                      onClick={() => removeArrayItem("languages", language.id)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   )}
-                  <div className="space-y-2">
-                    <Label htmlFor={`refereeName-${index}`}>Referee Name</Label>
-                    <Input
-                      id={`refereeName-${index}`}
-                      name="refereeName"
-                      value={
-                        editing
-                          ? ref.refereeName || ""
-                          : ref.refereeName || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "references",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`positionCompany-${index}`}>
-                      Position / Company
-                    </Label>
-                    <Input
-                      id={`positionCompany-${index}`}
-                      name="positionCompany"
-                      value={
-                        editing
-                          ? ref.positionCompany || ""
-                          : ref.positionCompany || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "references",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`contactDetails-${index}`}>
-                      Contact Details
-                    </Label>
-                    <Input
-                      id={`contactDetails-${index}`}
-                      name="contactDetails"
-                      value={
-                        editing
-                          ? ref.contactDetails || ""
-                          : ref.contactDetails || "N/A"
-                      }
-                      onChange={(e) =>
-                        handleArrayItemChange(
-                          "references",
-                          index,
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                      disabled={!editing}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor={`languageName-${index}`}>Language</Label>
+                      <Input
+                        id={`languageName-${index}`}
+                        name="name"
+                        value={
+                          editing ? language.name || "" : language.name || "N/A"
+                        }
+                        onChange={(e) =>
+                          handleArrayItemChange(
+                            "languages",
+                            index,
+                            "name",
+                            e.target.value
+                          )
+                        }
+                        disabled={!editing}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`languageProficiency-${index}`}>
+                        Proficiency Level
+                      </Label>
+                      <Select
+                        value={
+                          editing
+                            ? language.proficiency?.toString() || ""
+                            : language.proficiency?.toString() || ""
+                        }
+                        onValueChange={(value) =>
+                          handleArrayItemChange(
+                            "languages",
+                            index,
+                            "proficiency",
+                            parseInt(value)
+                          )
+                        }
+                        disabled={!editing}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Proficiency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="25">Basic</SelectItem>
+                          <SelectItem value="50">Conversational</SelectItem>
+                          <SelectItem value="75">Fluent</SelectItem>
+                          <SelectItem value="100">Native</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               ))}
               {editing && (
                 <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
                   onClick={() =>
-                    addArrayItem("references", {
-                      refereeName: "",
-                      positionCompany: "",
-                      contactDetails: "",
+                    addArrayItem("languages", {
+                      name: "",
+                      proficiency: 50,
                     })
                   }
+                  className="w-full bg-teal-600 hover:bg-teal-700"
                 >
-                  <Plus className="h-4 w-4 mr-2" /> Add Reference
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Language
                 </Button>
+              )}
+              {!editing && client.languages?.length === 0 && (
+                <p className="text-gray-500 text-center py-4">
+                  No languages added yet.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -2100,52 +1910,88 @@ export default function UserProfilePage() {
                 Upload your resume and cover letter.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="resume">Resume</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="resume"
-                    type="file"
-                    ref={resumeInputRef}
-                    onChange={(e) => handleFileUpload(e, "resumeUrl")}
-                    className="flex-1"
-                    accept=".pdf,.doc,.docx"
-                    disabled={!editing}
-                  />
-                  {client.resumeUrl && (
-                    <a
-                      href={client.resumeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-teal-600 hover:underline text-sm"
-                    >
-                      View Current
-                    </a>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border p-4 rounded-lg">
+                  <h3 className="text-md font-semibold text-gray-800 mb-4">
+                    Resume
+                  </h3>
+                  {client.resumeUrl ? (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-2">
+                        Current Resume:
+                      </p>
+                      <a
+                        href={client.resumeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {client.resumeUrl.split("/").pop()}
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 mb-4">No resume uploaded</p>
+                  )}
+                  {editing && (
+                    <div>
+                      <input
+                        type="file"
+                        ref={resumeInputRef}
+                        onChange={(e) => handleFileUpload(e, "resumeUrl")}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => resumeInputRef.current?.click()}
+                        className="bg-transparent"
+                      >
+                        Upload Resume
+                      </Button>
+                    </div>
                   )}
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="coverLetter">Cover Letter</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="coverLetter"
-                    type="file"
-                    ref={coverLetterInputRef}
-                    onChange={(e) => handleFileUpload(e, "coverLetterUrl")}
-                    className="flex-1"
-                    accept=".pdf,.doc,.docx"
-                    disabled={!editing}
-                  />
-                  {client.coverLetterUrl && (
-                    <a
-                      href={client.coverLetterUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-teal-600 hover:underline text-sm"
-                    >
-                      View Current
-                    </a>
+                <div className="border p-4 rounded-lg">
+                  <h3 className="text-md font-semibold text-gray-800 mb-4">
+                    Cover Letter
+                  </h3>
+                  {client.coverLetterUrl ? (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-2">
+                        Current Cover Letter:
+                      </p>
+                      <a
+                        href={client.coverLetterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {client.coverLetterUrl.split("/").pop()}
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 mb-4">
+                      No cover letter uploaded
+                    </p>
+                  )}
+                  {editing && (
+                    <div>
+                      <input
+                        type="file"
+                        ref={coverLetterInputRef}
+                        onChange={(e) => handleFileUpload(e, "coverLetterUrl")}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => coverLetterInputRef.current?.click()}
+                        className="bg-transparent"
+                      >
+                        Upload Cover Letter
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>

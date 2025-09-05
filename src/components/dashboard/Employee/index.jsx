@@ -26,6 +26,7 @@ import {
   DollarSign,
   ArrowRight,
   TrendingUp,
+  Loader2,
 } from "lucide-react";
 import {
   Line,
@@ -39,96 +40,222 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 export default function UserDashboard() {
   const { data: session } = useSession();
-  console.log("session : ", session);
+  const [stats, setStats] = useState({
+    applicationsSent: 0,
+    profileViews: 0,
+    savedJobs: 0,
+    interviewInvites: 0,
+  });
+  const [recentJobs, setRecentJobs] = useState([]);
+  const [skillsData, setSkillsData] = useState([]);
+  const [applicationTimelineData, setApplicationTimelineData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const stats = [
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!session?.user?.email) return;
+
+      try {
+        setLoading(true);
+
+        // Fetch employee profile to get skills and other data
+        const profileRes = await fetch(
+          `/api/employeeProfile?email=${session.user.email}`
+        );
+        const profileData = await profileRes.json();
+
+        // Fetch applications data
+        const applicationsRes = await fetch(
+          `/api/employeeApplications?email=${session.user.email}`
+        );
+        const applicationsData = await applicationsRes.json();
+
+        // Fetch jobs data
+        const jobsRes = await fetch("/api/jobs");
+        const jobsData = await jobsRes.json();
+
+        // Process stats
+        const applicationsSent = applicationsData.allApplications?.length || 0;
+        const savedJobs =
+          jobsData.filter((job) => job.savedBy?.includes(session.user.email))
+            .length || 0;
+
+        // Updated to include interview-scheduled applications
+        setStats({
+          applicationsSent,
+          profileViews: profileData.profileViews || 0,
+          savedJobs,
+          interviewInvites:
+            applicationsData.interviewScheduled?.length ||
+            applicationsData.allApplications?.filter(
+              (app) => app.status === "interview-scheduled"
+            ).length ||
+            0,
+        });
+
+        // Process recent jobs
+        const recentApplications =
+          applicationsData.allApplications?.slice(0, 3) || [];
+        const processedJobs = recentApplications.map((app) => ({
+          id: app.jobId || app._id, // Use jobId if available, otherwise use _id
+          title: app.position || "Unknown Position",
+          company: app.company || "Unknown Company",
+          location: app.location || "Not specified",
+          salary: app.salary || "Not specified",
+          type: app.jobType || "Full-time",
+          posted: new Date(app.appliedAt).toLocaleDateString() || "Unknown",
+          status: app.status || "Applied",
+          avatar: "/placeholder.svg?height=40&width=40",
+          interviewSchedule: app.interviewSchedule || null, // Add interview schedule data
+        }));
+        setRecentJobs(processedJobs);
+
+        // Process skills data
+        const skills = profileData.skills?.slice(0, 4) || [];
+        const processedSkills = skills.map((skill, index) => ({
+          name: skill.name || skill.skillName || `Skill ${index + 1}`,
+          percentage: skill.level || skill.proficiency || 50,
+          color: [
+            "bg-yellow-400",
+            "bg-blue-500",
+            "bg-green-500",
+            "bg-purple-500",
+          ][index % 4],
+        }));
+        setSkillsData(processedSkills);
+
+        // Process application timeline data based on actual applications
+        const timelineData = processTimelineData(
+          applicationsData.allApplications || []
+        );
+        setApplicationTimelineData(timelineData);
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (session?.user?.email) {
+      fetchData();
+    }
+  }, [session]);
+
+  // Process timeline data from actual applications
+  const processTimelineData = (applications) => {
+    // Group applications by month
+    const monthlyData = {};
+
+    applications.forEach((app) => {
+      if (app.appliedAt) {
+        const date = new Date(app.appliedAt);
+        const monthYear = `${date.toLocaleString("default", {
+          month: "short",
+        })} ${date.getFullYear()}`;
+
+        if (!monthlyData[monthYear]) {
+          monthlyData[monthYear] = { applications: 0, interviews: 0 };
+        }
+
+        monthlyData[monthYear].applications += 1;
+        if (
+          app.status === "interview-scheduled" ||
+          app.status === "shortlisted"
+        ) {
+          monthlyData[monthYear].interviews += 1;
+        }
+      }
+    });
+
+    // Convert to array format for chart
+    return Object.entries(monthlyData).map(([name, data]) => ({
+      name,
+      applications: data.applications,
+      interviews: data.interviews,
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <p className="text-red-600 text-lg font-semibold">{error}</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const statsData = [
     {
       title: "Applications Sent",
-      value: "12",
+      value: stats.applicationsSent,
       icon: FileText,
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600",
     },
     {
       title: "Profile Views",
-      value: "48",
+      value: stats.profileViews,
       icon: Eye,
       iconBg: "bg-green-100",
       iconColor: "text-green-600",
     },
     {
       title: "Saved Jobs",
-      value: "6",
+      value: stats.savedJobs,
       icon: Heart,
       iconBg: "bg-purple-100",
       iconColor: "text-purple-600",
     },
     {
       title: "Interview Invites",
-      value: "3",
+      value: stats.interviewInvites,
       icon: Briefcase,
       iconBg: "bg-red-100",
       iconColor: "text-red-600",
     },
   ];
 
-  const recentJobs = [
-    {
-      title: "Senior Frontend Developer",
-      company: "TechCorp Inc.",
-      location: "San Francisco, CA",
-      salary: "$120k - $150k",
-      type: "Full-time",
-      posted: "2 days ago",
-      status: "Applied",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      title: "UX Designer",
-      company: "Design Studio",
-      location: "New York, NY",
-      salary: "$90k - $110k",
-      type: "Full-time",
-      posted: "1 week ago",
-      status: "Saved",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      title: "Product Manager",
-      company: "StartupXYZ",
-      location: "Remote",
-      salary: "$100k - $130k",
-      type: "Full-time",
-      posted: "3 days ago",
-      status: "Viewed",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-  ];
-
-  const skillsData = [
-    { name: "JavaScript", percentage: 90, color: "bg-yellow-400" },
-    { name: "React", percentage: 85, color: "bg-blue-500" },
-    { name: "Node.js", percentage: 75, color: "bg-green-500" },
-    { name: "Python", percentage: 60, color: "bg-purple-500" },
-  ];
-
-  const applicationTimelineData = [
-    { name: "Jan", applications: 10, interviews: 3 },
-    { name: "Feb", applications: 15, interviews: 5 },
-    { name: "Mar", applications: 12, interviews: 4 },
-    { name: "Apr", applications: 18, interviews: 7 },
-    { name: "May", applications: 20, interviews: 8 },
-    { name: "Jun", applications: 16, interviews: 6 },
-  ];
-
   return (
-    <div className="space-y-6  ">
+    <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
+        {statsData.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
             <Card key={index} className="bg-white shadow-sm border-0">
@@ -166,64 +293,119 @@ export default function UserDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentJobs.map((job, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage
-                          src={job.avatar || "/placeholder.svg"}
-                          alt={job.company}
-                        />
-                        <AvatarFallback className="bg-gray-200">
-                          {job.company
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900">
-                          {job.title}
-                        </h4>
-                        <p className="text-sm text-gray-600">{job.company}</p>
-                        <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                          <span className="flex items-center">
-                            <MapPin className="w-3 h-3 mr-1" />
-                            {job.location}
-                          </span>
-                          <span className="flex items-center">
-                            <DollarSign className="w-3 h-3 mr-1" />
-                            {job.salary}
-                          </span>
-                          <span className="flex items-center">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {job.posted}
-                          </span>
+                {recentJobs.length > 0 ? (
+                  recentJobs.map((job, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage
+                            src={job.avatar || "/placeholder.svg"}
+                            alt={job.company}
+                          />
+                          <AvatarFallback className="bg-gray-200">
+                            {job.company
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">
+                            {job.title}
+                          </h4>
+                          <p className="text-sm text-gray-600">{job.company}</p>
+                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                            <span className="flex items-center">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              {job.location}
+                            </span>
+                            <span className="flex items-center">
+                              <DollarSign className="w-3 h-3 mr-1" />
+                              {job.salary}
+                            </span>
+                            <span className="flex items-center">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {job.posted}
+                            </span>
+                          </div>
+                          {/* Show interview schedule if available */}
+                          {job.status === "interview-scheduled" &&
+                            job.interviewSchedule && (
+                              <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
+                                <div className="text-xs text-green-700 font-medium flex items-center mb-1">
+                                  <Calendar className="w-3 h-3 mr-1" />
+                                  Interview Scheduled
+                                </div>
+                                <div className="text-xs text-green-600">
+                                  {new Date(
+                                    `${job.interviewSchedule.date}T${job.interviewSchedule.time}`
+                                  ).toLocaleString("en-US", {
+                                    weekday: "short",
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                                <div className="text-xs text-green-600 capitalize">
+                                  {job.interviewSchedule.type}
+                                </div>
+                                {job.interviewSchedule.meetingLink && (
+                                  <a
+                                    href={job.interviewSchedule.meetingLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-blue-600 underline hover:text-blue-800"
+                                  >
+                                    Meeting Link
+                                  </a>
+                                )}
+                              </div>
+                            )}
                         </div>
                       </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge
+                          variant={
+                            job.status === "applied" ||
+                            job.status === "interview-scheduled"
+                              ? "default"
+                              : "secondary"
+                          }
+                          className={
+                            job.status === "applied" ||
+                            job.status === "interview-scheduled"
+                              ? "bg-green-100 text-green-700"
+                              : ""
+                          }
+                        >
+                          {job.status === "interview-scheduled"
+                            ? "Interview Scheduled"
+                            : job.status}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            (window.location.href = `/singleJob/${job.id}`)
+                          }
+                          className="bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge
-                        variant={
-                          job.status === "Applied" ? "default" : "secondary"
-                        }
-                        className={
-                          job.status === "Applied"
-                            ? "bg-green-100 text-green-700"
-                            : ""
-                        }
-                      >
-                        {job.status}
-                      </Badge>
-                      <Button variant="outline" size="sm">
-                        View
-                      </Button>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No recent job activity found
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -240,22 +422,30 @@ export default function UserDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {skillsData.map((skill, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-gray-700">
-                        {skill.name}
-                      </span>
-                      <span className="text-gray-500">{skill.percentage}%</span>
+                {skillsData.length > 0 ? (
+                  skillsData.map((skill, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium text-gray-700">
+                          {skill.name}
+                        </span>
+                        <span className="text-gray-500">
+                          {skill.percentage}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${skill.color}`}
+                          style={{ width: `${skill.percentage}%` }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${skill.color}`}
-                        style={{ width: `${skill.percentage}%` }}
-                      ></div>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No skills data available
                   </div>
-                ))}
+                )}
               </div>
               <Button
                 variant="link"
@@ -338,13 +528,20 @@ export default function UserDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full justify-start bg-blue-600 hover:bg-blue-700">
+              <Button
+                className="w-full justify-start bg-blue-600 hover:bg-blue-700"
+                onClick={() => (window.location.href = "/allJobs")}
+              >
                 <Briefcase className="w-4 h-4 mr-2" />
                 Search Jobs
               </Button>
               <Button
                 variant="outline"
                 className="w-full justify-start bg-transparent"
+                onClick={() =>
+                  (window.location.href =
+                    "/dashboard/employee/profileManagement")
+                }
               >
                 <FileText className="w-4 h-4 mr-2" />
                 Update Resume
@@ -352,9 +549,12 @@ export default function UserDashboard() {
               <Button
                 variant="outline"
                 className="w-full justify-start bg-transparent"
+                onClick={() =>
+                  (window.location.href = "/dashboard/employee/appliedJobs")
+                }
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
-                View Analytics
+                View Applications
               </Button>
             </CardContent>
           </Card>
