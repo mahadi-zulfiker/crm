@@ -30,9 +30,9 @@ export default function Brief() {
   };
 
   return (
-    <section className="relative w-full bg-white text-gray-800 font-sans overflow-hidden py-20 lg:py-28">
+    <section className="relative w-full bg-gray-50 text-gray-800 font-sans overflow-hidden py-20 lg:py-28">
       {/* Background subtle gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100" />
+      <div className="absolute inset-0 bg-gray-50" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-16">
