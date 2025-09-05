@@ -229,129 +229,129 @@ export default function ClientPaymentHistoryPage() {
 
   if (loading) {
     return (
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center space-y-4">
-            <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
-            <p className="text-gray-600">Loading payment history...</p>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
+          <p className="text-gray-600">Loading payment history...</p>
         </div>
+      </div>
     );
   }
 
   return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Payment History
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Track your payments and billing history.
-            </p>
-          </div>
-          <Button variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Export Report
-          </Button>
+    <div className="space-y-6 w-full">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Payment History
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Track your payments and billing history.
+          </p>
         </div>
+        <Button variant="outline" className="whitespace-nowrap">
+          <Download className="w-4 h-4 mr-2" />
+          <span className="hidden xs:inline">Export Report</span>
+          <span className="xs:hidden">Export</span>
+        </Button>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Total Spent
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    ${stats.totalSpent.toLocaleString()}
-                  </p>
-                </div>
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Total Transactions
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stats.totalTransactions}
-                  </p>
-                </div>
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Receipt className="w-5 h-5 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Pending Amount
-                  </p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    ${stats.pendingAmount.toLocaleString()}
-                  </p>
-                </div>
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <Calendar className="w-5 h-5 text-yellow-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Success Rate
-                  </p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {stats.totalTransactions > 0
-                      ? Math.round(
-                          (stats.completedTransactions /
-                            stats.totalTransactions) *
-                            100
-                        )
-                      : 0}
-                    %
-                  </p>
-                </div>
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-purple-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <Card>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="shadow-sm">
           <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    placeholder="Search by job title, candidate, or payment ID..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Spent</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">
+                  ${stats.totalSpent.toLocaleString()}
+                </p>
               </div>
+              <div className="p-2 bg-green-100 rounded-lg">
+                <DollarSign className="w-5 h-5 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Transactions
+                </p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">
+                  {stats.totalTransactions}
+                </p>
+              </div>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Receipt className="w-5 h-5 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Pending Amount
+                </p>
+                <p className="text-xl md:text-2xl font-bold text-yellow-600">
+                  ${stats.pendingAmount.toLocaleString()}
+                </p>
+              </div>
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Calendar className="w-5 h-5 text-yellow-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Success Rate
+                </p>
+                <p className="text-xl md:text-2xl font-bold text-green-600">
+                  {stats.totalTransactions > 0
+                    ? Math.round(
+                        (stats.completedTransactions /
+                          stats.totalTransactions) *
+                          100
+                      )
+                    : 0}
+                  %
+                </p>
+              </div>
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card className="shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search by job title, candidate, or payment ID..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:flex gap-2 md:gap-4">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-40">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -363,7 +363,7 @@ export default function ClientPaymentHistoryPage() {
                 </SelectContent>
               </Select>
               <Select value={methodFilter} onValueChange={setMethodFilter}>
-                <SelectTrigger className="w-full md:w-48">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Payment Method" />
                 </SelectTrigger>
                 <SelectContent>
@@ -375,7 +375,7 @@ export default function ClientPaymentHistoryPage() {
                 </SelectContent>
               </Select>
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-full md:w-40">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Date Range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -388,139 +388,130 @@ export default function ClientPaymentHistoryPage() {
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Payments Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Payment Transactions ({filteredPayments.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Payment ID</TableHead>
-                    <TableHead>Job Title</TableHead>
-                    <TableHead>Candidate</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>
-                        <div className="font-medium text-gray-900">
-                          {payment.transactionId}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium text-gray-900">
-                          {payment.jobTitle}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {payment.candidateName}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {payment.candidateEmail}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-xs">
-                          <p
-                            className="text-sm text-gray-900 truncate"
-                            title={payment.description}
-                          >
-                            {payment.description}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-3 h-3 text-gray-400" />
-                          <span className="font-medium">
-                            {payment.amount.toLocaleString()}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          {getMethodIcon(payment.paymentMethod)}
-                          <span className="capitalize">
-                            {payment.paymentMethod.replace("_", " ")}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(payment.status)}>
-                          {payment.status.charAt(0).toUpperCase() +
-                            payment.status.slice(1)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div>{payment.date}</div>
-                        <div className="text-sm text-gray-500">
-                          {payment.time}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            title="Download Invoice"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+      {/* Payments Table */}
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle>
+            Payment Transactions ({filteredPayments.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <Table className="w-full min-w-[800px] md:min-w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="whitespace-nowrap">Payment ID</TableHead>
+                <TableHead className="whitespace-nowrap">Job Title</TableHead>
+                <TableHead className="whitespace-nowrap">Candidate</TableHead>
+                <TableHead className="whitespace-nowrap">Description</TableHead>
+                <TableHead className="whitespace-nowrap">Amount</TableHead>
+                <TableHead className="whitespace-nowrap">Method</TableHead>
+                <TableHead className="whitespace-nowrap">Status</TableHead>
+                <TableHead className="whitespace-nowrap">Date</TableHead>
+                <TableHead className="whitespace-nowrap">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPayments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell className="font-medium text-gray-900 max-w-[120px] truncate">
+                    {payment.transactionId}
+                  </TableCell>
+                  <TableCell className="font-medium text-gray-900 max-w-[120px] truncate">
+                    {payment.jobTitle}
+                  </TableCell>
+                  <TableCell className="max-w-[150px]">
+                    <div className="font-medium text-gray-900 truncate">
+                      {payment.candidateName}
+                    </div>
+                    <div className="text-sm text-gray-500 truncate">
+                      {payment.candidateEmail}
+                    </div>
+                  </TableCell>
+                  <TableCell className="max-w-[150px] min-w-[150px]">
+                    <p
+                      className="text-sm text-gray-900 truncate"
+                      title={payment.description}
+                    >
+                      {payment.description}
+                    </p>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="w-3 h-3 text-gray-400" />
+                      <span className="font-medium">
+                        {payment.amount.toLocaleString()}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                      {getMethodIcon(payment.paymentMethod)}
+                      <span className="capitalize text-xs md:text-sm truncate max-w-[100px]">
+                        {payment.paymentMethod.replace("_", " ")}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(payment.status)}>
+                      {payment.status.charAt(0).toUpperCase() +
+                        payment.status.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <div>{payment.date}</div>
+                    <div className="text-sm text-gray-500">{payment.time}</div>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="View Details"
+                        className="p-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Download Invoice"
+                        className="p-2"
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {filteredPayments.length === 0 && (
+        <Card className="shadow-sm">
+          <CardContent className="p-12 text-center">
+            <div className="text-gray-400 mb-4">
+              <Receipt className="w-12 h-12 mx-auto" />
             </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No payments found
+            </h3>
+            <p className="text-gray-600">
+              {searchTerm ||
+              statusFilter !== "all" ||
+              methodFilter !== "all" ||
+              dateRange !== "all"
+                ? "Try adjusting your search criteria or filters."
+                : "You haven't made any payments yet. Payments will appear here once you start hiring candidates."}
+            </p>
           </CardContent>
         </Card>
-
-        {filteredPayments.length === 0 && (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <div className="text-gray-400 mb-4">
-                <Receipt className="w-12 h-12 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No payments found
-              </h3>
-              <p className="text-gray-600">
-                {searchTerm ||
-                statusFilter !== "all" ||
-                methodFilter !== "all" ||
-                dateRange !== "all"
-                  ? "Try adjusting your search criteria or filters."
-                  : "You haven't made any payments yet. Payments will appear here once you start hiring candidates."}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      )}
+    </div>
   );
 }

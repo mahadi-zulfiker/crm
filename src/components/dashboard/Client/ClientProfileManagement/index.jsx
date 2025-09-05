@@ -215,7 +215,6 @@ export default function ClientProfilePage() {
       [field]: value,
     }));
   };
-  
 
   const handleSave = async () => {
     try {
@@ -307,14 +306,16 @@ export default function ClientProfilePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Company Profile</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Company Profile
+          </h1>
+          <p className="text-gray-600 mt-1 text-sm md:text-base">
             Manage your company information and hiring preferences.
           </p>
           {profileData.lastUpdate && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs md:text-sm text-gray-500 mt-1">
               Last updated:{" "}
               {new Date(profileData.lastUpdate).toLocaleDateString()}
             </p>
@@ -323,23 +324,30 @@ export default function ClientProfilePage() {
         <div className="flex gap-2">
           {isEditing ? (
             <>
-              <Button variant="outline" onClick={() => setIsEditing(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(false)}
+                size="sm"
+                className="text-xs md:text-sm"
+              >
                 Cancel
               </Button>
               <Button
                 onClick={handleSave}
-                className="bg-teal-600 hover:bg-teal-700"
+                className="bg-teal-600 hover:bg-teal-700 text-xs md:text-sm"
+                size="sm"
               >
-                <Save className="w-4 h-4 mr-2" />
+                <Save className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                 Save Changes
               </Button>
             </>
           ) : (
             <Button
               onClick={() => setIsEditing(true)}
-              className="bg-teal-600 hover:bg-teal-700"
+              className="bg-teal-600 hover:bg-teal-700 text-xs md:text-sm"
+              size="sm"
             >
-              <Edit className="w-4 h-4 mr-2" />
+              <Edit className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
               Edit Profile
             </Button>
           )}
@@ -347,17 +355,17 @@ export default function ClientProfilePage() {
       </div>
 
       {/* Profile Overview Card */}
-      <Card>
-        <CardContent className="p-6">
+      <Card className="shadow-sm">
+        <CardContent className="p-4 md:p-6">
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex flex-col items-center">
               <div className="relative">
-                <Avatar className="h-32 w-32">
+                <Avatar className="h-24 w-24 md:h-32 md:w-32">
                   <AvatarImage
                     src={profileData.companyLogo || "/placeholder.svg"}
                     alt="Company Logo"
                   />
-                  <AvatarFallback className="text-2xl bg-teal-500 text-white">
+                  <AvatarFallback className="text-lg md:text-2xl bg-teal-500 text-white">
                     {(profileData.companyName || profileData.username || "C")
                       .split(" ")
                       .map((n) => n[0])
@@ -366,8 +374,8 @@ export default function ClientProfilePage() {
                   </AvatarFallback>
                 </Avatar>
                 {isEditing && (
-                  <label className="absolute bottom-0 right-0 bg-teal-600 text-white p-2 rounded-full cursor-pointer hover:bg-teal-700">
-                    <Camera className="w-4 h-4" />
+                  <label className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 md:p-2 rounded-full cursor-pointer hover:bg-teal-700">
+                    <Camera className="w-3 h-3 md:w-4 md:h-4" />
                     <input
                       type="file"
                       accept="image/*"
@@ -377,10 +385,10 @@ export default function ClientProfilePage() {
                   </label>
                 )}
               </div>
-              <div className="text-center mt-4">
+              <div className="text-center mt-3 md:mt-4">
                 <Badge
                   variant="outline"
-                  className="bg-green-50 text-green-700 border-green-200"
+                  className="bg-green-50 text-green-700 border-green-200 text-xs"
                 >
                   {profileData.userType === "client"
                     ? "Client Account"
@@ -392,56 +400,64 @@ export default function ClientProfilePage() {
             <div className="flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-xl md:text-2xl font-bold text-gray-900">
                     {profileData.companyName ||
                       profileData.username ||
                       "Your Company"}
                   </h2>
-                  <p className="text-gray-600 mb-2">
+                  <p className="text-gray-600 mb-2 text-sm md:text-base">
                     {profileData.industry || "Industry not specified"}
                   </p>
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                  <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-gray-600 mb-4">
                     <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
+                      <Users className="w-3 h-3 md:w-4 md:h-4" />
                       {profileData.companySize || "Size not specified"}
                     </div>
                     {profileData.foundedYear && (
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
+                        <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                         Founded {profileData.foundedYear}
                       </div>
                     )}
                     <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-400" />
+                      <Star className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" />
                       {profileData.averageRating || 0} Rating
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="text-center p-2 md:p-3 bg-blue-50 rounded-lg">
+                    <div className="text-lg md:text-2xl font-bold text-blue-600">
                       {profileData.totalJobsPosted}
                     </div>
-                    <div className="text-sm text-gray-600">Jobs Posted</div>
+                    <div className="text-xs md:text-sm text-gray-600">
+                      Jobs Posted
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
+                  <div className="text-center p-2 md:p-3 bg-green-50 rounded-lg">
+                    <div className="text-lg md:text-2xl font-bold text-green-600">
                       {profileData.activeJobs}
                     </div>
-                    <div className="text-sm text-gray-600">Active Jobs</div>
+                    <div className="text-xs md:text-sm text-gray-600">
+                      Active Jobs
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">
+                  <div className="text-center p-2 md:p-3 bg-purple-50 rounded-lg">
+                    <div className="text-lg md:text-2xl font-bold text-purple-600">
                       {profileData.totalHires}
                     </div>
-                    <div className="text-sm text-gray-600">Total Hires</div>
+                    <div className="text-xs md:text-sm text-gray-600">
+                      Total Hires
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">
+                  <div className="text-center p-2 md:p-3 bg-orange-50 rounded-lg">
+                    <div className="text-lg md:text-2xl font-bold text-orange-600">
                       {profileData.averageRating}
                     </div>
-                    <div className="text-sm text-gray-600">Avg Rating</div>
+                    <div className="text-xs md:text-sm text-gray-600">
+                      Avg Rating
+                    </div>
                   </div>
                 </div>
               </div>
@@ -452,27 +468,39 @@ export default function ClientProfilePage() {
 
       {/* Detailed Information Tabs */}
       <Tabs defaultValue="company" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="company">Company Info</TabsTrigger>
-          <TabsTrigger value="contact">Contact Details</TabsTrigger>
-          <TabsTrigger value="hiring">Hiring Preferences</TabsTrigger>
-          <TabsTrigger value="culture">Culture & Benefits</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+          <TabsTrigger value="company" className="text-xs md:text-sm">
+            Company Info
+          </TabsTrigger>
+          <TabsTrigger value="contact" className="text-xs md:text-sm">
+            Contact Details
+          </TabsTrigger>
+          <TabsTrigger value="hiring" className="text-xs md:text-sm">
+            Hiring Preferences
+          </TabsTrigger>
+          <TabsTrigger value="culture" className="text-xs md:text-sm">
+            Culture & Benefits
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="text-xs md:text-sm">
+            Settings
+          </TabsTrigger>
         </TabsList>
 
         {/* Company Information Tab */}
         <TabsContent value="company">
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                <Building2 className="w-4 h-4 md:w-5 md:h-5" />
                 Company Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name *</Label>
+                  <Label htmlFor="companyName" className="text-sm">
+                    Company Name *
+                  </Label>
                   <Input
                     id="companyName"
                     value={profileData.companyName}
@@ -481,10 +509,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="Enter company name"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="industry">Industry *</Label>
+                  <Label htmlFor="industry" className="text-sm">
+                    Industry *
+                  </Label>
                   <Input
                     id="industry"
                     value={profileData.industry}
@@ -493,10 +524,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., Technology, Healthcare"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="companySize">Company Size</Label>
+                  <Label htmlFor="companySize" className="text-sm">
+                    Company Size
+                  </Label>
                   <Input
                     id="companySize"
                     value={profileData.companySize}
@@ -505,10 +539,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., 1-10, 11-50, 51-200"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="foundedYear">Founded Year</Label>
+                  <Label htmlFor="foundedYear" className="text-sm">
+                    Founded Year
+                  </Label>
                   <Input
                     id="foundedYear"
                     value={profileData.foundedYear}
@@ -517,10 +554,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., 2020"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
+                  <Label htmlFor="website" className="text-sm">
+                    Website
+                  </Label>
                   <Input
                     id="website"
                     value={profileData.website}
@@ -529,10 +569,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="https://yourcompany.com"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="businessType">Business Type</Label>
+                  <Label htmlFor="businessType" className="text-sm">
+                    Business Type
+                  </Label>
                   <Input
                     id="businessType"
                     value={profileData.businessType}
@@ -541,12 +584,15 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., Corporation, LLC"
+                    className="text-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Company Description</Label>
+                <Label htmlFor="description" className="text-sm">
+                  Company Description
+                </Label>
                 <Textarea
                   id="description"
                   value={profileData.description}
@@ -556,12 +602,13 @@ export default function ClientProfilePage() {
                   disabled={!isEditing}
                   rows={4}
                   placeholder="Describe your company, mission, and values..."
+                  className="text-sm"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="businessRegistration">
+                  <Label htmlFor="businessRegistration" className="text-sm">
                     Business Registration
                   </Label>
                   <Input
@@ -572,16 +619,20 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="Registration number"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="taxId">Tax ID</Label>
+                  <Label htmlFor="taxId" className="text-sm">
+                    Tax ID
+                  </Label>
                   <Input
                     id="taxId"
                     value={profileData.taxId}
                     onChange={(e) => handleInputChange("taxId", e.target.value)}
                     disabled={!isEditing}
                     placeholder="Tax identification number"
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -591,17 +642,19 @@ export default function ClientProfilePage() {
 
         {/* Contact Details Tab */}
         <TabsContent value="contact">
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                <Mail className="w-4 h-4 md:w-5 md:h-5" />
                 Contact Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contactPerson">Contact Person *</Label>
+                  <Label htmlFor="contactPerson" className="text-sm">
+                    Contact Person *
+                  </Label>
                   <Input
                     id="contactPerson"
                     value={profileData.contactPerson}
@@ -610,10 +663,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="Primary contact name"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Job Title</Label>
+                  <Label htmlFor="jobTitle" className="text-sm">
+                    Job Title
+                  </Label>
                   <Input
                     id="jobTitle"
                     value={profileData.jobTitle}
@@ -622,31 +678,39 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., HR Manager, CEO"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
+                  <Label htmlFor="email" className="text-sm">
+                    Email Address *
+                  </Label>
                   <Input
                     id="email"
                     type="email"
                     value={profileData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     disabled={true} // Email should not be editable
-                    className="bg-gray-50"
+                    className="bg-gray-50 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone" className="text-sm">
+                    Phone Number
+                  </Label>
                   <Input
                     id="phone"
                     value={profileData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
                     disabled={!isEditing}
                     placeholder="+1 (555) 123-4567"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="alternativePhone">Alternative Phone</Label>
+                  <Label htmlFor="alternativePhone" className="text-sm">
+                    Alternative Phone
+                  </Label>
                   <Input
                     id="alternativePhone"
                     value={profileData.alternativePhone}
@@ -655,12 +719,15 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="Secondary contact number"
+                    className="text-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="headquarters">Headquarters Address</Label>
+                <Label htmlFor="headquarters" className="text-sm">
+                  Headquarters Address
+                </Label>
                 <Textarea
                   id="headquarters"
                   value={profileData.headquarters}
@@ -670,12 +737,15 @@ export default function ClientProfilePage() {
                   disabled={!isEditing}
                   rows={2}
                   placeholder="Full company address"
+                  className="text-sm"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
+                  <Label htmlFor="country" className="text-sm">
+                    Country
+                  </Label>
                   <Input
                     id="country"
                     value={profileData.country}
@@ -684,30 +754,39 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="Country"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="state">State/Province</Label>
+                  <Label htmlFor="state" className="text-sm">
+                    State/Province
+                  </Label>
                   <Input
                     id="state"
                     value={profileData.state}
                     onChange={(e) => handleInputChange("state", e.target.value)}
                     disabled={!isEditing}
                     placeholder="State/Province"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city" className="text-sm">
+                    City
+                  </Label>
                   <Input
                     id="city"
                     value={profileData.city}
                     onChange={(e) => handleInputChange("city", e.target.value)}
                     disabled={!isEditing}
                     placeholder="City"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="zipCode">ZIP Code</Label>
+                  <Label htmlFor="zipCode" className="text-sm">
+                    ZIP Code
+                  </Label>
                   <Input
                     id="zipCode"
                     value={profileData.zipCode}
@@ -716,13 +795,16 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="ZIP/Postal Code"
+                    className="text-sm"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+                  <Label htmlFor="linkedinUrl" className="text-sm">
+                    LinkedIn URL
+                  </Label>
                   <Input
                     id="linkedinUrl"
                     value={profileData.linkedinUrl}
@@ -731,10 +813,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="https://linkedin.com/company/..."
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="twitterUrl">Twitter URL</Label>
+                  <Label htmlFor="twitterUrl" className="text-sm">
+                    Twitter URL
+                  </Label>
                   <Input
                     id="twitterUrl"
                     value={profileData.twitterUrl}
@@ -743,10 +828,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="https://twitter.com/..."
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="facebookUrl">Facebook URL</Label>
+                  <Label htmlFor="facebookUrl" className="text-sm">
+                    Facebook URL
+                  </Label>
                   <Input
                     id="facebookUrl"
                     value={profileData.facebookUrl}
@@ -755,6 +843,7 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="https://facebook.com/..."
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -764,17 +853,17 @@ export default function ClientProfilePage() {
 
         {/* Hiring Preferences Tab */}
         <TabsContent value="hiring">
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                <Briefcase className="w-4 h-4 md:w-5 md:h-5" />
                 Hiring Preferences
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="typicalHiringVolume">
+                  <Label htmlFor="typicalHiringVolume" className="text-sm">
                     Typical Hiring Volume
                   </Label>
                   <Input
@@ -785,10 +874,11 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., 5-10 per month"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="averageTimeToHire">
+                  <Label htmlFor="averageTimeToHire" className="text-sm">
                     Average Time to Hire
                   </Label>
                   <Input
@@ -799,10 +889,11 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., 2-4 weeks"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="preferredCandidateLevel">
+                  <Label htmlFor="preferredCandidateLevel" className="text-sm">
                     Preferred Candidate Level
                   </Label>
                   <Input
@@ -816,10 +907,13 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., Mid to Senior Level"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="remoteWorkPolicy">Remote Work Policy</Label>
+                  <Label htmlFor="remoteWorkPolicy" className="text-sm">
+                    Remote Work Policy
+                  </Label>
                   <Input
                     id="remoteWorkPolicy"
                     value={profileData.remoteWorkPolicy}
@@ -828,6 +922,7 @@ export default function ClientProfilePage() {
                     }
                     disabled={!isEditing}
                     placeholder="e.g., Hybrid, Remote, On-site"
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -837,16 +932,18 @@ export default function ClientProfilePage() {
 
         {/* Culture & Benefits Tab */}
         <TabsContent value="culture">
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                <Award className="w-4 h-4 md:w-5 md:h-5" />
                 Company Culture & Benefits
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="companyValues">Company Values</Label>
+                <Label htmlFor="companyValues" className="text-sm">
+                  Company Values
+                </Label>
                 <Textarea
                   id="companyValues"
                   value={profileData.companyValues}
@@ -856,14 +953,17 @@ export default function ClientProfilePage() {
                   disabled={!isEditing}
                   rows={3}
                   placeholder="Enter your company values separated by commas (e.g., Innovation, Collaboration, Excellence, Integrity)"
+                  className="text-sm"
                 />
-                <p className="text-sm text-gray-500">
+                <p className="text-xs text-gray-500">
                   Enter multiple values separated by commas
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="benefits">Benefits & Perks</Label>
+                <Label htmlFor="benefits" className="text-sm">
+                  Benefits & Perks
+                </Label>
                 <Textarea
                   id="benefits"
                   value={profileData.benefits}
@@ -873,14 +973,17 @@ export default function ClientProfilePage() {
                   disabled={!isEditing}
                   rows={4}
                   placeholder="Enter your company benefits separated by commas (e.g., Health Insurance, 401(k) Matching, Flexible Hours, Remote Work, Professional Development)"
+                  className="text-sm"
                 />
-                <p className="text-sm text-gray-500">
+                <p className="text-xs text-gray-500">
                   Enter multiple benefits separated by commas
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="workEnvironment">Work Environment</Label>
+                <Label htmlFor="workEnvironment" className="text-sm">
+                  Work Environment
+                </Label>
                 <Textarea
                   id="workEnvironment"
                   value={profileData.workEnvironment}
@@ -890,6 +993,7 @@ export default function ClientProfilePage() {
                   disabled={!isEditing}
                   rows={3}
                   placeholder="Describe your company culture and work environment..."
+                  className="text-sm"
                 />
               </div>
 
@@ -908,7 +1012,7 @@ export default function ClientProfilePage() {
                             <Badge
                               key={index}
                               variant="outline"
-                              className="bg-blue-50 text-blue-700"
+                              className="bg-blue-50 text-blue-700 text-xs"
                             >
                               {value.trim()}
                             </Badge>
@@ -929,7 +1033,7 @@ export default function ClientProfilePage() {
                             <Badge
                               key={index}
                               variant="outline"
-                              className="bg-green-50 text-green-700"
+                              className="bg-green-50 text-green-700 text-xs"
                             >
                               {benefit.trim()}
                             </Badge>
@@ -945,17 +1049,19 @@ export default function ClientProfilePage() {
 
         {/* Settings Tab */}
         <TabsContent value="settings">
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
+              <CardTitle className="text-lg md:text-xl">
+                Notification Settings
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-2">
                 <div>
-                  <Label htmlFor="emailNotifications">
+                  <Label htmlFor="emailNotifications" className="text-sm">
                     Email Notifications
                   </Label>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-gray-600">
                     Receive email notifications for new applications
                   </p>
                 </div>
@@ -968,10 +1074,12 @@ export default function ClientProfilePage() {
                   disabled={!isEditing}
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-2">
                 <div>
-                  <Label htmlFor="smsNotifications">SMS Notifications</Label>
-                  <p className="text-sm text-gray-600">
+                  <Label htmlFor="smsNotifications" className="text-sm">
+                    SMS Notifications
+                  </Label>
+                  <p className="text-xs text-gray-600">
                     Receive SMS alerts for urgent updates
                   </p>
                 </div>
@@ -984,10 +1092,12 @@ export default function ClientProfilePage() {
                   disabled={!isEditing}
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-2">
                 <div>
-                  <Label htmlFor="marketingEmails">Marketing Emails</Label>
-                  <p className="text-sm text-gray-600">
+                  <Label htmlFor="marketingEmails" className="text-sm">
+                    Marketing Emails
+                  </Label>
+                  <p className="text-xs text-gray-600">
                     Receive updates about new features and tips
                   </p>
                 </div>

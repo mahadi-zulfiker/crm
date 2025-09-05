@@ -12,7 +12,14 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Calendar, Briefcase } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Calendar,
+  Briefcase,
+  Loader2,
+  Eye,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 
 const ApprovedJobs = () => {
@@ -23,54 +30,62 @@ const ApprovedJobs = () => {
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.email) {
-      const fetchAppliedJobs = async () => {
-        try {
-          const response = await fetch(
-            `/api/applicationManagementEmployee?email=${session.user.email}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch applied jobs");
-          }
-          const data = await response.json();
-
-          // Ensure correct data format
-          if (Array.isArray(data.approvedJobs)) {
-            setJobs(data.approvedJobs);
-          } else {
-            throw new Error("Unexpected response format");
-          }
-
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchAppliedJobs();
+      fetchApprovedJobs();
     } else if (status === "unauthenticated") {
       setLoading(false);
     }
   }, [session, status]);
 
+  const fetchApprovedJobs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(
+        `/api/applicationManagementEmployee?email=${session.user.email}`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch approved jobs: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+
+      // Filter for approved jobs
+      const approvedJobs =
+        data.allApplications?.filter(
+          (job) => job.status === "Approved" || job.statusJob === "Approved"
+        ) || [];
+
+      setJobs(approvedJobs);
+    } catch (err) {
+      console.error("Error fetching approved jobs:", err);
+      setError(err.message || "Failed to fetch approved jobs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateJobStatus = async (id, action) => {
-    const confirmText =
-      action === "complete"
-        ? "You are about to mark this job as completed."
-        : "You will resign from this job.";
+    try {
+      const confirmText =
+        action === "complete"
+          ? "You are about to mark this job as completed."
+          : "You will resign from this job.";
 
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: confirmText,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: `Yes, ${action}!`,
-    });
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: confirmText,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: `Yes, ${action}!`,
+      });
 
-    if (result.isConfirmed) {
-      try {
+      if (result.isConfirmed) {
         const response = await fetch("/api/approvedJobsEmployee", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -78,8 +93,12 @@ const ApprovedJobs = () => {
         });
 
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Failed to update job");
 
+        if (!response.ok) {
+          throw new Error(data.error || data.message || "Failed to update job");
+        }
+
+        // Update the local state
         setJobs((prevJobs) =>
           prevJobs.map((job) =>
             job._id === id
@@ -92,9 +111,14 @@ const ApprovedJobs = () => {
         );
 
         Swal.fire("Success!", `Job marked as ${action}.`, "success");
-      } catch (error) {
-        Swal.fire("Error!", error.message, "error");
       }
+    } catch (error) {
+      console.error("Error updating job status:", error);
+      Swal.fire(
+        "Error!",
+        error.message || "Failed to update job status",
+        "error"
+      );
     }
   };
 
@@ -137,11 +161,52 @@ const ApprovedJobs = () => {
     );
   };
 
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-teal-600" />
+          <p className="text-gray-600 mt-4">Loading session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-gray-400 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Authentication Required
+          </h3>
+          <p className="text-gray-600">
+            Please sign in to view your approved jobs.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-teal-600" />
           <p className="text-gray-600 mt-4">Loading approved jobs...</p>
         </div>
       </div>
@@ -151,11 +216,26 @@ const ApprovedJobs = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-        <p className="text-red-600 text-lg font-semibold">Error: {error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">
-          Try Again
-        </Button>
+        <div className="text-red-600 mb-4">
+          <svg
+            className="w-16 h-16 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Error Loading Approved Jobs
+        </h3>
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button onClick={fetchApprovedJobs}>Try Again</Button>
       </div>
     );
   }
@@ -207,8 +287,11 @@ const ApprovedJobs = () => {
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
               {
-                jobs.filter((job) => !job.status || job.status === "Approved")
-                  .length
+                jobs.filter(
+                  (job) =>
+                    job.statusJob !== "Completed" &&
+                    job.statusJob !== "Resigned"
+                ).length
               }
             </div>
           </CardContent>
@@ -241,6 +324,9 @@ const ApprovedJobs = () => {
                       Job Title
                     </th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Company
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
                       Schedule
                     </th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">
@@ -262,18 +348,28 @@ const ApprovedJobs = () => {
                     >
                       <td className="py-4 px-4">
                         <div className="font-medium text-gray-900">
-                          {job.position}
+                          {job.position || job.title || "Job Title"}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="text-gray-700">
+                          {job.company || "Company"}
                         </div>
                       </td>
                       <td className="py-4 px-4 text-gray-700">
-                        {new Date(job.appliedAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        {job.appliedAt
+                          ? new Date(job.appliedAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )
+                          : "N/A"}
                       </td>
                       <td className="py-4 px-4">
-                        {getStatusBadge(job.statusJob)}
+                        {getStatusBadge(job.statusJob || job.status)}
                       </td>
                       <td className="py-4 px-4">
                         <Link href="/scheduleMeet">
@@ -281,7 +377,9 @@ const ApprovedJobs = () => {
                             variant="outline"
                             size="sm"
                             className="flex items-center gap-2 bg-transparent"
-                            onClick={() => handleArrangeMeeting(job.position)}
+                            onClick={() =>
+                              handleArrangeMeeting(job.position || job.title)
+                            }
                           >
                             <Calendar className="w-4 h-4" />
                             Arrange Meeting
@@ -290,6 +388,19 @@ const ApprovedJobs = () => {
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mr-2 bg-transparent"
+                            onClick={() =>
+                              (window.location.href = `/singleJob/${
+                                job.jobId || job._id
+                              }`)
+                            }
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
                           {job.statusJob !== "Completed" &&
                             job.statusJob !== "Resigned" && (
                               <>
