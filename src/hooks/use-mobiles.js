@@ -17,5 +17,6 @@ export function useIsMobile() {
     return () => mql.removeEventListener("change", onChange);
   }, []);
 
-  return !!isMobile;
+  // Default to false if undefined (server-side rendering)
+  return isMobile !== undefined ? isMobile : false;
 }

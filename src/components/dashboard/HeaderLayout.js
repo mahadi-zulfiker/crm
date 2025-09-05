@@ -11,12 +11,14 @@ import {
   LogOut,
   User,
   Settings,
+  Menu,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { useIsMobile } from "@/hooks/use-mobiles";
 
 const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { data: session, status } = useSession();
@@ -24,6 +26,7 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
+  const isMobile = useIsMobile();
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -91,64 +94,80 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+    <header className="bg-white border-b border-gray-200 px-3 md:px-6 py-2 md:py-3 flex-shrink-0 sticky top-0 z-30">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2 hover:bg-gray-100 transition-colors duration-200"
           >
-            {isSidebarOpen ? (
-              <ListCollapse className="w-8 h-8 text-teal-700" />
+            {isMobile ? (
+              <Menu className="w-5 h-5 text-teal-700" />
+            ) : isSidebarOpen ? (
+              <ListCollapse className="w-5 h-5 md:w-6 md:h-6 text-teal-700" />
             ) : (
-              <AlignLeft className="w-8 h-8 text-teal-700" />
+              <AlignLeft className="w-5 h-5 md:w-6 md:h-6 text-teal-700" />
             )}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => window.location.reload()}
-            className="text-teal-600 border-teal-200 hover:bg-teal-50 bg-transparent transition-colors duration-200"
+            className="text-teal-600 border-teal-200 hover:bg-teal-50 bg-transparent transition-colors duration-200 hidden sm:flex h-8 text-xs md:text-sm"
           >
-            <RotateCcw className="w-4 h-4 mr-2 text-teal-700" />
-            Refresh {user?.name ? `(${user.name})` : ""}
+            <RotateCcw className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4 text-teal-700" />
+            <span className="hidden md:inline">Refresh</span>
+            {user?.name ? (
+              <span className="hidden md:inline ml-1">({user.name})</span>
+            ) : (
+              ""
+            )}
+          </Button>
+          {/* Mobile refresh button */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => window.location.reload()}
+            className="text-teal-600 border-teal-200 hover:bg-teal-50 bg-transparent transition-colors duration-200 sm:hidden h-8 w-8"
+          >
+            <RotateCcw className="w-4 h-4 text-teal-700" />
           </Button>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={toggleFullscreen}
-            className="transition-colors duration-200"
+            className="transition-colors duration-200 hidden sm:flex h-8 w-8"
           >
             {isFullscreen ? (
-              <Minimize2 className="w-8 h-8 text-teal-700" />
+              <Minimize2 className="w-4 h-4 md:w-5 md:h-5 text-teal-700" />
             ) : (
-              <Fullscreen className="w-8 h-8 text-teal-700" />
+              <Fullscreen className="w-4 h-4 md:w-5 md:h-5 text-teal-700" />
             )}
           </Button>
 
           {/* Profile Dropdown */}
           {status === "loading" ? (
-            <div className="h-10 w-32 bg-gray-200 animate-pulse rounded-full"></div>
+            <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full"></div>
           ) : session ? (
             <div className="relative" ref={profileMenuRef}>
               <Button
                 variant="ghost"
-                className="relative h-10 w-auto px-3 rounded-full bg-teal-50 hover:bg-teal-100 transition-colors duration-200"
+                className="relative h-8 w-8 md:h-9 md:w-auto px-1 md:px-2 rounded-full bg-teal-50 hover:bg-teal-100 transition-colors duration-200"
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 aria-expanded={isProfileMenuOpen}
                 aria-haspopup="true"
               >
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
+                <div className="flex items-center gap-1 md:gap-2">
+                  <Avatar className="h-6 w-6">
                     <AvatarImage
                       src={user?.image || "/placeholder.svg?height=32&width=32"}
                       alt={user?.name || "User"}
                     />
-                    <AvatarFallback className="bg-teal-500 text-white">
+                    <AvatarFallback className="bg-teal-500 text-white text-xs">
                       {user?.name
                         ? user.name
                             .split(" ")
@@ -159,11 +178,11 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
                         : "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="text-left hidden sm:block">
-                    <p className="text-sm font-medium text-gray-900 truncate max-w-24">
+                  <div className="text-left hidden md:block">
+                    <p className="text-xs font-medium text-gray-900 truncate max-w-20 md:max-w-24">
                       {user?.name || "User"}
                     </p>
-                    <p className="text-xs text-gray-500 capitalize">
+                    <p className="text-[10px] md:text-xs text-gray-500 capitalize">
                       {getUserRole()}
                     </p>
                   </div>
@@ -173,7 +192,7 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
               {isProfileMenuOpen && (
                 <div
                   className={cn(
-                    "absolute right-0 mt-2 w-56 rounded-md border bg-white p-1 text-popover-foreground shadow-xl z-50",
+                    "absolute right-0 mt-1 w-48 md:w-56 rounded-md border bg-white p-1 text-popover-foreground shadow-xl z-50",
                     "origin-top-right animate-in fade-in-0 zoom-in-95"
                   )}
                 >
@@ -232,7 +251,7 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
             </div>
           ) : (
             <Link href="/signIn">
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+              <Button className="bg-teal-600 hover:bg-teal-700 text-white text-xs md:text-sm h-8">
                 Sign In
               </Button>
             </Link>
