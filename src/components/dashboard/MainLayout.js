@@ -59,14 +59,14 @@ const MainLayout = () => {
   const pathname = usePathname();
 
   return (
-    <div className="relative bg-[#f7f6f9] w-full min-h-screen font-[sans-serif] flex flex-col lg:flex-row">
+    <div className="relative bg-[#f7f6f9] w-full h-screen font-[sans-serif] flex flex-col lg:flex-row">
       <Sidebar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen">
+      <main className="flex-1 flex flex-col h-screen">
         <Header
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
