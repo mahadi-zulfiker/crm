@@ -41,6 +41,7 @@ import AdminProfileManagement from "./Admin/AdminProfileManagement";
 import VendorProfileManagement from "./Vendor/VendorProfileManagement";
 import ClientProfileManagement from "./Client/ClientProfileManagement";
 import Messages from "./Employee/Messages";
+import AllJobApplications from "./Employee/AllJobApplications";
 import CreateJobs from "./Client/CreateJobs";
 import ALlCandidates from "./Client/AllCandidates";
 import HiredCandidatesPage from "./Client/HiredCandidatesClient";
@@ -48,6 +49,7 @@ import JobDetailsClient from "./Client/JobDetailsClient";
 import ViewEmployeeProfile from "./Client/ViewEmployeeProfile";
 import InterviewScheduleClient from "./Client/InterviewScheduleClient";
 import SetInterViewClient from "./Client/SetInterviewClient";
+import InterviewedJobs from "./Employee/InterviewedJobs";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -175,6 +177,12 @@ const MainLayout = () => {
             <ProfileManagement />
           )}
           {pathname === "/dashboard/employee/messages" && <Messages />}
+          {pathname === "/dashboard/employee/allJobApplications" && (
+            <AllJobApplications />
+          )}
+          {pathname === "/dashboard/employee/interviewedJobs" && (
+            <InterviewedJobs />
+          )}
         </div>
       </main>
     </div>
