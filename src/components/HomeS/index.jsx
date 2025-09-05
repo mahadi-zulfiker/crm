@@ -48,7 +48,7 @@ const TestimonialCard = () => {
 
 const WhatWeOfferSection = () => {
   return (
-    <section className="bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 py-20 px-4 md:px-8 font-sans">
+    <section className="bg-gray-50 text-gray-800 py-20 px-4 md:px-8 font-sans">
       <div className="max-w-7xl mx-auto text-center">
         <motion.h3
           initial={{ opacity: 0, y: -20 }}

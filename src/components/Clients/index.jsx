@@ -79,7 +79,7 @@ export default function Clients() {
   const displayedLogos = [...logos, ...logos, ...logos];
 
   return (
-    <section className="bg-gradient-to-b from-white to-gray-50 py-20 px-4 md:px-8 font-sans relative overflow-hidden">
+    <section className="bg-gray-50 py-20 px-4 md:px-8 font-sans relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Heading */}
         <motion.div
@@ -99,7 +99,7 @@ export default function Clients() {
 
         {/* Logo Marquee */}
         <div
-          className="relative overflow-hidden py-8 border-y border-gray-200"
+          className="relative overflow-hidden py-8 border-y border-gray-50"
           data-aos="fade-up"
         >
           <div className="flex whitespace-nowrap animate-marquee">
