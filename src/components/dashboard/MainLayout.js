@@ -59,146 +59,124 @@ const MainLayout = () => {
   const pathname = usePathname();
 
   return (
-    <div
-      className={`relative bg-[#f7f6f9] w-full  ${
-        isSidebarOpen ? "h-screen" : "h-[calc(113vh)]"
-      } font-[sans-serif]`}
-    >
-      <div className="flex items-start">
-        <Sidebar
+    <div className="relative bg-[#f7f6f9] w-full min-h-screen font-[sans-serif] flex flex-col lg:flex-row">
+      <Sidebar
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+      />
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-h-screen">
+        <Header
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         />
 
-        {/* Main Content */}
-        <section
-          className={`main-content w-full bg-[#f7f6f9] overflow-x-hidden ${
-            isSidebarOpen ? "h-screen" : "h-[calc(113vh)]"
-          }  overflow-scroll`}
-        >
-          <Header
-            isSidebarOpen={isSidebarOpen}
-            setIsSidebarOpen={setIsSidebarOpen}
-          />
+        {/* Content based on route */}
+        <div className="flex-1 overflow-y-auto bg-[#f7f6f9] p-3 md:p-6">
+          {pathname === "/dashboard/client" && <Client />}
+          {pathname === "/dashboard/client/postedJobs" && <PostedJobs />}
+          {pathname === "/dashboard/client/completedJobsClient" && (
+            <CompletedJobsClient />
+          )}
+          {pathname === "/dashboard/client/paymentHistory" && (
+            <PaymentHistory />
+          )}
+          {pathname === "/dashboard/client/jobManagementClient" && (
+            <JobManagementClient />
+          )}
+          {pathname === "/dashboard/client/vendorInteraction" && (
+            <VendorInteraction />
+          )}
+          {pathname === "/dashboard/client/jobHistoryReports" && (
+            <JobHistoryReports />
+          )}
+          {pathname === "/dashboard/client/clientProfileManagement" && (
+            <ClientProfileManagement />
+          )}
+          {pathname === "/dashboard/client/createJobs" && <CreateJobs />}
+          {pathname === "/dashboard/client/jobDetailsClient" && (
+            <JobDetailsClient />
+          )}
+          {pathname === "/dashboard/client/allCandidates" && <ALlCandidates />}
+          {pathname === "/dashboard/client/hiredCandidatesClient" && (
+            <HiredCandidatesPage />
+          )}
+          {pathname === "/dashboard/client/viewEmployeeProfile" && (
+            <ViewEmployeeProfile />
+          )}
+          {pathname === "/dashboard/client/interviewScheduleClient" && (
+            <InterviewScheduleClient />
+          )}
+          {pathname === "/dashboard/client/setInterviewClient" && (
+            <SetInterViewClient />
+          )}
 
-          {/* Content based on route */}
-          <div
-            className={`bg-[#f7f6f9] ${
-              isSidebarOpen ? "mt-8 p-4" : "mt-8 p-4"
-            }`}
-          >
-            {pathname === "/dashboard/client" && <Client />}
-            {pathname === "/dashboard/client/postedJobs" && <PostedJobs />}
-            {pathname === "/dashboard/client/completedJobsClient" && (
-              <CompletedJobsClient />
-            )}
-            {pathname === "/dashboard/client/paymentHistory" && (
-              <PaymentHistory />
-            )}
-            {pathname === "/dashboard/client/jobManagementClient" && (
-              <JobManagementClient />
-            )}
-            {pathname === "/dashboard/client/vendorInteraction" && (
-              <VendorInteraction />
-            )}
-            {pathname === "/dashboard/client/jobHistoryReports" && (
-              <JobHistoryReports />
-            )}
-            {pathname === "/dashboard/client/clientProfileManagement" && (
-              <ClientProfileManagement />
-            )}
-            {pathname === "/dashboard/client/createJobs" && <CreateJobs />}
-            {pathname === "/dashboard/client/jobDetailsClient" && (
-              <JobDetailsClient />
-            )}
-            {pathname === "/dashboard/client/allCandidates" && (
-              <ALlCandidates />
-            )}
-            {pathname === "/dashboard/client/hiredCandidatesClient" && (
-              <HiredCandidatesPage />
-            )}
-            {pathname === "/dashboard/client/viewEmployeeProfile" && (
-              <ViewEmployeeProfile />
-            )}
-            {pathname === "/dashboard/client/interviewScheduleClient" && (
-              <InterviewScheduleClient />
-            )}
-            {pathname === "/dashboard/client/setInterviewClient" && (
-              <SetInterViewClient />
-            )}
+          {pathname === "/dashboard/vendor" && <Vendor />}
+          {pathname === "/dashboard/vendor/jobManagementVendor" && (
+            <JobManagementVendor />
+          )}
+          {pathname === "/dashboard/vendor/employeeManagement" && (
+            <EmployeeManagement />
+          )}
+          {pathname === "/dashboard/vendor/reportsAnalyticsVendor" && (
+            <ReportsAnalyticsVendor />
+          )}
+          {pathname === "/dashboard/vendor/meeting" && <Meeting />}
+          {pathname === "/dashboard/vendor/jobProgressVendor" && (
+            <JobProgressVendor />
+          )}
+          {pathname === "/dashboard/vendor/viewResumeVendor" && (
+            <ViewResumeVendor />
+          )}
+          {pathname === "/dashboard/vendor/vendorProfileManagement" && (
+            <VendorProfileManagement />
+          )}
 
-            {pathname === "/dashboard/vendor" && <Vendor />}
-            {pathname === "/dashboard/vendor/jobManagementVendor" && (
-              <JobManagementVendor />
-            )}
-            {pathname === "/dashboard/vendor/employeeManagement" && (
-              <EmployeeManagement />
-            )}
-            {pathname === "/dashboard/vendor/reportsAnalyticsVendor" && (
-              <ReportsAnalyticsVendor />
-            )}
-            {pathname === "/dashboard/vendor/meeting" && <Meeting />}
-            {pathname === "/dashboard/vendor/jobProgressVendor" && (
-              <JobProgressVendor />
-            )}
-            {pathname === "/dashboard/vendor/viewResumeVendor" && (
-              <ViewResumeVendor />
-            )}
-            {pathname === "/dashboard/vendor/vendorProfileManagement" && (
-              <VendorProfileManagement />
-            )}
+          {pathname === "/dashboard/admin" && <Admin />}
+          {pathname === "/dashboard/admin/userManagement" && <UserManagement />}
+          {pathname === "/dashboard/admin/jobManagementAdmin" && (
+            <JobManagementAdmin />
+          )}
+          {pathname === "/dashboard/admin/reportsAnalyticsAdmin" && (
+            <ReportsAnalyticsAdmin />
+          )}
+          {pathname === "/dashboard/admin/postBlogs" && <PostBlogs />}
+          {pathname === "/dashboard/admin/postProjects" && <PostProjects />}
+          {pathname === "/dashboard/admin/jobProgressAdmin" && (
+            <JobProgressAdmin />
+          )}
+          {pathname === "/dashboard/admin/viewResumeAdmin" && (
+            <ViewResumeAdmin />
+          )}
+          {pathname === "/dashboard/admin/createJobCategory" && (
+            <CreateJobCategory />
+          )}
+          {pathname === "/dashboard/admin/applicationManagementE" && (
+            <ApplicationManagementE />
+          )}
+          {pathname === "/dashboard/admin/timeSheetJob" && <TimeSheetJob />}
+          {pathname === "/dashboard/admin/adminProfileManagement" && (
+            <AdminProfileManagement />
+          )}
 
-            {pathname === "/dashboard/admin" && <Admin />}
-            {pathname === "/dashboard/admin/userManagement" && (
-              <UserManagement />
-            )}
-            {pathname === "/dashboard/admin/jobManagementAdmin" && (
-              <JobManagementAdmin />
-            )}
-            {pathname === "/dashboard/admin/reportsAnalyticsAdmin" && (
-              <ReportsAnalyticsAdmin />
-            )}
-            {pathname === "/dashboard/admin/postBlogs" && <PostBlogs />}
-            {pathname === "/dashboard/admin/postProjects" && <PostProjects />}
-            {pathname === "/dashboard/admin/jobProgressAdmin" && (
-              <JobProgressAdmin />
-            )}
-            {pathname === "/dashboard/admin/viewResumeAdmin" && (
-              <ViewResumeAdmin />
-            )}
-            {pathname === "/dashboard/admin/createJobCategory" && (
-              <CreateJobCategory />
-            )}
-            {pathname === "/dashboard/admin/applicationManagementE" && (
-              <ApplicationManagementE />
-            )}
-            {pathname === "/dashboard/admin/timeSheetJob" && <TimeSheetJob />}
-            {pathname === "/dashboard/admin/adminProfileManagement" && (
-              <AdminProfileManagement />
-            )}
-
-            {pathname === "/dashboard/employee" && <Employee />}
-            {pathname === "/dashboard/employee/appliedJobs" && <AppliedJobs />}
-            {pathname === "/dashboard/employee/approvedJobs" && (
-              <ApprovedJobs />
-            )}
-            {pathname === "/dashboard/employee/rejectedJobs" && (
-              <RejectedJobs />
-            )}
-            {pathname === "/dashboard/employee/completedJobs" && (
-              <CompletedJobs />
-            )}
-            {pathname === "/dashboard/employee/jobApplyManagement" && (
-              <JobApplyManagement />
-            )}
-            {pathname === "/dashboard/employee/jobHistory" && <JobHistory />}
-            {pathname === "/dashboard/employee/profileManagement" && (
-              <ProfileManagement />
-            )}
-            {pathname === "/dashboard/employee/messages" && <Messages />}
-          </div>
-        </section>
-      </div>
+          {pathname === "/dashboard/employee" && <Employee />}
+          {pathname === "/dashboard/employee/appliedJobs" && <AppliedJobs />}
+          {pathname === "/dashboard/employee/approvedJobs" && <ApprovedJobs />}
+          {pathname === "/dashboard/employee/rejectedJobs" && <RejectedJobs />}
+          {pathname === "/dashboard/employee/completedJobs" && (
+            <CompletedJobs />
+          )}
+          {pathname === "/dashboard/employee/jobApplyManagement" && (
+            <JobApplyManagement />
+          )}
+          {pathname === "/dashboard/employee/jobHistory" && <JobHistory />}
+          {pathname === "/dashboard/employee/profileManagement" && (
+            <ProfileManagement />
+          )}
+          {pathname === "/dashboard/employee/messages" && <Messages />}
+        </div>
+      </main>
     </div>
   );
 };
