@@ -32,19 +32,19 @@ export async function POST(req) {
     const db = await connectMongoDB();
     console.log("✅ Connected to MongoDB");
 
-    // 🔹 Ensure a default admin exists (only create once)
-    const existingAdmin = await db.collection("users").findOne({ email: "admin@example.com" });
-    if (!existingAdmin) {
-      const adminPassword = await bcrypt.hash("admin123", 10);
-      await db.collection("users").insertOne({
-        username: "admin",
-        email: "admin@example.com",
-        password: adminPassword,
-        userType: "Admin",
-        createdAt: new Date(),
-      });
-      console.log("🛠️ Admin user created successfully");
-    }
+    // // 🔹 Ensure a default admin exists (only create once)
+    // const existingAdmin = await db.collection("users").findOne({ email: "admin@example.com" });
+    // if (!existingAdmin) {
+    //   const adminPassword = await bcrypt.hash("admin123", 10);
+    //   await db.collection("users").insertOne({
+    //     username: "admin",
+    //     email: "admin@example.com",
+    //     password: adminPassword,
+    //     userType: "Admin",
+    //     createdAt: new Date(),
+    //   });
+    //   console.log("🛠️ Admin user created successfully");
+    // }
 
     // 🔹 Check if user already exists
     const existingUser = await db.collection("users").findOne({ email });
