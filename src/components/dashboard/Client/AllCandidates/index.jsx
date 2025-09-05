@@ -191,189 +191,240 @@ function InnerAllCandidates() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Candidates</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+            Candidates
+          </h1>
+          <p className="text-gray-600 mt-1 text-xs md:text-sm">
             Review and manage job applications from candidates.
           </p>
         </div>
-        <Button variant="outline" className="text-gray-600 hover:bg-gray-100">
-          <Download className="w-4 h-4 mr-2" />
-          Export Data
+        <Button
+          variant="outline"
+          className="text-gray-600 hover:bg-gray-100 h-9 text-xs md:text-sm"
+        >
+          <Download className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
+          <span className="hidden xs:inline">Export</span>
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card>
-          <CardContent className="p-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <Card className="rounded-lg">
+          <CardContent className="p-3">
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-              <p className="text-sm text-gray-600">Total Applications</p>
+              <p className="text-lg md:text-xl font-bold text-gray-900">
+                {stats.total}
+              </p>
+              <p className="text-xs text-gray-600">Total Apps</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="rounded-lg">
+          <CardContent className="p-3">
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-lg md:text-xl font-bold text-blue-600">
                 {stats.applied}
               </p>
-              <p className="text-sm text-gray-600">Applied</p>
+              <p className="text-xs text-gray-600">Applied</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="rounded-lg">
+          <CardContent className="p-3">
             <div className="text-center">
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-lg md:text-xl font-bold text-purple-600">
                 {stats.shortlisted}
               </p>
-              <p className="text-sm text-gray-600">Shortlisted</p>
+              <p className="text-xs text-gray-600">Shortlisted</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="rounded-lg">
+          <CardContent className="p-3">
             <div className="text-center">
-              <p className="text-2xl font-bold text-orange-600">
+              <p className="text-lg md:text-xl font-bold text-orange-600">
                 {stats.interviewed}
               </p>
-              <p className="text-sm text-gray-600">Interviewed</p>
+              <p className="text-xs text-gray-600">Interviewed</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="rounded-lg">
+          <CardContent className="p-3">
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{stats.hired}</p>
-              <p className="text-sm text-gray-600">Hired</p>
+              <p className="text-lg md:text-xl font-bold text-green-600">
+                {stats.hired}
+              </p>
+              <p className="text-xs text-gray-600">Hired</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+      <Card className="rounded-lg">
+        <CardContent className="p-3">
+          <div className="flex flex-col gap-3">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-gray-400" />
                 <Input
-                  placeholder="Search candidates by name, job title, or skills..."
+                  placeholder="Search candidates..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-8 h-9 text-xs md:text-sm"
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="applied">Applied</SelectItem>
-                <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                <SelectItem value="interview-scheduled">
-                  Interview Scheduled
-                </SelectItem>
-                <SelectItem value="hired">Hired</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={jobFilter} onValueChange={setJobFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter by Job" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Jobs</SelectItem>
-                <SelectItem value="frontend developer">
-                  Frontend Developer
-                </SelectItem>
-                <SelectItem value="backend engineer">
-                  Backend Engineer
-                </SelectItem>
-                <SelectItem value="ux/ui designer">UX/UI Designer</SelectItem>
-                <SelectItem value="product manager">Product Manager</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full h-9 text-xs md:text-sm">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="text-xs md:text-sm">
+                    All Status
+                  </SelectItem>
+                  <SelectItem value="applied" className="text-xs md:text-sm">
+                    Applied
+                  </SelectItem>
+                  <SelectItem
+                    value="shortlisted"
+                    className="text-xs md:text-sm"
+                  >
+                    Shortlisted
+                  </SelectItem>
+                  <SelectItem
+                    value="interview-scheduled"
+                    className="text-xs md:text-sm"
+                  >
+                    Interview Scheduled
+                  </SelectItem>
+                  <SelectItem value="hired" className="text-xs md:text-sm">
+                    Hired
+                  </SelectItem>
+                  <SelectItem value="rejected" className="text-xs md:text-sm">
+                    Rejected
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={jobFilter} onValueChange={setJobFilter}>
+                <SelectTrigger className="w-full h-9 text-xs md:text-sm">
+                  <SelectValue placeholder="Job" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="text-xs md:text-sm">
+                    All Jobs
+                  </SelectItem>
+                  <SelectItem
+                    value="frontend developer"
+                    className="text-xs md:text-sm"
+                  >
+                    Frontend Developer
+                  </SelectItem>
+                  <SelectItem
+                    value="backend engineer"
+                    className="text-xs md:text-sm"
+                  >
+                    Backend Engineer
+                  </SelectItem>
+                  <SelectItem
+                    value="ux/ui designer"
+                    className="text-xs md:text-sm"
+                  >
+                    UX/UI Designer
+                  </SelectItem>
+                  <SelectItem
+                    value="product manager"
+                    className="text-xs md:text-sm"
+                  >
+                    Product Manager
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Candidates List */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-4">
         {filteredCandidates.map((candidate) => (
           <Card
             key={candidate.id}
-            className="hover:shadow-md transition-shadow"
+            className="hover:shadow-md transition-shadow rounded-lg"
           >
-            <CardContent className="p-6">
-              <div className="flex flex-col lg:flex-row gap-6">
+            <CardContent className="p-4">
+              <div className="flex flex-col gap-4">
                 {/* Candidate Info */}
-                <div className="flex items-start gap-4 flex-1">
-                  <Avatar className="h-16 w-16">
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-12 w-12">
                     <AvatarImage src={candidate.avatar} alt={candidate.name} />
-                    <AvatarFallback className="bg-teal-500 text-white text-lg">
+                    <AvatarFallback className="bg-teal-500 text-white text-sm">
                       {candidate.name
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="text-xl font-semibold text-gray-900">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">
                           {candidate.name}
                         </h3>
-                        <p className="text-gray-600">{candidate.jobTitle}</p>
+                        <p className="text-gray-600 text-xs md:text-sm truncate">
+                          {candidate.jobTitle}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getStatusColor(candidate.status)}>
-                          {candidate.status.replace("-", " ")}
-                        </Badge>
+                      <Badge
+                        className={`${getStatusColor(
+                          candidate.status
+                        )} text-[10px] md:text-xs py-0.5 px-1.5`}
+                      >
+                        {candidate.status.replace("-", " ")}
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{candidate.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                        <Calendar className="w-3 h-3 flex-shrink-0" />
+                        <span>Applied {candidate.appliedDate}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600 sm:col-span-2">
+                        <Briefcase className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{candidate.jobTitle}</span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <MapPin className="w-4 h-4" />
-                        {candidate.location}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        Applied {candidate.appliedDate}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Briefcase className="w-4 h-4" />
-                        {candidate.jobTitle}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
                       <div className="flex items-center gap-1">
-                        <Mail className="w-4 h-4" />
-                        {candidate.email}
+                        <Mail className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate max-w-[120px]">
+                          {candidate.email}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Phone className="w-4 h-4" />
-                        {candidate.phone}
+                        <Phone className="w-3 h-3 flex-shrink-0" />
+                        <span>{candidate.phone}</span>
                       </div>
                     </div>
 
                     {candidate.coverLetter && (
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-600 mb-2">
+                      <div className="mt-3">
+                        <p className="text-xs text-gray-600 mb-1">
                           Cover Letter:
                         </p>
-                        <p className="text-sm text-gray-600">
-                          {candidate.coverLetter.substring(0, 50)}...
+                        <p className="text-xs text-gray-600">
+                          {candidate.coverLetter.substring(0, 80)}...
                         </p>
                       </div>
                     )}
@@ -381,54 +432,65 @@ function InnerAllCandidates() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-3 lg:w-48">
-                  <div className="flex flex-col gap-2">
-                    <Link
-                      className="w-full"
-                      href={`/dashboard/client/viewEmployeeProfile?email=${candidate?.email}`}
-                    >
-                      <Button
-                        size="sm"
-                        className="bg-teal-600 hover:bg-teal-700 w-full"
-                        disabled={!candidate.resumeUrl}
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View Profile
-                      </Button>
-                    </Link>
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                  <Link
+                    className="flex-1 min-w-[120px]"
+                    href={`/dashboard/client/viewEmployeeProfile?email=${candidate?.email}`}
+                  >
                     <Button
-                      variant="outline"
                       size="sm"
+                      className="bg-teal-600 hover:bg-teal-700 w-full h-8 text-xs"
                       disabled={!candidate.resumeUrl}
                     >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download Resume
+                      <Eye className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
+                      <span className="hidden xs:inline">View Profile</span>
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Message
-                    </Button>
-                  </div>
-
-                  <Select
-                    value={candidate.status}
-                    onValueChange={(value) =>
-                      updateCandidateStatus(candidate.id, value)
-                    }
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
+                    disabled={!candidate.resumeUrl}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="applied">Applied</SelectItem>
-                      <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                      <SelectItem value="interview-scheduled">
-                        Interview Scheduled
-                      </SelectItem>
-                      <SelectItem value="hired">Hired</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Download className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
+                    <span className="hidden xs:inline">Resume</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-8 text-xs">
+                    <MessageSquare className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
+                    <span className="hidden xs:inline">Message</span>
+                  </Button>
+                  <div className="w-full sm:w-auto sm:flex-1 min-w-[150px]">
+                    <Select
+                      value={candidate.status}
+                      onValueChange={(value) =>
+                        updateCandidateStatus(candidate.id, value)
+                      }
+                    >
+                      <SelectTrigger className="w-full h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="applied" className="text-xs">
+                          Applied
+                        </SelectItem>
+                        <SelectItem value="shortlisted" className="text-xs">
+                          Shortlisted
+                        </SelectItem>
+                        <SelectItem
+                          value="interview-scheduled"
+                          className="text-xs"
+                        >
+                          Interview Scheduled
+                        </SelectItem>
+                        <SelectItem value="hired" className="text-xs">
+                          Hired
+                        </SelectItem>
+                        <SelectItem value="rejected" className="text-xs">
+                          Rejected
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -437,15 +499,15 @@ function InnerAllCandidates() {
       </div>
 
       {filteredCandidates.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
+        <Card className="rounded-lg">
+          <CardContent className="p-8 text-center">
             <div className="text-gray-400 mb-4">
-              <Search className="w-12 h-12 mx-auto" />
+              <Search className="w-10 h-10 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-base font-medium text-gray-900 mb-2">
               No candidates found
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm">
               Try adjusting your search criteria or filters.
             </p>
           </CardContent>
