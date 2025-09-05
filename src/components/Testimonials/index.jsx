@@ -1,54 +1,54 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { FaQuoteLeft, FaStar } from "react-icons/fa";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
-import { Pagination, Autoplay, Navigation } from "swiper/modules";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import React from "react";
+import { Star, Quote, Briefcase } from "lucide-react";
 
-// Testimonial data remains the same
 const testimonials = [
   {
+    id: 1,
     name: "Emily R.",
-    position: "HR Manager, Future Innovations",
+    role: "HR Manager",
+    company: "Future Innovations",
     testimonial:
       "Your platform has completely transformed our recruitment strategy. We've seen a 40% reduction in time-to-hire and a significant increase in candidate quality. The team's support is unparalleled!",
     rating: 5,
-    logoSrc: "/clients/client1.png",
+    userType: "recruiter",
     avatarSrc:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?fit=crop&w=80&q=80",
   },
   {
+    id: 2,
     name: "Michael B.",
-    position: "Talent Acquisition, Global Services",
+    role: "Talent Acquisition",
+    company: "Global Services",
     testimonial:
       "A true game-changer in staffing! The seamless experience and automated matching features have saved us countless hours and helped us find top-tier talent effortlessly.",
     rating: 5,
-    logoSrc: "/clients/client2.png",
+    userType: "recruiter",
     avatarSrc:
       "https://images.unsplash.com/photo-1549068106-b024baf5062d?fit=crop&w=80&q=80",
   },
   {
+    id: 3,
     name: "Jessica P.",
-    position: "CEO, Pinnacle Health Group",
+    role: "CEO",
+    company: "Pinnacle Health Group",
     testimonial:
       "We were looking for a reliable partner for our healthcare staffing needs, and we found it here. The service is fast, efficient, and the candidates are always a perfect fit for our culture.",
     rating: 5,
-    logoSrc: "/clients/client3.png",
+    userType: "recruiter",
     avatarSrc:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?fit=crop&w=80&q=80",
   },
   {
+    id: 4,
     name: "Alex F.",
-    position: "Operations Director, Swift Hospitality",
+    role: "Operations Director",
+    company: "Swift Hospitality",
     testimonial:
       "The quality of the candidates we receive is consistently high. We are extremely impressed with the level of professionalism and the personalized service we receive. Highly recommended!",
     rating: 5,
-    logoSrc: "/clients/client4.png",
+    userType: "recruiter",
     avatarSrc:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=80&q=80",
   },
@@ -64,9 +64,8 @@ const logos = [
 ];
 
 const TrustpilotBadge = () => (
-  // Ensured a centered, flexible container for alignment
-  <div className="flex flex-col items-center justify-center gap-2 mb-4">
-    <div className="flex items-center gap-2">
+  <div className="flex flex-col items-center justify-center gap-2 mb-8">
+    <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
       <img
         src="https://placehold.co/100x20/000/fff?text=Trustpilot"
         alt="Trustpilot"
@@ -74,148 +73,151 @@ const TrustpilotBadge = () => (
       />
       <div className="flex gap-1 text-yellow-400">
         {[...Array(5)].map((_, i) => (
-          <FaStar key={i} className="animate-star" />
+          <Star key={i} className="w-4 h-4 fill-current animate-pulse" />
         ))}
       </div>
     </div>
-    <span className="text-sm text-gray-500">Excellent</span>
+    <span className="text-sm font-medium text-gray-500">Excellent</span>
   </div>
 );
 
-function Testimonials() {
-  useEffect(() => {
-    AOS.init({ duration: 900, once: true });
-  }, []);
+const Testimonials = () => {
+  const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${i < rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+      />
+    ));
+  };
 
-  return (
-    // Base section with consistent vertical padding
-    <div className="bg-gray-50 py-20 px-4 md:px-8 font-sans">
-      <div className="max-w-7xl mx-auto text-center">
-        <h2
-          data-aos="fade-up"
-          className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4"
-        >
-          What Our Clients Say
-        </h2>
-        <p
-          data-aos="fade-up"
-          data-aos-delay="100"
-          className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto"
-        >
-          Hear from the businesses we've helped find the perfect talent.
-        </p>
+  const getUserTypeBadge = (userType) => {
+    const badgeClasses =
+      userType === "recruiter"
+        ? "bg-teal-100 text-teal-800 border-teal-200"
+        : "bg-gray-100 text-gray-800 border-gray-200";
 
-        <div data-aos="fade-up" data-aos-delay="200" className="mb-12">
-          <TrustpilotBadge />
-        </div>
+    return (
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${badgeClasses}`}
+      >
+        <Briefcase className="w-4 h-4 text-teal-500" />
+        Recruiter
+      </span>
+    );
+  };
 
-        {/* Swiper Testimonial Carousel */}
-        <div data-aos="fade-up" data-aos-delay="300">
-          <Swiper
-            modules={[Pagination, Autoplay, Navigation]}
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 4500, disableOnInteraction: false }}
-            navigation
-            grabCursor
-            loop={true}
-            spaceBetween={30}
-            breakpoints={{
-              640: {
-                slidesPerView: 1,
-              },
-              768: {
-                slidesPerView: 2,
-              },
-              1024: {
-                slidesPerView: 3,
-              },
-            }}
-            // Added a small top margin to the swiper for better spacing from the badge
-            className="mt-8 pb-12 py-4"
-          >
-            {testimonials.map((item, index) => (
-              <SwiperSlide key={index}>
-                <div className="h-full">
-                  <div className="bg-white py-4 h-full p-8 rounded-3xl shadow-xl border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:scale-[1.03] flex flex-col justify-between">
-                    <div>
-                      <FaQuoteLeft className="text-teal-500 text-5xl mb-6" />
-                      <p className="text-md font-light italic text-gray-700 leading-relaxed mb-6">
-                        “{item.testimonial}”
-                      </p>
-                    </div>
-                    {/* The `mt-auto` class correctly pushes this block to the bottom */}
-                    <div className="mt-auto">
-                      <div className="flex items-center gap-4 mb-4">
-                        <img
-                          src={item.avatarSrc}
-                          alt={item.name}
-                          className="h-12 w-12 rounded-full object-cover border-2 border-teal-500"
-                        />
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-800">
-                            {item.name}
-                          </h3>
-                          <p className="text-sm font-medium text-gray-600">
-                            {item.position}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1 text-yellow-500">
-                        {[...Array(item.rating)].map((_, i) => (
-                          <FaStar key={i} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+  const TestimonialCard = ({ testimonial }) => (
+    <div
+      className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 border border-gray-100 min-w-[300px] md:min-w-[390px] mx-3 hover:scale-105"
+    >
+      <div className="flex justify-between items-start mb-4">
+        <Quote className="w-8 h-8 text-teal-500" />
+        {getUserTypeBadge(testimonial.userType)}
+      </div>
+      <div className="flex items-center gap-1 mb-4">{renderStars(testimonial.rating)}</div>
+      <p className="text-gray-700 mb-6 leading-relaxed text-sm">
+        &quot;{testimonial.testimonial}&quot;
+      </p>
+      <div className="flex items-center gap-3">
+        <img
+          src={testimonial.avatarSrc}
+          alt={testimonial.name}
+          className="h-12 w-12 rounded-full object-cover border-2 border-teal-500"
+        />
+        <div>
+          <div className="font-semibold text-gray-900">{testimonial.name}</div>
+          <div className="text-sm text-gray-600">
+            {testimonial.role}
+            {testimonial.company && (
+              <span className="text-teal-600"> • {testimonial.company}</span>
+            )}
+          </div>
         </div>
       </div>
-      {/* --- Logos Section --- */}
-      <div className="mt-16">
-        <h3
-          data-aos="fade-up"
-          className="text-2xl font-bold text-gray-700 text-center mb-8"
-        >
-          Trusted by Industry Leaders
-        </h3>
-        <div
-          data-aos="fade-up"
-          className="flex flex-wrap items-center justify-center gap-8 md:gap-10"
-        >
-          {logos.map((item, i) => (
-            <a
-              key={i}
-              href="#"
-              className="transform transition-all duration-300 hover:scale-110 hover:rotate-1"
-            >
-              <img
-                src={item.src}
-                alt={item.alt}
-                className="h-10 w-auto object-contain opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
-              />
-            </a>
-          ))}
+    </div>
+  );
+
+  const duplicatedTestimonials = [...testimonials, ...testimonials];
+
+  return (
+    <section className="py-16 bg-gray-50 overflow-hidden">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-5xl font-bold text-gray-800 mb-4">
+            What Our Clients Say
+          </h2>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+            Hear from the businesses we've helped find the perfect talent.
+          </p>
+        </div>
+        <div className="mb-12">
+          <TrustpilotBadge />
+        </div>
+        <div className="relative mb-12">
+          <div className="marquee-container overflow-hidden">
+            <div className="marquee-content flex animate-marquee hover:pause-marquee">
+              {duplicatedTestimonials.map((testimonial, index) => (
+                <TestimonialCard key={`${testimonial.id}-${index}`} testimonial={testimonial} />
+              ))}
+            </div>
+          </div>
+          <div className="absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none z-10"></div>
+          <div className="absolute right-0 top-0 h-full w-20 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none z-10"></div>
+        </div>
+        <div className="mt-16">
+          <h3 className="text-2xl font-bold text-gray-700 text-center mb-8">
+            Trusted by Industry Leaders
+          </h3>
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-10">
+            {logos.map((item, i) => (
+              <a
+                key={i}
+                href="#"
+                className="transform transition-all duration-300 hover:scale-110 hover:rotate-1"
+              >
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  className="h-10 w-auto object-contain opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
+                />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
       <style jsx>{`
-        /* Swiper styles to align pagination bullets and navigation properly */
-        :global(.swiper-pagination-bullet) {
-          background: #d1d5db; /* gray-400 */
-          opacity: 1;
+        @keyframes marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
         }
-        :global(.swiper-pagination-bullet-active) {
-          background: #0d9488; /* teal-600 */
+        .animate-marquee {
+          animation: marquee 30s linear infinite;
         }
-        :global(.swiper-button-prev),
-        :global(.swiper-button-next) {
-          color: #111827; /* gray-900 */
+        .hover\\:pause-marquee:hover {
+          animation-play-state: paused;
+        }
+        .marquee-container {
+          mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+          -webkit-mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+        }
+        @media (max-width: 768px) {
+          .animate-marquee {
+            animation-duration: 25s;
+          }
+        }
+        @media (max-width: 480px) {
+          .animate-marquee {
+            animation-duration: 20s;
+          }
         }
       `}</style>
-    </div>
+    </section>
   );
-}
+};
 
 export default Testimonials;
