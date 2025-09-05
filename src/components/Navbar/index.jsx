@@ -321,10 +321,10 @@ const Navbar = ({ setHeaderHeight }) => {
                             onMouseEnter={() => handleMouseEnter("whyDemandRecruitment")}
                             onMouseLeave={handleMouseLeave}
                         >
-                            <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                            <Link href="/whyDemand" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
                                 <span>Why Demand Recruitment</span>
                                 <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
-                            </button>
+                            </Link>
                             {isWhyDemandRecruitmentMenuOpen && (
                                 <div className="absolute top-full left-1/2 -translate-x-1/2 bg-white text-gray-800 shadow-2xl mt-2 p-8 rounded-lg z-50 w-[700px] grid grid-cols-2 gap-8 border border-gray-200 transform opacity-100 scale-100 transition-all duration-300 animate-in slide-in-from-top-2">
                                     <div>
@@ -434,7 +434,7 @@ const Navbar = ({ setHeaderHeight }) => {
 
                                     {/* Services Section */}
                                     <div className="space-y-3">
-                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Services</h3>
+                                        <Link href="/services" className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Services</Link>
                                         <Link href="/" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Home</Link>
                                         <Link href="/recruitment" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Recruitment Services</Link>
                                         <Link href="/communityService" className="block py-2 text-gray-700 hover:text-teal-600 transition-all duration-300 font-medium hover:translate-x-2 transform">Community Services</Link>
@@ -443,7 +443,7 @@ const Navbar = ({ setHeaderHeight }) => {
 
                                     {/* Why Demand Recruitment */}
                                     <div className="space-y-3">
-                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Why Demand Recruitment</h3>
+                                        <Link href="/whyDemand" className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Why Demand Recruitment</Link>
                                         <div className="pl-4 space-y-2">
                                             <h4 className="text-xs font-medium text-gray-400">INSIGHTS & NEWS</h4>
                                             <Link href="/newsEvent" className="block py-1 text-gray-600 hover:text-teal-600 transition-all duration-300 text-sm hover:translate-x-2 transform">News & Events</Link>
