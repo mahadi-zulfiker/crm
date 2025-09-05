@@ -168,37 +168,37 @@ export default function CreateJobPage() {
   };
 
   const JobPreview = () => (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white">
-        <div className="flex justify-between items-start">
+    <Card className="w-full mx-auto">
+      <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-t-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-start gap-4">
           <div>
-            <CardTitle className="text-2xl mb-2">
+            <CardTitle className="text-xl md:text-2xl mb-2">
               {jobData.title || "Job Title"}
             </CardTitle>
-            <div className="flex items-center gap-4 text-teal-100">
+            <div className="flex flex-wrap items-center gap-3 text-teal-100 text-sm">
               <div className="flex items-center gap-1">
-                <Building2 className="w-4 h-4" />
+                <Building2 className="w-3 h-3 md:w-4 md:h-4" />
                 {jobData.company || "Company Name"}
               </div>
               <div className="flex items-center gap-1">
-                <MapPin className="w-4 h-4" />
+                <MapPin className="w-3 h-3 md:w-4 md:h-4" />
                 {jobData.location || "Location"}
               </div>
               <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                 {jobData.jobType || "Job Type"}
               </div>
             </div>
           </div>
           <div className="text-right">
             {jobData.featured && (
-              <Badge className="bg-yellow-500 text-yellow-900 mb-2">
+              <Badge className="bg-yellow-500 text-yellow-900 text-xs mb-2">
                 Featured
               </Badge>
             )}
-            <div className="text-teal-100">
+            <div className="text-teal-100 text-sm">
               <div className="flex items-center gap-1">
-                <DollarSign className="w-4 h-4" />
+                <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
                 {jobData.salary
                   ? `${jobData.currency} ${jobData.salary}/month`
                   : jobData.salaryMin && jobData.salaryMax
@@ -209,22 +209,24 @@ export default function CreateJobPage() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
+      <CardContent className="p-4 md:p-6">
+        <div className="grid grid-cols-1 gap-4 md:gap-6">
+          <div className="space-y-4 md:space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-3">Job Description</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">
+              <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3">
+                Job Description
+              </h3>
+              <p className="text-gray-700 text-sm md:text-base whitespace-pre-wrap">
                 {jobData.description || "Job description will appear here..."}
               </p>
             </div>
 
             {jobData.responsibilities && (
               <div>
-                <h3 className="text-lg font-semibold mb-3">
+                <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3">
                   Key Responsibilities
                 </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
+                <p className="text-gray-700 text-sm md:text-base whitespace-pre-wrap">
                   {jobData.responsibilities}
                 </p>
               </div>
@@ -232,8 +234,10 @@ export default function CreateJobPage() {
 
             {jobData.requirements && (
               <div>
-                <h3 className="text-lg font-semibold mb-3">Requirements</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
+                <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3">
+                  Requirements
+                </h3>
+                <p className="text-gray-700 text-sm md:text-base whitespace-pre-wrap">
                   {jobData.requirements}
                 </p>
               </div>
@@ -241,59 +245,63 @@ export default function CreateJobPage() {
 
             {jobData.benefits && (
               <div>
-                <h3 className="text-lg font-semibold mb-3">Benefits & Perks</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
+                <h3 className="text-base md:text-lg font-semibold mb-2 md:mb-3">
+                  Benefits & Perks
+                </h3>
+                <p className="text-gray-700 text-sm md:text-base whitespace-pre-wrap">
                   {jobData.benefits}
                 </p>
               </div>
             )}
           </div>
 
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Job Details</CardTitle>
+          <div className="space-y-3 md:space-y-4">
+            <Card className="rounded-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base md:text-lg">
+                  Job Details
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
+              <CardContent className="space-y-2 md:space-y-3">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-600">Category:</span>
                   <span className="font-medium">
                     {jobData.category || "N/A"}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-600">Job Reference:</span>
                   <span className="font-medium">
                     {jobData.jobReference || "N/A"}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-600">Vacancies:</span>
                   <span className="font-medium flex items-center gap-1">
-                    <Users className="w-4 h-4" />
+                    <Users className="w-3 h-3 md:w-4 md:h-4" />
                     {jobData.vacancy || "1"}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-600">Experience Level:</span>
                   <span className="font-medium">
                     {jobData.experienceLevel || "N/A"}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-600">Work Type:</span>
                   <span className="font-medium">
                     {jobData.workType || "N/A"}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-600">Deadline:</span>
                   <span className="font-medium">
                     {jobData.deadline || "N/A"}
                   </span>
                 </div>
                 {jobData.vendor && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-xs md:text-sm">
                     <span className="text-gray-600">Vendor:</span>
                     <span className="font-medium">{jobData.vendor}</span>
                   </div>
@@ -302,14 +310,20 @@ export default function CreateJobPage() {
             </Card>
 
             {jobData.skills && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Required Skills</CardTitle>
+              <Card className="rounded-lg">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base md:text-lg">
+                    Required Skills
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1 md:gap-2">
                     {jobData.skills.split(",").map((skill, index) => (
-                      <Badge key={index} variant="outline">
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="text-xs py-0.5 px-1.5"
+                      >
                         {skill.trim()}
                       </Badge>
                     ))}
@@ -318,19 +332,21 @@ export default function CreateJobPage() {
               </Card>
             )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Contact Information</CardTitle>
+            <Card className="rounded-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base md:text-lg">
+                  Contact Information
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-1 md:space-y-2">
                 {jobData.contactEmail && (
-                  <div className="text-sm">
+                  <div className="text-xs md:text-sm">
                     <span className="text-gray-600">Email: </span>
                     <span className="font-medium">{jobData.contactEmail}</span>
                   </div>
                 )}
                 {jobData.contactPhone && (
-                  <div className="text-sm">
+                  <div className="text-xs md:text-sm">
                     <span className="text-gray-600">Phone: </span>
                     <span className="font-medium">{jobData.contactPhone}</span>
                   </div>
@@ -338,7 +354,7 @@ export default function CreateJobPage() {
               </CardContent>
             </Card>
 
-            <Button className="w-full bg-teal-600 hover:bg-teal-700">
+            <Button className="w-full bg-teal-600 hover:bg-teal-700 h-9 text-sm">
               Apply for this Job
             </Button>
           </div>
@@ -349,32 +365,40 @@ export default function CreateJobPage() {
 
   if (showPreview) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => setShowPreview(false)}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Edit
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setShowPreview(false)}
+            size="sm"
+            className="h-8 text-xs"
+          >
+            <ArrowLeft className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
+            <span className="hidden xs:inline">Back to Edit</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Job Preview</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-lg md:text-xl font-bold text-gray-900">
+              Job Preview
+            </h1>
+            <p className="text-gray-600 mt-1 text-xs md:text-sm">
               This is how your job posting will appear to candidates.
             </p>
           </div>
         </div>
         <JobPreview />
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
           <Button
             onClick={() => handleSubmit("published")}
-            className="bg-teal-600 hover:bg-teal-700"
+            className="bg-teal-600 hover:bg-teal-700 h-9 text-xs md:text-sm"
             disabled={isSubmitting}
           >
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
             {isSubmitting ? "Publishing..." : "Publish Job"}
           </Button>
           <Button
             onClick={() => handleSubmit("draft")}
             variant="outline"
+            className="h-9 text-xs md:text-sm"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Saving..." : "Save as Draft"}
@@ -385,42 +409,51 @@ export default function CreateJobPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <Link href="/dashboard/client/postedJobs">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Jobs
+          <Button variant="outline" size="sm" className="h-8 text-xs">
+            <ArrowLeft className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
+            <span className="hidden xs:inline">Back to Jobs</span>
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Post New Job</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900">
+            Post New Job
+          </h1>
+          <p className="text-gray-600 mt-1 text-xs md:text-sm">
             Create a new job posting to attract the best candidates.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+      <div className="grid grid-cols-1 gap-4 md:gap-6">
+        <div className="space-y-4 md:space-y-6">
+          <Card className="rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base md:text-lg">
+                Basic Information
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Job Title *</Label>
+                  <Label htmlFor="title" className="text-xs md:text-sm">
+                    Job Title *
+                  </Label>
                   <Input
                     id="title"
                     value={jobData.title}
                     onChange={(e) => handleInputChange("title", e.target.value)}
                     placeholder="e.g. Senior Frontend Developer"
                     required
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company Name *</Label>
+                  <Label htmlFor="company" className="text-xs md:text-sm">
+                    Company Name *
+                  </Label>
                   <Input
                     id="company"
                     value={jobData.company}
@@ -429,13 +462,16 @@ export default function CreateJobPage() {
                     }
                     placeholder="Your company name"
                     required
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location *</Label>
+                  <Label htmlFor="location" className="text-xs md:text-sm">
+                    Location *
+                  </Label>
                   <Input
                     id="location"
                     value={jobData.location}
@@ -444,10 +480,13 @@ export default function CreateJobPage() {
                     }
                     placeholder="e.g. New York, NY or Remote"
                     required
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category" className="text-xs md:text-sm">
+                    Category *
+                  </Label>
                   <Select
                     value={jobData.category}
                     onValueChange={(value) =>
@@ -455,30 +494,62 @@ export default function CreateJobPage() {
                     }
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 text-xs md:text-sm">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Technology">Technology</SelectItem>
-                      <SelectItem value="Marketing">Marketing</SelectItem>
-                      <SelectItem value="Sales">Sales</SelectItem>
-                      <SelectItem value="Customer Support">
+                      <SelectItem
+                        value="Technology"
+                        className="text-xs md:text-sm"
+                      >
+                        Technology
+                      </SelectItem>
+                      <SelectItem
+                        value="Marketing"
+                        className="text-xs md:text-sm"
+                      >
+                        Marketing
+                      </SelectItem>
+                      <SelectItem value="Sales" className="text-xs md:text-sm">
+                        Sales
+                      </SelectItem>
+                      <SelectItem
+                        value="Customer Support"
+                        className="text-xs md:text-sm"
+                      >
                         Customer Support
                       </SelectItem>
-                      <SelectItem value="Design">Design</SelectItem>
-                      <SelectItem value="Finance">Finance</SelectItem>
-                      <SelectItem value="Human Resources">
+                      <SelectItem value="Design" className="text-xs md:text-sm">
+                        Design
+                      </SelectItem>
+                      <SelectItem
+                        value="Finance"
+                        className="text-xs md:text-sm"
+                      >
+                        Finance
+                      </SelectItem>
+                      <SelectItem
+                        value="Human Resources"
+                        className="text-xs md:text-sm"
+                      >
                         Human Resources
                       </SelectItem>
-                      <SelectItem value="Operations">Operations</SelectItem>
+                      <SelectItem
+                        value="Operations"
+                        className="text-xs md:text-sm"
+                      >
+                        Operations
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="jobType">Job Type *</Label>
+                  <Label htmlFor="jobType" className="text-xs md:text-sm">
+                    Job Type *
+                  </Label>
                   <Select
                     value={jobData.jobType}
                     onValueChange={(value) =>
@@ -486,38 +557,76 @@ export default function CreateJobPage() {
                     }
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 text-xs md:text-sm">
                       <SelectValue placeholder="Select job type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Full-time">Full-time</SelectItem>
-                      <SelectItem value="Part-time">Part-time</SelectItem>
-                      <SelectItem value="Contract">Contract</SelectItem>
-                      <SelectItem value="Internship">Internship</SelectItem>
-                      <SelectItem value="Freelance">Freelance</SelectItem>
+                      <SelectItem
+                        value="Full-time"
+                        className="text-xs md:text-sm"
+                      >
+                        Full-time
+                      </SelectItem>
+                      <SelectItem
+                        value="Part-time"
+                        className="text-xs md:text-sm"
+                      >
+                        Part-time
+                      </SelectItem>
+                      <SelectItem
+                        value="Contract"
+                        className="text-xs md:text-sm"
+                      >
+                        Contract
+                      </SelectItem>
+                      <SelectItem
+                        value="Internship"
+                        className="text-xs md:text-sm"
+                      >
+                        Internship
+                      </SelectItem>
+                      <SelectItem
+                        value="Freelance"
+                        className="text-xs md:text-sm"
+                      >
+                        Freelance
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="workType">Work Type</Label>
+                  <Label htmlFor="workType" className="text-xs md:text-sm">
+                    Work Type
+                  </Label>
                   <Select
                     value={jobData.workType}
                     onValueChange={(value) =>
                       handleInputChange("workType", value)
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 text-xs md:text-sm">
                       <SelectValue placeholder="Select work type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="On-site">On-site</SelectItem>
-                      <SelectItem value="Remote">Remote</SelectItem>
-                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                      <SelectItem
+                        value="On-site"
+                        className="text-xs md:text-sm"
+                      >
+                        On-site
+                      </SelectItem>
+                      <SelectItem value="Remote" className="text-xs md:text-sm">
+                        Remote
+                      </SelectItem>
+                      <SelectItem value="Hybrid" className="text-xs md:text-sm">
+                        Hybrid
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="vacancy">Number of Vacancies *</Label>
+                  <Label htmlFor="vacancy" className="text-xs md:text-sm">
+                    Number of Vacancies *
+                  </Label>
                   <Input
                     id="vacancy"
                     type="number"
@@ -528,13 +637,16 @@ export default function CreateJobPage() {
                     placeholder="1"
                     min="1"
                     required
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="salary">Salary (Monthly)</Label>
+                  <Label htmlFor="salary" className="text-xs md:text-sm">
+                    Salary (Monthly)
+                  </Label>
                   <Input
                     id="salary"
                     type="number"
@@ -543,10 +655,13 @@ export default function CreateJobPage() {
                       handleInputChange("salary", e.target.value)
                     }
                     placeholder="5000"
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="salaryMin">Salary Range Min</Label>
+                  <Label htmlFor="salaryMin" className="text-xs md:text-sm">
+                    Salary Range Min
+                  </Label>
                   <Input
                     id="salaryMin"
                     type="number"
@@ -555,10 +670,13 @@ export default function CreateJobPage() {
                       handleInputChange("salaryMin", e.target.value)
                     }
                     placeholder="4000"
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="salaryMax">Salary Range Max</Label>
+                  <Label htmlFor="salaryMax" className="text-xs md:text-sm">
+                    Salary Range Max
+                  </Label>
                   <Input
                     id="salaryMax"
                     type="number"
@@ -567,32 +685,45 @@ export default function CreateJobPage() {
                       handleInputChange("salaryMax", e.target.value)
                     }
                     placeholder="6000"
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
+                  <Label htmlFor="currency" className="text-xs md:text-sm">
+                    Currency
+                  </Label>
                   <Select
                     value={jobData.currency}
                     onValueChange={(value) =>
                       handleInputChange("currency", value)
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 text-xs md:text-sm">
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="INR">INR</SelectItem>
+                      <SelectItem value="USD" className="text-xs md:text-sm">
+                        USD
+                      </SelectItem>
+                      <SelectItem value="EUR" className="text-xs md:text-sm">
+                        EUR
+                      </SelectItem>
+                      <SelectItem value="GBP" className="text-xs md:text-sm">
+                        GBP
+                      </SelectItem>
+                      <SelectItem value="INR" className="text-xs md:text-sm">
+                        INR
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="jobReference">Job Reference *</Label>
+                  <Label htmlFor="jobReference" className="text-xs md:text-sm">
+                    Job Reference *
+                  </Label>
                   <Input
                     id="jobReference"
                     value={jobData.jobReference}
@@ -601,13 +732,16 @@ export default function CreateJobPage() {
                     }
                     placeholder="REF-001"
                     required
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="vendor">Vendor/Recruiter</Label>
+                  <Label htmlFor="vendor" className="text-xs md:text-sm">
+                    Vendor/Recruiter
+                  </Label>
                   <Input
                     id="vendor"
                     value={jobData.vendor}
@@ -615,10 +749,13 @@ export default function CreateJobPage() {
                       handleInputChange("vendor", e.target.value)
                     }
                     placeholder="Vendor name"
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="deadline">Application Deadline</Label>
+                  <Label htmlFor="deadline" className="text-xs md:text-sm">
+                    Application Deadline
+                  </Label>
                   <Input
                     id="deadline"
                     type="date"
@@ -626,19 +763,24 @@ export default function CreateJobPage() {
                     onChange={(e) =>
                       handleInputChange("deadline", e.target.value)
                     }
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Job Details</CardTitle>
+          <Card className="rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base md:text-lg">
+                Job Details
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 md:space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="description">Job Description *</Label>
+                <Label htmlFor="description" className="text-xs md:text-sm">
+                  Job Description *
+                </Label>
                 <Textarea
                   id="description"
                   value={jobData.description}
@@ -646,13 +788,19 @@ export default function CreateJobPage() {
                     handleInputChange("description", e.target.value)
                   }
                   placeholder="Describe the role, company culture, and what makes this opportunity unique..."
-                  rows={6}
+                  rows={4}
                   required
+                  className="text-xs md:text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="responsibilities">Key Responsibilities</Label>
+                <Label
+                  htmlFor="responsibilities"
+                  className="text-xs md:text-sm"
+                >
+                  Key Responsibilities
+                </Label>
                 <Textarea
                   id="responsibilities"
                   value={jobData.responsibilities}
@@ -660,12 +808,15 @@ export default function CreateJobPage() {
                     handleInputChange("responsibilities", e.target.value)
                   }
                   placeholder="List the main responsibilities and duties..."
-                  rows={5}
+                  rows={4}
+                  className="text-xs md:text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="requirements">Requirements</Label>
+                <Label htmlFor="requirements" className="text-xs md:text-sm">
+                  Requirements
+                </Label>
                 <Textarea
                   id="requirements"
                   value={jobData.requirements}
@@ -673,12 +824,15 @@ export default function CreateJobPage() {
                     handleInputChange("requirements", e.target.value)
                   }
                   placeholder="List the required qualifications, skills, and experience..."
-                  rows={5}
+                  rows={4}
+                  className="text-xs md:text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="benefits">Benefits & Perks</Label>
+                <Label htmlFor="benefits" className="text-xs md:text-sm">
+                  Benefits & Perks
+                </Label>
                 <Textarea
                   id="benefits"
                   value={jobData.benefits}
@@ -686,69 +840,113 @@ export default function CreateJobPage() {
                     handleInputChange("benefits", e.target.value)
                   }
                   placeholder="Health insurance, flexible hours, remote work options..."
-                  rows={4}
+                  rows={3}
+                  className="text-xs md:text-sm"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Candidate Requirements</CardTitle>
+          <Card className="rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base md:text-lg">
+                Candidate Requirements
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="experienceLevel">Experience Level</Label>
+                  <Label
+                    htmlFor="experienceLevel"
+                    className="text-xs md:text-sm"
+                  >
+                    Experience Level
+                  </Label>
                   <Select
                     value={jobData.experienceLevel}
                     onValueChange={(value) =>
                       handleInputChange("experienceLevel", value)
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 text-xs md:text-sm">
                       <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Entry Level">
+                      <SelectItem
+                        value="Entry Level"
+                        className="text-xs md:text-sm"
+                      >
                         Entry Level (0-2 years)
                       </SelectItem>
-                      <SelectItem value="Mid Level">
+                      <SelectItem
+                        value="Mid Level"
+                        className="text-xs md:text-sm"
+                      >
                         Mid Level (2-5 years)
                       </SelectItem>
-                      <SelectItem value="Senior Level">
+                      <SelectItem
+                        value="Senior Level"
+                        className="text-xs md:text-sm"
+                      >
                         Senior Level (5-10 years)
                       </SelectItem>
-                      <SelectItem value="Lead/Principal">
+                      <SelectItem
+                        value="Lead/Principal"
+                        className="text-xs md:text-sm"
+                      >
                         Lead/Principal (10+ years)
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="educationLevel">Education Level</Label>
+                  <Label
+                    htmlFor="educationLevel"
+                    className="text-xs md:text-sm"
+                  >
+                    Education Level
+                  </Label>
                   <Select
                     value={jobData.educationLevel}
                     onValueChange={(value) =>
                       handleInputChange("educationLevel", value)
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 text-xs md:text-sm">
                       <SelectValue placeholder="Select education level" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="High School">High School</SelectItem>
-                      <SelectItem value="Associate Degree">
+                      <SelectItem
+                        value="High School"
+                        className="text-xs md:text-sm"
+                      >
+                        High School
+                      </SelectItem>
+                      <SelectItem
+                        value="Associate Degree"
+                        className="text-xs md:text-sm"
+                      >
                         Associate Degree
                       </SelectItem>
-                      <SelectItem value="Bachelor's Degree">
+                      <SelectItem
+                        value="Bachelor's Degree"
+                        className="text-xs md:text-sm"
+                      >
                         Bachelor's Degree
                       </SelectItem>
-                      <SelectItem value="Master's Degree">
+                      <SelectItem
+                        value="Master's Degree"
+                        className="text-xs md:text-sm"
+                      >
                         Master's Degree
                       </SelectItem>
-                      <SelectItem value="PhD">PhD</SelectItem>
-                      <SelectItem value="No Requirement">
+                      <SelectItem value="PhD" className="text-xs md:text-sm">
+                        PhD
+                      </SelectItem>
+                      <SelectItem
+                        value="No Requirement"
+                        className="text-xs md:text-sm"
+                      >
                         No Requirement
                       </SelectItem>
                     </SelectContent>
@@ -757,25 +955,32 @@ export default function CreateJobPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="skills">Required Skills</Label>
+                <Label htmlFor="skills" className="text-xs md:text-sm">
+                  Required Skills
+                </Label>
                 <Input
                   id="skills"
                   value={jobData.skills}
                   onChange={(e) => handleInputChange("skills", e.target.value)}
                   placeholder="React, Node.js, TypeScript, AWS (comma separated)"
+                  className="h-9 text-xs md:text-sm"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
+          <Card className="rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base md:text-lg">
+                Contact Information
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Contact Email</Label>
+                  <Label htmlFor="contactEmail" className="text-xs md:text-sm">
+                    Contact Email
+                  </Label>
                   <Input
                     id="contactEmail"
                     type="email"
@@ -784,10 +989,13 @@ export default function CreateJobPage() {
                       handleInputChange("contactEmail", e.target.value)
                     }
                     placeholder="hr@company.com"
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contactPhone">Contact Phone</Label>
+                  <Label htmlFor="contactPhone" className="text-xs md:text-sm">
+                    Contact Phone
+                  </Label>
                   <Input
                     id="contactPhone"
                     value={jobData.contactPhone}
@@ -795,6 +1003,7 @@ export default function CreateJobPage() {
                       handleInputChange("contactPhone", e.target.value)
                     }
                     placeholder="+1 (555) 123-4567"
+                    className="h-9 text-xs md:text-sm"
                   />
                 </div>
               </div>
@@ -802,16 +1011,20 @@ export default function CreateJobPage() {
           </Card>
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Job Settings</CardTitle>
+        <div className="space-y-4 md:space-y-6">
+          <Card className="rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base md:text-lg">
+                Job Settings
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 md:space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="featured">Featured Job</Label>
-                  <p className="text-sm text-gray-600">
+                  <Label htmlFor="featured" className="text-xs md:text-sm">
+                    Featured Job
+                  </Label>
+                  <p className="text-xs text-gray-600">
                     Highlight this job posting
                   </p>
                 </div>
@@ -825,8 +1038,10 @@ export default function CreateJobPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="isRemote">Remote Position</Label>
-                  <p className="text-sm text-gray-600">Allow remote work</p>
+                  <Label htmlFor="isRemote" className="text-xs md:text-sm">
+                    Remote Position
+                  </Label>
+                  <p className="text-xs text-gray-600">Allow remote work</p>
                 </div>
                 <Switch
                   id="isRemote"
@@ -838,8 +1053,10 @@ export default function CreateJobPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="isUrgent">Urgent Hiring</Label>
-                  <p className="text-sm text-gray-600">Mark as urgent</p>
+                  <Label htmlFor="isUrgent" className="text-xs md:text-sm">
+                    Urgent Hiring
+                  </Label>
+                  <p className="text-xs text-gray-600">Mark as urgent</p>
                 </div>
                 <Switch
                   id="isUrgent"
@@ -852,32 +1069,32 @@ export default function CreateJobPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Actions</CardTitle>
+          <Card className="rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base md:text-lg">Actions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2 md:space-y-3">
               <Button
                 onClick={() => setShowPreview(true)}
                 variant="outline"
-                className="w-full"
+                className="w-full h-9 text-xs md:text-sm"
                 disabled={isSubmitting}
               >
-                <Eye className="w-4 h-4 mr-2" />
+                <Eye className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
                 Preview Job
               </Button>
               <Button
                 onClick={() => handleSubmit("published")}
-                className="w-full bg-teal-600 hover:bg-teal-700"
+                className="w-full bg-teal-600 hover:bg-teal-700 h-9 text-xs md:text-sm"
                 disabled={isSubmitting}
               >
-                <Save className="w-4 h-4 mr-2" />
+                <Save className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
                 {isSubmitting ? "Publishing..." : "Publish Job"}
               </Button>
               <Button
                 onClick={() => handleSubmit("draft")}
                 variant="outline"
-                className="w-full"
+                className="w-full h-9 text-xs md:text-sm"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Saving..." : "Save as Draft"}
@@ -885,12 +1102,14 @@ export default function CreateJobPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Tips for Better Results</CardTitle>
+          <Card className="rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base md:text-lg">
+                Tips for Better Results
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="text-sm text-gray-600 space-y-2">
+              <ul className="text-xs md:text-sm text-gray-600 space-y-1">
                 <li>• Use clear, specific job titles</li>
                 <li>• Include salary range to attract more candidates</li>
                 <li>• Highlight unique benefits and company culture</li>
