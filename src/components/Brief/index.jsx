@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { FaHeartbeat, FaConciergeBell, FaWrench, FaHandshake, FaBullhorn, FaBriefcase } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
@@ -76,24 +76,6 @@ export default function Brief() {
             transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 100 }}
             data-aos="fade-left"
           >
-            {/* Floating Icon */}
-            <div className="absolute -top-10 -right-10 w-28 h-28 md:w-36 md:h-36 rounded-full bg-teal-100 flex items-center justify-center shadow-lg">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={services[index].id}
-                  initial={{ opacity: 0, rotate: -15, scale: 0.8 }}
-                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={{ opacity: 0, rotate: 15, scale: 0.8 }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }}
-                  className="flex flex-col items-center text-teal-700"
-                >
-                  {services[index].icon}
-                  <div className="mt-2 text-sm md:text-base font-medium text-gray-700">
-                    {services[index].name}
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
 
             {/* Content */}
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
