@@ -16,6 +16,7 @@ import {
   FileText,
   Calendar,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -28,40 +29,96 @@ function RejectedJobs() {
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.email) {
-      const fetchRejectedJobs = async () => {
-        try {
-          const response = await fetch(
-            `/api/applicationManagementEmployee?email=${session.user.email}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch applied jobs");
-          }
-          const data = await response.json();
-
-          // Ensure correct data format
-          if (Array.isArray(data.rejectedJobs)) {
-            setRejectedJobs(data.rejectedJobs);
-          } else {
-            throw new Error("Unexpected response format");
-          }
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-
       fetchRejectedJobs();
     } else if (status === "unauthenticated") {
       setLoading(false);
     }
   }, [session, status]);
 
+  const fetchRejectedJobs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(
+        `/api/applicationManagementEmployee?email=${session.user.email}`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch applications: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+
+      // Filter for rejected jobs
+      const rejected =
+        data.allApplications?.filter(
+          (job) => job.status === "Rejected" || job.statusJob === "Rejected"
+        ) || [];
+
+      setRejectedJobs(rejected);
+      setAllJobs(data.allApplications || []);
+    } catch (err) {
+      console.error("Error fetching rejected jobs:", err);
+      setError(err.message || "Failed to fetch rejected applications");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRejectionRate = () => {
+    if (allJobs.length === 0) return 0;
+    return Math.round((rejectedJobs.length / allJobs.length) * 100);
+  };
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-teal-600" />
+          <p className="text-gray-600 mt-4">Loading session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-gray-400 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Authentication Required
+          </h3>
+          <p className="text-gray-600">
+            Please sign in to view your rejected applications.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-teal-600" />
           <p className="text-gray-600 mt-4">Loading rejected applications...</p>
         </div>
       </div>
@@ -72,10 +129,11 @@ function RejectedJobs() {
     return (
       <div className="text-center py-12">
         <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-        <p className="text-red-600 text-lg font-semibold">{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">
-          Try Again
-        </Button>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Error Loading Rejected Applications
+        </h3>
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button onClick={fetchRejectedJobs}>Try Again</Button>
       </div>
     );
   }
@@ -130,10 +188,7 @@ function RejectedJobs() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              {allJobs.length > 0
-                ? Math.round((rejectedJobs.length / allJobs.length) * 100)
-                : 0}
-              %
+              {getRejectionRate()}%
             </div>
           </CardContent>
         </Card>
@@ -166,31 +221,34 @@ function RejectedJobs() {
                 <thead>
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-3 px-4 font-medium text-gray-600">
-                      Applicant Details
+                      Job Title
                     </th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">
-                      Contact Info
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">
-                      Cover Letter
+                      Company
                     </th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">
                       Applied Date
                     </th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Status
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
                       Rejection Reason
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rejectedJobs.map((job, index) => (
+                  {rejectedJobs.map((job) => (
                     <tr
-                      key={job._id || index}
+                      key={job._id}
                       className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                     >
                       <td className="py-4 px-4">
                         <div className="font-medium text-gray-900">
-                          {job.fullName}
+                          {job.position || job.title || "Job Title"}
                         </div>
                         <Badge className="bg-red-100 text-red-800 mt-1">
                           <XCircle className="w-3 h-3 mr-1" />
@@ -198,45 +256,51 @@ function RejectedJobs() {
                         </Badge>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Mail className="w-4 h-4" />
-                            {job.email}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Phone className="w-4 h-4" />
-                            {job.phone}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="max-w-xs">
-                          <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                            <FileText className="w-4 h-4" />
-                            Cover Letter
-                          </div>
-                          <p
-                            className="text-sm text-gray-700 truncate"
-                            title={job.coverLetter}
-                          >
-                            {job.coverLetter}
-                          </p>
+                        <div className="text-gray-700">
+                          {job.company || "Company"}
                         </div>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Calendar className="w-4 h-4" />
-                          {new Date(job.appliedAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
+                          {job.appliedAt
+                            ? new Date(job.appliedAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                }
+                              )
+                            : "N/A"}
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="text-sm text-gray-700">
-                          {job.reason || "No specific reason provided"}
+                        <Badge className="bg-red-100 text-red-800">
+                          {job.status || job.statusJob || "Rejected"}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="text-sm text-gray-700 max-w-xs">
+                          {job.reason ||
+                            job.rejectionReason ||
+                            "No specific reason provided"}
                         </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-transparent"
+                          onClick={() =>
+                            (window.location.href = `/singleJob/${
+                              job.jobId || job._id
+                            }`)
+                          }
+                        >
+                          <FileText className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
                       </td>
                     </tr>
                   ))}

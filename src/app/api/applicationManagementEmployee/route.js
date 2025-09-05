@@ -22,7 +22,7 @@ export async function GET(req) {
 
     // Categorize applications by status
     const appliedJobs = allApplications.filter(
-      (app) => app.status === "applied"
+      (app) => app.status === "applied" || app.status === "interview-scheduled"
     );
     const approvedJobs = allApplications.filter(
       (app) => app.status === "Approved"

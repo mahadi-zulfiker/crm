@@ -385,33 +385,36 @@ function InnerCompletedJobsClientPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Completed Jobs</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Completed Jobs
+          </h1>
+          <p className="text-gray-600 mt-1 text-sm md:text-base">
             Review your successfully completed job postings and hiring outcomes.
           </p>
         </div>
         <Button
           variant="outline"
           onClick={exportReport}
-          className="text-gray-600 hover:bg-gray-100 bg-transparent"
+          className="text-gray-600 hover:bg-gray-100 bg-transparent whitespace-nowrap"
         >
           <Download className="w-4 h-4 mr-2" />
-          Export Report
+          <span className="hidden xs:inline">Export Report</span>
+          <span className="xs:hidden">Export</span>
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card className="shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   Total Completed
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-xl md:text-2xl font-bold text-green-600">
                   {stats.totalCompleted}
                 </p>
               </div>
@@ -421,14 +424,14 @@ function InnerCompletedJobsClientPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   Total Payment
                 </p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-xl md:text-2xl font-bold text-blue-600">
                   ${stats.totalPayment.toLocaleString()}
                 </p>
               </div>
@@ -438,14 +441,14 @@ function InnerCompletedJobsClientPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   Average Rating
                 </p>
-                <p className="text-2xl font-bold text-yellow-600">
+                <p className="text-xl md:text-2xl font-bold text-yellow-600">
                   {stats.averageRating}
                 </p>
               </div>
@@ -455,12 +458,14 @@ function InnerCompletedJobsClientPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Hires</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
+                  Total Hires
+                </p>
+                <p className="text-xl md:text-2xl font-bold text-purple-600">
                   {stats.totalHires}
                 </p>
               </div>
@@ -470,14 +475,14 @@ function InnerCompletedJobsClientPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   Avg Time to Hire
                 </p>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-xl md:text-2xl font-bold text-orange-600">
                   {stats.averageTimeToHire} days
                 </p>
               </div>
@@ -490,7 +495,7 @@ function InnerCompletedJobsClientPage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="shadow-sm">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -504,49 +509,51 @@ function InnerCompletedJobsClientPage() {
                 />
               </div>
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter by Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="technology">Technology</SelectItem>
-                <SelectItem value="design">Design</SelectItem>
-                <SelectItem value="customer support">
-                  Customer Support
-                </SelectItem>
-                <SelectItem value="marketing">Marketing</SelectItem>
-                <SelectItem value="sales">Sales</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={ratingFilter} onValueChange={setRatingFilter}>
-              <SelectTrigger className="w-full md:w-40">
-                <SelectValue placeholder="Rating" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Ratings</SelectItem>
-                <SelectItem value="5">5 Stars</SelectItem>
-                <SelectItem value="4">4+ Stars</SelectItem>
-                <SelectItem value="3">3+ Stars</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger className="w-full md:w-40">
-                <SelectValue placeholder="Date Range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="quarter">This Quarter</SelectItem>
-                <SelectItem value="year">This Year</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 md:flex gap-2 md:gap-4">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="technology">Technology</SelectItem>
+                  <SelectItem value="design">Design</SelectItem>
+                  <SelectItem value="customer support">
+                    Customer Support
+                  </SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="sales">Sales</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Rating" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Ratings</SelectItem>
+                  <SelectItem value="5">5 Stars</SelectItem>
+                  <SelectItem value="4">4+ Stars</SelectItem>
+                  <SelectItem value="3">3+ Stars</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Date Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="quarter">This Quarter</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {error && (
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="p-4">
             <div className="text-red-600 text-center">{error}</div>
           </CardContent>
@@ -558,29 +565,29 @@ function InnerCompletedJobsClientPage() {
         {currentJobs.map((job) => (
           <Card
             key={job._id}
-            className="hover:shadow-md transition-shadow border-l-4 border-l-teal-500"
+            className="hover:shadow-md transition-shadow border-l-4 border-l-teal-500 shadow-sm"
           >
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex flex-col lg:flex-row gap-6">
                 {/* Job Information */}
                 <div className="flex-1">
-                  <div className="flex items-start justify-between mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="text-lg md:text-xl font-semibold text-gray-900">
                           {job.title}
                         </h3>
                         {job.featured && (
-                          <Badge className="bg-yellow-100 text-yellow-800">
+                          <Badge className="bg-yellow-100 text-yellow-800 text-xs">
                             Featured
                           </Badge>
                         )}
-                        <Badge className="bg-green-100 text-green-800">
+                        <Badge className="bg-green-100 text-green-800 text-xs">
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Completed
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                      <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm text-gray-600 mb-2">
                         <div className="flex items-center gap-1">
                           <Building2 className="w-4 h-4" />
                           {job.company}
@@ -598,70 +605,74 @@ function InnerCompletedJobsClientPage() {
                           {job.vacancy} position{job.vacancy > 1 ? "s" : ""}
                         </div>
                       </div>
-                      <p className="text-gray-700 mb-3">{job.description}</p>
+                      <p className="text-gray-700 text-sm mt-2">
+                        {job.description}
+                      </p>
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-1 mb-1">
+                    <div className="text-right min-w-[120px]">
+                      <div className="flex items-center justify-end gap-1 mb-1">
                         {getRatingStars(job.rating || 0)}
-                        <span className="text-sm text-gray-600 ml-1">
+                        <span className="text-xs text-gray-600 ml-1">
                           ({job.rating || 0})
                         </span>
                       </div>
-                      <div className="text-lg font-semibold text-green-600">
+                      <div className="text-base md:text-lg font-semibold text-green-600">
                         ${job.payment || 0} earned
                       </div>
                     </div>
                   </div>
 
                   {/* Hired Candidates Info */}
-                  <div className="bg-green-50 rounded-lg p-4 mb-4">
-                    <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                  <div className="bg-green-50 rounded-lg p-3 md:p-4 mb-4">
+                    <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm md:text-base">
                       <Award className="w-4 h-4 text-green-600" />
                       Hired Candidates
                     </h4>
-                    {job.hiredCandidates.map((candidate, index) => (
-                      <div key={index} className="flex items-center gap-3 mb-2">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src={candidate.avatar}
-                            alt={candidate.name}
-                          />
-                          <AvatarFallback className="bg-green-500 text-white">
-                            {candidate.name
-                              ?.split(" ")
-                              .map((n) => n[0])
-                              .join("") || "N/A"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium text-gray-900">
-                                {candidate.name}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {candidate.email}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                <span className="text-sm font-medium">
-                                  {candidate.rating || "N/A"}
-                                </span>
+                    <div className="space-y-3">
+                      {job.hiredCandidates.map((candidate, index) => (
+                        <div key={index} className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage
+                              src={candidate.avatar}
+                              alt={candidate.name}
+                            />
+                            <AvatarFallback className="bg-green-500 text-white text-xs">
+                              {candidate.name
+                                ?.split(" ")
+                                .map((n) => n[0])
+                                .join("") || "N/A"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="font-medium text-gray-900 text-sm truncate">
+                                  {candidate.name}
+                                </p>
+                                <p className="text-xs text-gray-600 truncate">
+                                  {candidate.email}
+                                </p>
                               </div>
-                              <p className="text-sm text-gray-600">
-                                {candidate.experience || "N/A"}
-                              </p>
+                              <div className="text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                  <span className="text-xs font-medium">
+                                    {candidate.rating || "N/A"}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-600">
+                                  {candidate.experience || "N/A"}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
 
                   {/* Job Metrics */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <div className="text-center p-2 bg-blue-50 rounded">
                       <div className="font-semibold text-blue-600">
                         {job.totalApplications || 0}
@@ -691,12 +702,12 @@ function InnerCompletedJobsClientPage() {
 
                 {/* Job Details Sidebar */}
                 <div className="lg:w-64 space-y-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <h4 className="font-medium text-gray-900 mb-3">
+                  <Card className="shadow-sm">
+                    <CardContent className="p-3 md:p-4">
+                      <h4 className="font-medium text-gray-900 mb-3 text-sm md:text-base">
                         Job Details
                       </h4>
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-2 text-xs md:text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Reference:</span>
                           <span className="font-medium">
@@ -750,7 +761,7 @@ function InnerCompletedJobsClientPage() {
                     >
                       <Link href={`/hired-candidates?jobId=${job._id}`}>
                         <Eye className="w-4 h-4 mr-2" />
-                        View Hired Candidates
+                        <span className="text-xs">View Candidates</span>
                       </Link>
                     </Button>
                     <Button
@@ -759,7 +770,7 @@ function InnerCompletedJobsClientPage() {
                       className="text-gray-600 hover:bg-gray-100 bg-transparent"
                     >
                       <Download className="w-4 h-4 mr-2" />
-                      Download Report
+                      <span className="text-xs">Download Report</span>
                     </Button>
                   </div>
                 </div>
@@ -771,65 +782,101 @@ function InnerCompletedJobsClientPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-center items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => paginate(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-
-              {Array.from({ length: totalPages }, (_, index) => (
+        <Card className="shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="text-sm text-gray-600">
+                Showing {indexOfFirstJob + 1} to{" "}
+                {Math.min(indexOfLastJob, filteredJobs.length)} of{" "}
+                {filteredJobs.length} jobs
+              </div>
+              <div className="flex justify-center items-center space-x-1">
                 <Button
-                  key={index}
-                  variant={currentPage === index + 1 ? "default" : "outline"}
+                  variant="outline"
                   size="sm"
-                  onClick={() => paginate(index + 1)}
-                  className={
-                    currentPage === index + 1
-                      ? "bg-teal-600 text-white hover:bg-teal-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed px-3"
                 >
-                  {index + 1}
+                  <ChevronLeft className="w-4 h-4" />
                 </Button>
-              ))}
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+                {Array.from({ length: totalPages }, (_, index) => {
+                  // Show first, last, current, and nearby pages
+                  if (
+                    index === 0 ||
+                    index === totalPages - 1 ||
+                    Math.abs(index + 1 - currentPage) <= 1 ||
+                    (currentPage <= 2 && index < 3) ||
+                    (currentPage >= totalPages - 1 && index >= totalPages - 3)
+                  ) {
+                    return (
+                      <Button
+                        key={index}
+                        variant={
+                          currentPage === index + 1 ? "default" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => paginate(index + 1)}
+                        className={`px-3 ${
+                          currentPage === index + 1
+                            ? "bg-teal-600 text-white hover:bg-teal-700"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {index + 1}
+                      </Button>
+                    );
+                  }
 
-            <div className="text-center mt-4 text-sm text-gray-600">
-              Showing {indexOfFirstJob + 1} to{" "}
-              {Math.min(indexOfLastJob, filteredJobs.length)} of{" "}
-              {filteredJobs.length} jobs
+                  // Show ellipsis for skipped pages
+                  if (index === 1 && currentPage > 3) {
+                    return (
+                      <span key={index} className="px-2 text-gray-500">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  if (
+                    index === totalPages - 2 &&
+                    currentPage < totalPages - 2
+                  ) {
+                    return (
+                      <span key={index} className="px-2 text-gray-500">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  return null;
+                })}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed px-3"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
       )}
 
       {filteredJobs.length === 0 && !loading && (
-        <Card>
-          <CardContent className="p-12 text-center">
+        <Card className="shadow-sm">
+          <CardContent className="p-8 md:p-12 text-center">
             <div className="text-gray-400 mb-4">
               <CheckCircle className="w-12 h-12 mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No completed jobs found
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm md:text-base">
               {searchTerm ||
               categoryFilter !== "all" ||
               ratingFilter !== "all" ||

@@ -16,6 +16,7 @@ import {
   DollarSign,
   Briefcase,
   XCircle,
+  Loader2,
 } from "lucide-react";
 
 export default function JobHistory() {
@@ -24,25 +25,31 @@ export default function JobHistory() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchJobHistory = async () => {
-      try {
-        const response = await fetch("/api/jobHistoryEmployee");
-        const data = await response.json();
-
-        if (response.ok) {
-          setJobHistory(data);
-        } else {
-          setError("Failed to fetch job history");
-        }
-      } catch (err) {
-        setError("Error fetching data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchJobHistory();
   }, []);
+
+  const fetchJobHistory = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/jobHistoryEmployee");
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch job history: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      setJobHistory(data);
+    } catch (err) {
+      console.error("Error fetching job history:", err);
+      setError(err.message || "Error fetching job history data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -50,6 +57,8 @@ export default function JobHistory() {
       "In Progress": { className: "bg-blue-100 text-blue-800" },
       Cancelled: { className: "bg-red-100 text-red-800" },
       "On Hold": { className: "bg-yellow-100 text-yellow-800" },
+      Approved: { className: "bg-purple-100 text-purple-800" },
+      Pending: { className: "bg-gray-100 text-gray-800" },
     };
 
     const config = statusConfig[status] || {
@@ -64,6 +73,7 @@ export default function JobHistory() {
       "Part-time": { className: "bg-blue-100 text-blue-800" },
       Contract: { className: "bg-purple-100 text-purple-800" },
       Freelance: { className: "bg-orange-100 text-orange-800" },
+      Internship: { className: "bg-teal-100 text-teal-800" },
     };
 
     const config = typeConfig[jobType] || {
@@ -79,11 +89,16 @@ export default function JobHistory() {
     }, 0);
   };
 
+  const getAveragePayment = () => {
+    if (jobHistory.length === 0) return 0;
+    return getTotalEarnings() / jobHistory.length;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-teal-600" />
           <p className="text-gray-600 mt-4">Loading job history...</p>
         </div>
       </div>
@@ -94,10 +109,11 @@ export default function JobHistory() {
     return (
       <div className="text-center py-12">
         <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-        <p className="text-red-600 text-lg font-semibold">{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">
-          Try Again
-        </Button>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Error Loading Job History
+        </h3>
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button onClick={fetchJobHistory}>Try Again</Button>
       </div>
     );
   }
@@ -141,7 +157,11 @@ export default function JobHistory() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${getTotalEarnings().toLocaleString()}
+              $
+              {getTotalEarnings().toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
           </CardContent>
         </Card>
@@ -166,11 +186,10 @@ export default function JobHistory() {
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
               $
-              {jobHistory.length > 0
-                ? Math.round(
-                    getTotalEarnings() / jobHistory.length
-                  ).toLocaleString()
-                : 0}
+              {getAveragePayment().toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
           </CardContent>
         </Card>
@@ -219,6 +238,9 @@ export default function JobHistory() {
                     <th className="text-left py-3 px-4 font-medium text-gray-600">
                       Payment
                     </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -229,36 +251,69 @@ export default function JobHistory() {
                     >
                       <td className="py-4 px-4">
                         <div className="font-medium text-gray-900">
-                          {job.title}
+                          {job.title || job.position || "Job Title"}
                         </div>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           <Building2 className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-700">{job.company}</span>
+                          <span className="text-gray-700">
+                            {job.company || "Company"}
+                          </span>
                         </div>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-700">{job.location}</span>
+                          <span className="text-gray-700">
+                            {job.location || "Location"}
+                          </span>
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        {getJobTypeBadge(job.jobType)}
+                        {getJobTypeBadge(job.jobType || "Full-time")}
                       </td>
                       <td className="py-4 px-4">
                         <div className="font-semibold text-green-600">
-                          ${Number.parseFloat(job.salary).toLocaleString()}
+                          $
+                          {Number.parseFloat(job.salary || 0).toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        {getStatusBadge(job.status)}
+                        {getStatusBadge(job.status || "Pending")}
                       </td>
                       <td className="py-4 px-4">
                         <div className="font-semibold text-green-600">
-                          ${Number.parseFloat(job.payment).toLocaleString()}
+                          $
+                          {Number.parseFloat(job.payment || 0).toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}
                         </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-transparent"
+                          onClick={() =>
+                            (window.location.href = `/singleJob/${
+                              job.jobId || job._id
+                            }`)
+                          }
+                        >
+                          <FileText className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
                       </td>
                     </tr>
                   ))}
