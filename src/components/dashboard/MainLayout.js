@@ -50,6 +50,9 @@ import ViewEmployeeProfile from "./Client/ViewEmployeeProfile";
 import InterviewScheduleClient from "./Client/InterviewScheduleClient";
 import SetInterViewClient from "./Client/SetInterviewClient";
 import InterviewedJobs from "./Employee/InterviewedJobs";
+import NoticeBoard from "./NoticeBoard";
+import NoticeManagement from "./Admin/NoticeManagement";
+import AdminNoticeBoard from "./Admin/NoticeBoard";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -110,9 +113,7 @@ const MainLayout = () => {
           {pathname === "/dashboard/client/interviewScheduleClient" && (
             <InterviewScheduleClient />
           )}
-          {pathname === "/dashboard/client/setInterviewClient" && (
-            <SetInterViewClient />
-          )}
+          {pathname === "/dashboard/client/noticeBoard" && <NoticeBoard />}
 
           {pathname === "/dashboard/vendor" && <Vendor />}
           {pathname === "/dashboard/vendor/jobManagementVendor" && (
@@ -134,6 +135,7 @@ const MainLayout = () => {
           {pathname === "/dashboard/vendor/vendorProfileManagement" && (
             <VendorProfileManagement />
           )}
+          {pathname === "/dashboard/vendor/noticeBoard" && <NoticeBoard />}
 
           {pathname === "/dashboard/admin" && <Admin />}
           {pathname === "/dashboard/admin/userManagement" && <UserManagement />}
@@ -161,6 +163,10 @@ const MainLayout = () => {
           {pathname === "/dashboard/admin/adminProfileManagement" && (
             <AdminProfileManagement />
           )}
+          {pathname === "/dashboard/admin/noticeManagement" && (
+            <NoticeManagement />
+          )}
+          {pathname === "/dashboard/admin/noticeBoard" && <AdminNoticeBoard />}
 
           {pathname === "/dashboard/employee" && <Employee />}
           {pathname === "/dashboard/employee/appliedJobs" && <AppliedJobs />}
@@ -183,6 +189,7 @@ const MainLayout = () => {
           {pathname === "/dashboard/employee/interviewedJobs" && (
             <InterviewedJobs />
           )}
+          {pathname === "/dashboard/employee/noticeBoard" && <NoticeBoard />}
         </div>
       </main>
     </div>
