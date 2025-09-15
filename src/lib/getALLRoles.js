@@ -16,6 +16,7 @@ import {
   HomeIcon,
   WalletCards,
   Search,
+  Bell,
 } from "lucide-react";
 
 export default function getALLRoles() {
@@ -40,7 +41,7 @@ export default function getALLRoles() {
           // {
           //   name: "Job Templates",
           //   href: "/dashboard/client/templates",
-          // },
+          //   },
         ],
       },
       {
@@ -62,6 +63,11 @@ export default function getALLRoles() {
         title: "Payment History",
         icon: WalletCards,
         href: "/dashboard/client/paymentHistory",
+      },
+      {
+        title: "Notice Board",
+        icon: Bell,
+        href: "/dashboard/client/noticeBoard",
       },
       {
         title: "Profile",
@@ -126,6 +132,11 @@ export default function getALLRoles() {
         ],
       },
       {
+        title: "Notice Board",
+        icon: Bell,
+        href: "/dashboard/employee/noticeBoard",
+      },
+      {
         title: "Profile",
         icon: User,
         href: "/dashboard/employee/profileManagement",
@@ -181,6 +192,11 @@ export default function getALLRoles() {
         ],
       },
       {
+        title: "Notice Board",
+        icon: Bell,
+        href: "/dashboard/vendor/noticeBoard",
+      },
+      {
         title: "Clients",
         icon: Building2,
       },
@@ -233,7 +249,16 @@ export default function getALLRoles() {
           { name: "Post Blogs", href: "/dashboard/admin/postBlogs" },
           { name: "Post Projects", href: "/dashboard/admin/postProjects" },
           { name: "View Resumes", href: "/dashboard/admin/viewResumeAdmin" },
+          {
+            name: "Notice Management",
+            href: "/dashboard/admin/noticeManagement",
+          },
         ],
+      },
+      {
+        title: "Notice Board",
+        icon: Bell,
+        href: "/dashboard/admin/noticeBoard",
       },
       {
         title: "Profile",
