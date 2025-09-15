@@ -1,6 +1,11 @@
 "use client";
 import MainLayout from "@/components/dashboard/MainLayout";
+import InterviewedJobs from "@/components/dashboard/Employee/InterviewedJobs";
 
-export default function InterviewedJobs() {
-  return <MainLayout></MainLayout>;
+export default function InterviewedJobsPage() {
+  return (
+    <MainLayout>
+      <InterviewedJobs />
+    </MainLayout>
+  );
 }

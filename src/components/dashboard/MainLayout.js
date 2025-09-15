@@ -113,6 +113,9 @@ const MainLayout = () => {
           {pathname === "/dashboard/client/interviewScheduleClient" && (
             <InterviewScheduleClient />
           )}
+          {pathname === "/dashboard/client/interviews" && (
+            <InterviewScheduleClient />
+          )}
           {pathname === "/dashboard/client/noticeBoard" && <NoticeBoard />}
 
           {pathname === "/dashboard/vendor" && <Vendor />}

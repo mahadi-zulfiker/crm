@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AllCandidates() {
   return (
@@ -46,6 +47,7 @@ function InnerAllCandidates() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [jobFilter, setJobFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchCandidates = async () => {
@@ -168,6 +170,14 @@ function InnerAllCandidates() {
     } catch (error) {
       console.error("Error updating candidate status:", error);
     }
+  };
+
+  const handleScheduleInterview = (candidate) => {
+    // Redirect to interview scheduling page with candidate details
+    const scheduleUrl = `/dashboard/client/interviewScheduleClient?candidateId=${
+      candidate.id
+    }&jobId=${candidate.jobId || jobId}`;
+    window.location.href = scheduleUrl;
   };
 
   const stats = {
@@ -458,6 +468,15 @@ function InnerAllCandidates() {
                   <Button variant="outline" size="sm" className="h-8 text-xs">
                     <MessageSquare className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
                     <span className="hidden xs:inline">Message</span>
+                  </Button>
+                  {/* Add Schedule Interview Button */}
+                  <Button
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 w-full h-8 text-xs"
+                    onClick={() => handleScheduleInterview(candidate)}
+                  >
+                    <Calendar className="w-3 h-3 mr-1 md:mr-2 md:w-4 md:h-4" />
+                    <span className="hidden xs:inline">Schedule Interview</span>
                   </Button>
                   <div className="w-full sm:w-auto sm:flex-1 min-w-[150px]">
                     <Select
