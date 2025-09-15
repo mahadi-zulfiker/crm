@@ -321,12 +321,8 @@ export default function JobManagementAdmin() {
 
   const stats = {
     total: jobs.length,
-    pending: jobs.filter(
-      (job) => job.status === "Pending" || job.status === "published"
-    ).length,
-    approved: jobs.filter(
-      (job) => job.status === "Approved" || job.status === "Active"
-    ).length,
+    pending: jobs.filter((job) => job.status === "Pending").length,
+    approved: jobs.filter((job) => job.status === "Approved").length,
     rejected: jobs.filter((job) => job.status === "Rejected").length,
   };
 
