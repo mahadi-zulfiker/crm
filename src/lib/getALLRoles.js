@@ -38,27 +38,17 @@ export default function getALLRoles() {
             name: "Completed Job",
             href: "/dashboard/client/completedJobsClient",
           },
+          {
+            name: "Interview Schedule",
+            href: "/dashboard/client/interviews",
+          },
           // {
           //   name: "Job Templates",
           //   href: "/dashboard/client/templates",
           //   },
         ],
       },
-      {
-        title: "Applications",
-        icon: FileText,
-        items: [
-          { name: "My Applications", href: "/dashboard/client/applications" },
-          {
-            name: "Application Status",
-            href: "/dashboard/client/applications/status",
-          },
-          {
-            name: "Interview Schedule",
-            href: "/dashboard/client/applications/interviews",
-          },
-        ],
-      },
+
       {
         title: "Payment History",
         icon: WalletCards,
@@ -112,7 +102,7 @@ export default function getALLRoles() {
             href: "/dashboard/employee/interviewedJobs",
           },
           { name: "Approved Jobs", href: "/dashboard/employee/approvedJobs" },
-          { name: "Rejected Jobs", href: "/dashboard/employee/rejectedJobs" },
+          // { name: "Rejected Jobs", href: "/dashboard/employee/rejectedJobs" },
           { name: "Completed Jobs", href: "/dashboard/employee/completedJobs" },
           {
             name: "All Applications",
@@ -157,7 +147,6 @@ export default function getALLRoles() {
         href: "/dashboard/employee/settings",
       },
     ],
-
     vendor: [
       {
         title: "Dashboard",
