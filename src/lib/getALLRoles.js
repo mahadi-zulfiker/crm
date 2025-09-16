@@ -16,6 +16,7 @@ import {
   HomeIcon,
   WalletCards,
   Search,
+  Bell,
 } from "lucide-react";
 
 export default function getALLRoles() {
@@ -37,31 +38,26 @@ export default function getALLRoles() {
             name: "Completed Job",
             href: "/dashboard/client/completedJobsClient",
           },
+          {
+            name: "Interview Schedule",
+            href: "/dashboard/client/interviews",
+          },
           // {
           //   name: "Job Templates",
           //   href: "/dashboard/client/templates",
-          // },
+          //   },
         ],
       },
-      {
-        title: "Applications",
-        icon: FileText,
-        items: [
-          { name: "My Applications", href: "/dashboard/client/applications" },
-          {
-            name: "Application Status",
-            href: "/dashboard/client/applications/status",
-          },
-          {
-            name: "Interview Schedule",
-            href: "/dashboard/client/applications/interviews",
-          },
-        ],
-      },
+
       {
         title: "Payment History",
         icon: WalletCards,
         href: "/dashboard/client/paymentHistory",
+      },
+      {
+        title: "Notice Board",
+        icon: Bell,
+        href: "/dashboard/client/noticeBoard",
       },
       {
         title: "Profile",
@@ -106,7 +102,7 @@ export default function getALLRoles() {
             href: "/dashboard/employee/interviewedJobs",
           },
           { name: "Approved Jobs", href: "/dashboard/employee/approvedJobs" },
-          { name: "Rejected Jobs", href: "/dashboard/employee/rejectedJobs" },
+          // { name: "Rejected Jobs", href: "/dashboard/employee/rejectedJobs" },
           { name: "Completed Jobs", href: "/dashboard/employee/completedJobs" },
           {
             name: "All Applications",
@@ -124,6 +120,11 @@ export default function getALLRoles() {
           },
           { name: "Job History", href: "/dashboard/employee/jobHistory" },
         ],
+      },
+      {
+        title: "Notice Board",
+        icon: Bell,
+        href: "/dashboard/employee/noticeBoard",
       },
       {
         title: "Profile",
@@ -146,7 +147,6 @@ export default function getALLRoles() {
         href: "/dashboard/employee/settings",
       },
     ],
-
     vendor: [
       {
         title: "Dashboard",
@@ -179,6 +179,11 @@ export default function getALLRoles() {
             href: "/dashboard/vendor/projects/feedback",
           },
         ],
+      },
+      {
+        title: "Notice Board",
+        icon: Bell,
+        href: "/dashboard/vendor/noticeBoard",
       },
       {
         title: "Clients",
@@ -233,7 +238,16 @@ export default function getALLRoles() {
           { name: "Post Blogs", href: "/dashboard/admin/postBlogs" },
           { name: "Post Projects", href: "/dashboard/admin/postProjects" },
           { name: "View Resumes", href: "/dashboard/admin/viewResumeAdmin" },
+          {
+            name: "Notice Management",
+            href: "/dashboard/admin/noticeManagement",
+          },
         ],
+      },
+      {
+        title: "Notice Board",
+        icon: Bell,
+        href: "/dashboard/admin/noticeBoard",
       },
       {
         title: "Profile",

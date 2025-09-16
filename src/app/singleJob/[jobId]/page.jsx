@@ -111,7 +111,7 @@ function SingleJob() {
           <div className="text-center bg-white p-8 rounded-lg shadow-md border border-red-200">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <p className="text-lg font-semibold text-red-600 mb-2">{error}</p>
-            <Link href="/jobs">
+            <Link href="/allJobs">
               <button className="mt-4 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
                 Back to Jobs
               </button>

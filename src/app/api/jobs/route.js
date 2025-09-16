@@ -4,12 +4,19 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const db = await connectMongoDB();
-    const jobs = await db.collection("jobs").find().toArray();
+    // Only return approved jobs for public viewing
+    const jobs = await db
+      .collection("jobs")
+      .find({ status: "Approved" })
+      .toArray();
 
     return NextResponse.json(jobs, { status: 200 });
   } catch (error) {
     console.error("Error fetching jobs:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -29,13 +36,28 @@ export async function POST(req) {
       featured,
     } = body;
 
-    if (!title || !company || !location || !jobType || !category || !description || !jobReference || !vacancy) {
-      return NextResponse.json({ message: "Please fill out all required fields!" }, { status: 400 });
+    if (
+      !title ||
+      !company ||
+      !location ||
+      !jobType ||
+      !category ||
+      !description ||
+      !jobReference ||
+      !vacancy
+    ) {
+      return NextResponse.json(
+        { message: "Please fill out all required fields!" },
+        { status: 400 }
+      );
     }
 
     const parsedVacancy = parseInt(vacancy, 10);
     if (isNaN(parsedVacancy) || parsedVacancy < 1) {
-      return NextResponse.json({ message: "Vacancy must be a positive number." }, { status: 400 });
+      return NextResponse.json(
+        { message: "Vacancy must be a positive number." },
+        { status: 400 }
+      );
     }
 
     const db = await connectMongoDB();
@@ -53,9 +75,15 @@ export async function POST(req) {
       postedAt: new Date(),
     });
 
-    return NextResponse.json({ message: "Job posted successfully!", jobId: result.insertedId }, { status: 201 });
+    return NextResponse.json(
+      { message: "Job posted successfully!", jobId: result.insertedId },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error posting job:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

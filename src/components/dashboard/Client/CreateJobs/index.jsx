@@ -388,7 +388,7 @@ export default function CreateJobPage() {
         <JobPreview />
         <div className="flex flex-col sm:flex-row justify-center gap-3">
           <Button
-            onClick={() => handleSubmit("published")}
+            onClick={() => handleSubmit("Pending")}
             className="bg-teal-600 hover:bg-teal-700 h-9 text-xs md:text-sm"
             disabled={isSubmitting}
           >
@@ -1084,7 +1084,7 @@ export default function CreateJobPage() {
                 Preview Job
               </Button>
               <Button
-                onClick={() => handleSubmit("published")}
+                onClick={() => handleSubmit("Pending")}
                 className="w-full bg-teal-600 hover:bg-teal-700 h-9 text-xs md:text-sm"
                 disabled={isSubmitting}
               >

@@ -503,7 +503,7 @@ export default function ClientDashboard() {
                   <p className="text-gray-600 text-sm">
                     No recent job postings
                   </p>
-                  <Link href="/dashboard/client/jobs/create">
+                  <Link href="/dashboard/client/createJobs">
                     <Button className="mt-2 bg-teal-600 hover:bg-teal-700 h-8 text-xs px-3">
                       Post Your First Job
                     </Button>

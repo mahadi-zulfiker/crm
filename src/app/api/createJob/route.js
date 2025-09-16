@@ -81,7 +81,7 @@ export async function POST(req) {
       vacancy: parsedVacancy,
       featured: Boolean(featured),
       vendor: vendor || "",
-      status: status || "draft",
+      status: status || "Pending",
       rating: rating || 0,
       payment: payment || "0",
       deadline: deadline ? new Date(deadline) : null,
