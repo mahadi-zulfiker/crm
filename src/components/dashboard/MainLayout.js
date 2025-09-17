@@ -53,6 +53,15 @@ import InterviewedJobs from "./Employee/InterviewedJobs";
 import NoticeBoard from "./NoticeBoard";
 import NoticeManagement from "./Admin/NoticeManagement";
 import AdminNoticeBoard from "./Admin/NoticeBoard";
+import Attendance from "./Employee/Attendance";
+import CompanyManagement from "./Admin/CompanyManagement";
+import Company from "./Employee/Company";
+import AttendanceManagement from "./Admin/CompanyManagement/Attendance";
+import MonthlyAttendance from "./Admin/CompanyManagement/MonthlyAttendance";
+import MissingAttendance from "./Admin/CompanyManagement/MissingAttendance";
+import LoanList from "./Admin/CompanyManagement/LoanList";
+import LeaveManagement from "./Admin/CompanyManagement/LeaveManagement";
+import CompanyEmployeeManagement from "./Admin/CompanyManagement/EmployeeManagement";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -170,6 +179,31 @@ const MainLayout = () => {
             <NoticeManagement />
           )}
           {pathname === "/dashboard/admin/noticeBoard" && <AdminNoticeBoard />}
+          {pathname === "/dashboard/admin/companyManagement" && (
+            <CompanyManagement />
+          )}
+          {pathname === "/dashboard/admin/companyManagement/attendance" && (
+            <AttendanceManagement />
+          )}
+          {pathname ===
+            "/dashboard/admin/companyManagement/monthlyAttendance" && (
+            <MonthlyAttendance />
+          )}
+          {pathname ===
+            "/dashboard/admin/companyManagement/missingAttendance" && (
+            <MissingAttendance />
+          )}
+          {pathname === "/dashboard/admin/companyManagement/loanList" && (
+            <LoanList />
+          )}
+          {pathname ===
+            "/dashboard/admin/companyManagement/leaveManagement" && (
+            <LeaveManagement />
+          )}
+          {pathname ===
+            "/dashboard/admin/companyManagement/employeeManagement" && (
+            <CompanyEmployeeManagement />
+          )}
 
           {pathname === "/dashboard/employee" && <Employee />}
           {pathname === "/dashboard/employee/appliedJobs" && <AppliedJobs />}
@@ -193,6 +227,8 @@ const MainLayout = () => {
             <InterviewedJobs />
           )}
           {pathname === "/dashboard/employee/noticeBoard" && <NoticeBoard />}
+          {pathname === "/dashboard/employee/attendance" && <Attendance />}
+          {pathname === "/dashboard/employee/company" && <Company />}
         </div>
       </main>
     </div>

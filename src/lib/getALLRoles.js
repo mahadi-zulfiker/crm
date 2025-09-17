@@ -111,6 +111,16 @@ export default function getALLRoles() {
         ],
       },
       {
+        title: "Attendance",
+        icon: Calendar,
+        href: "/dashboard/employee/attendance",
+      },
+      {
+        title: "Company",
+        icon: Building2,
+        href: "/dashboard/employee/company",
+      },
+      {
         title: "Job Management",
         icon: FileText,
         items: [
@@ -208,6 +218,36 @@ export default function getALLRoles() {
         title: "User Management",
         icon: Users,
         href: "/dashboard/admin/userManagement",
+      },
+      {
+        title: "Company Management",
+        icon: Building2,
+        items: [
+          {
+            name: "Attendance",
+            href: "/dashboard/admin/companyManagement/attendance",
+          },
+          {
+            name: "Monthly Attendance",
+            href: "/dashboard/admin/companyManagement/monthlyAttendance",
+          },
+          {
+            name: "Missing Attendance",
+            href: "/dashboard/admin/companyManagement/missingAttendance",
+          },
+          {
+            name: "Loan List",
+            href: "/dashboard/admin/companyManagement/loanList",
+          },
+          {
+            name: "Leave Management",
+            href: "/dashboard/admin/companyManagement/leaveManagement",
+          },
+          {
+            name: "Employee Management",
+            href: "/dashboard/admin/companyManagement/employeeManagement",
+          },
+        ],
       },
       {
         title: "Job Management",

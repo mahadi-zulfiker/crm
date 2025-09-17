@@ -27,6 +27,7 @@ import {
   ArrowRight,
   TrendingUp,
   Loader2,
+  Calendar,
 } from "lucide-react";
 import {
   Line,
@@ -42,7 +43,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-export default function UserDashboard() {
+function UserDashboard() {
   const { data: session } = useSession();
   const [stats, setStats] = useState({
     applicationsSent: 0,
@@ -563,3 +564,5 @@ export default function UserDashboard() {
     </div>
   );
 }
+
+export default UserDashboard;
