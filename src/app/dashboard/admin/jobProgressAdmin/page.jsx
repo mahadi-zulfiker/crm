@@ -1,11 +1,7 @@
 'use client';
-import MainLayout from "@/components/dashboard/MainLayout";
 
-export default function JobProgressAdmin() {
-    return (
-        <MainLayout>
+import JobProgressAdmin from "@/components/dashboard/Admin/JobProgressAdmin";
 
-        </MainLayout>
-    );
+export default function JobProgressAdminPage() {
+  return <JobProgressAdmin />;
 }
-

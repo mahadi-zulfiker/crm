@@ -110,15 +110,32 @@ export default function getALLRoles() {
           },
         ],
       },
+
       {
-        title: "Attendance",
-        icon: Calendar,
-        href: "/dashboard/employee/attendance",
-      },
-      {
-        title: "Company",
+        title: "Company Management",
         icon: Building2,
-        href: "/dashboard/employee/company",
+        items: [
+          {
+            name: "Overview",
+            href: "/dashboard/employee/companyManagement",
+          },
+          {
+            name: "Attendance",
+            href: "/dashboard/employee/companyManagement/attendance",
+          },
+          {
+            name: "Leave Management",
+            href: "/dashboard/employee/companyManagement/leaveManagement",
+          },
+          {
+            name: "Loan Management",
+            href: "/dashboard/employee/companyManagement/loanManagement",
+          },
+          {
+            name: "Reports & Analytics",
+            href: "/dashboard/employee/companyManagement/reportsAnalytics",
+          },
+        ],
       },
       {
         title: "Job Management",
@@ -246,6 +263,10 @@ export default function getALLRoles() {
           {
             name: "Employee Management",
             href: "/dashboard/admin/companyManagement/employeeManagement",
+          },
+          {
+            name: "Reports & Analytics",
+            href: "/dashboard/admin/companyManagement/reportsAnalytics",
           },
         ],
       },

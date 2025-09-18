@@ -1,11 +1,7 @@
-'use client';
-import MainLayout from "@/components/dashboard/MainLayout";
+"use client";
 
-export default function AdminProfileManagement() {
-    return (
-        <MainLayout>
+import AdminProfileManagement from "@/components/dashboard/Admin/AdminProfileManagement";
 
-        </MainLayout>
-    );
+export default function AdminProfileManagementPage() {
+  return <AdminProfileManagement />;
 }
-
