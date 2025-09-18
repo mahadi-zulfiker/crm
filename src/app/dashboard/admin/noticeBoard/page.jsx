@@ -1,6 +1,7 @@
 "use client";
-import MainLayout from "@/components/dashboard/MainLayout";
 
-export default function NoticeBoardPage() {
-  return <MainLayout></MainLayout>;
+import AdminNoticeBoard from "@/components/dashboard/Admin/NoticeBoard";
+
+export default function AdminNoticeBoardPage() {
+  return <AdminNoticeBoard />;
 }

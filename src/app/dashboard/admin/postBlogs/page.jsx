@@ -1,11 +1,7 @@
 'use client';
-import MainLayout from "@/components/dashboard/MainLayout";
 
-export default function PostBlogs() {
-    return (
-        <MainLayout>
+import PostBlogs from "@/components/dashboard/Admin/PostBlogs";
 
-        </MainLayout>
-    );
+export default function PostBlogsPage() {
+  return <PostBlogs />;
 }
-

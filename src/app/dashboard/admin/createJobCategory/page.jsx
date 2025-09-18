@@ -1,10 +1,7 @@
-'use client';
-import MainLayout from "@/components/dashboard/MainLayout";
+"use client";
 
-export default function CreateJobCategory() {
-    return (
-        <MainLayout>
+import CreateJobCategory from "@/components/dashboard/Admin/CreateJobCategory";
 
-        </MainLayout>
-    );
+export default function CreateJobCategoryPage() {
+  return <CreateJobCategory />;
 }

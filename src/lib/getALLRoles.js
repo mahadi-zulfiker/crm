@@ -110,6 +110,33 @@ export default function getALLRoles() {
           },
         ],
       },
+
+      {
+        title: "Company Management",
+        icon: Building2,
+        items: [
+          {
+            name: "Overview",
+            href: "/dashboard/employee/companyManagement",
+          },
+          {
+            name: "Attendance",
+            href: "/dashboard/employee/companyManagement/attendance",
+          },
+          {
+            name: "Leave Management",
+            href: "/dashboard/employee/companyManagement/leaveManagement",
+          },
+          {
+            name: "Loan Management",
+            href: "/dashboard/employee/companyManagement/loanManagement",
+          },
+          {
+            name: "Reports & Analytics",
+            href: "/dashboard/employee/companyManagement/reportsAnalytics",
+          },
+        ],
+      },
       {
         title: "Job Management",
         icon: FileText,
@@ -208,6 +235,40 @@ export default function getALLRoles() {
         title: "User Management",
         icon: Users,
         href: "/dashboard/admin/userManagement",
+      },
+      {
+        title: "Company Management",
+        icon: Building2,
+        items: [
+          {
+            name: "Attendance",
+            href: "/dashboard/admin/companyManagement/attendance",
+          },
+          {
+            name: "Monthly Attendance",
+            href: "/dashboard/admin/companyManagement/monthlyAttendance",
+          },
+          {
+            name: "Missing Attendance",
+            href: "/dashboard/admin/companyManagement/missingAttendance",
+          },
+          {
+            name: "Loan List",
+            href: "/dashboard/admin/companyManagement/loanList",
+          },
+          {
+            name: "Leave Management",
+            href: "/dashboard/admin/companyManagement/leaveManagement",
+          },
+          {
+            name: "Employee Management",
+            href: "/dashboard/admin/companyManagement/employeeManagement",
+          },
+          {
+            name: "Reports & Analytics",
+            href: "/dashboard/admin/companyManagement/reportsAnalytics",
+          },
+        ],
       },
       {
         title: "Job Management",

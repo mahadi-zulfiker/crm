@@ -1,11 +1,7 @@
 'use client';
-import MainLayout from "@/components/dashboard/MainLayout";
 
-export default function ViewResumeAdmin() {
-    return (
-        <MainLayout>
+import ViewResumeAdmin from "@/components/dashboard/Admin/ViewResumeAdmin";
 
-        </MainLayout>
-    );
+export default function ViewResumeAdminPage() {
+  return <ViewResumeAdmin />;
 }
-

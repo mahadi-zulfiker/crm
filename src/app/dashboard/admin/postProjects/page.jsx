@@ -1,10 +1,7 @@
-'use client';
-import MainLayout from "@/components/dashboard/MainLayout";
+"use client";
 
-export default function PostProjects() {
-    return (
-        <MainLayout>
+import PostProjects from "@/components/dashboard/Admin/PostProjects";
 
-        </MainLayout>
-    );
+export default function PostProjectsPage() {
+  return <PostProjects />;
 }
