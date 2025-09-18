@@ -1,11 +1,7 @@
 'use client';
-import MainLayout from "@/components/dashboard/MainLayout";
 
-export default function ApplicationManagementE() {
-    return (
-        <MainLayout>
+import ApplicationManagementE from "@/components/dashboard/Admin/ApplicationManagementE";
 
-        </MainLayout>
-    );
+export default function ApplicationManagementEPage() {
+  return <ApplicationManagementE />;
 }
-
