@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,6 +7,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Calendar,
   UserMinus,
@@ -15,35 +23,27 @@ import {
   Clock,
   Filter,
   Download,
+  Search,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function LeaveManagement() {
   const { toast } = useToast();
-
-  const handleApprove = (employeeName) => {
-    toast({
-      title: "Leave Approved",
-      description: `Leave request for ${employeeName} has been approved.`,
-    });
-  };
-
-  const handleReject = (employeeName) => {
-    toast({
-      title: "Leave Rejected",
-      description: `Leave request for ${employeeName} has been rejected.`,
-    });
-  };
-
-  const handleExport = () => {
-    toast({
-      title: "Export Started",
-      description: "Leave management report export has started.",
-    });
-  };
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterDepartment, setFilterDepartment] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedLeave, setSelectedLeave] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   // Mock data for leave requests
-  const leaveData = [
+  const [leaveData, setLeaveData] = useState([
     {
       id: 1,
       employee: "John Smith",
@@ -53,6 +53,13 @@ export default function LeaveManagement() {
       endDate: "2023-06-25",
       days: 5,
       status: "Pending",
+      reason: "Family vacation",
+      appliedDate: "2023-06-01",
+      balance: {
+        annual: 15,
+        sick: 10,
+        casual: 10,
+      },
     },
     {
       id: 2,
@@ -63,6 +70,13 @@ export default function LeaveManagement() {
       endDate: "2023-06-20",
       days: 3,
       status: "Approved",
+      reason: "Medical appointment",
+      appliedDate: "2023-06-15",
+      balance: {
+        annual: 12,
+        sick: 7,
+        casual: 10,
+      },
     },
     {
       id: 3,
@@ -73,6 +87,13 @@ export default function LeaveManagement() {
       endDate: "2023-06-23",
       days: 2,
       status: "Pending",
+      reason: "Personal matters",
+      appliedDate: "2023-06-18",
+      balance: {
+        annual: 15,
+        sick: 10,
+        casual: 8,
+      },
     },
     {
       id: 4,
@@ -83,6 +104,13 @@ export default function LeaveManagement() {
       endDate: "2023-09-30",
       days: 90,
       status: "Approved",
+      reason: "Maternity leave",
+      appliedDate: "2023-05-15",
+      balance: {
+        annual: 10,
+        sick: 10,
+        casual: 10,
+      },
     },
     {
       id: 5,
@@ -93,8 +121,76 @@ export default function LeaveManagement() {
       endDate: "2023-06-17",
       days: 3,
       status: "Rejected",
+      reason: "Annual conference",
+      appliedDate: "2023-06-01",
+      rejectionReason: "Team understaffed during that period",
+      balance: {
+        annual: 12,
+        sick: 10,
+        casual: 10,
+      },
     },
-  ];
+  ]);
+
+  const handleApprove = (id) => {
+    setLeaveData(
+      leaveData.map((leave) =>
+        leave.id === id ? { ...leave, status: "Approved" } : leave
+      )
+    );
+    toast({
+      title: "Leave Approved",
+      description: "Leave request has been approved successfully.",
+    });
+  };
+
+  const handleReject = (id, rejectionReason = "") => {
+    setLeaveData(
+      leaveData.map((leave) =>
+        leave.id === id
+          ? { ...leave, status: "Rejected", rejectionReason }
+          : leave
+      )
+    );
+    toast({
+      title: "Leave Rejected",
+      description: "Leave request has been rejected.",
+    });
+  };
+
+  const handleExport = () => {
+    toast({
+      title: "Export Started",
+      description: "Leave management report export has started.",
+    });
+  };
+
+  const handleViewLeave = (leave) => {
+    setSelectedLeave(leave);
+    setIsViewModalOpen(true);
+  };
+
+  // Get unique departments for filter
+  const departments = [...new Set(leaveData.map((leave) => leave.department))];
+
+  // Filter leave data
+  const filteredLeaveData = leaveData.filter((leave) => {
+    const matchesSearch =
+      leave.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      leave.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      leave.type.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesDepartment =
+      filterDepartment && filterDepartment !== "all"
+        ? leave.department === filterDepartment
+        : true;
+    const matchesStatus =
+      filterStatus && filterStatus !== "all"
+        ? leave.status === filterStatus
+        : true;
+
+    return matchesSearch && matchesDepartment && matchesStatus;
+  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -109,6 +205,21 @@ export default function LeaveManagement() {
     }
   };
 
+  // Calculate summary stats
+  const pendingRequests = leaveData.filter(
+    (leave) => leave.status === "Pending"
+  ).length;
+  const approvedRequests = leaveData.filter(
+    (leave) => leave.status === "Approved"
+  ).length;
+  const rejectedRequests = leaveData.filter(
+    (leave) => leave.status === "Rejected"
+  ).length;
+  const totalLeaveDays = leaveData.reduce(
+    (total, leave) => total + leave.days,
+    0
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -119,10 +230,40 @@ export default function LeaveManagement() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filter
-          </Button>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Search employees..."
+              className="pl-10 w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Select value={filterDepartment} onValueChange={setFilterDepartment}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="All Departments" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Departments</SelectItem>
+              {departments.map((dept) => (
+                <SelectItem key={dept} value={dept}>
+                  {dept}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Approved">Approved</SelectItem>
+              <SelectItem value="Rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
           <Button onClick={handleExport} className="flex items-center gap-2">
             <Download className="w-4 h-4" />
             Export
@@ -140,7 +281,7 @@ export default function LeaveManagement() {
             <Clock className="w-4 h-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{pendingRequests}</div>
             <p className="text-xs text-gray-500">Awaiting approval</p>
           </CardContent>
         </Card>
@@ -151,7 +292,7 @@ export default function LeaveManagement() {
             <CheckCircle className="w-4 h-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{approvedRequests}</div>
             <p className="text-xs text-gray-500">This month</p>
           </CardContent>
         </Card>
@@ -162,7 +303,7 @@ export default function LeaveManagement() {
             <XCircle className="w-4 h-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1</div>
+            <div className="text-2xl font-bold">{rejectedRequests}</div>
             <p className="text-xs text-gray-500">This month</p>
           </CardContent>
         </Card>
@@ -175,7 +316,7 @@ export default function LeaveManagement() {
             <UserMinus className="w-4 h-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">103</div>
+            <div className="text-2xl font-bold">{totalLeaveDays}</div>
             <p className="text-xs text-gray-500">This year</p>
           </CardContent>
         </Card>
@@ -204,7 +345,7 @@ export default function LeaveManagement() {
                 </tr>
               </thead>
               <tbody>
-                {leaveData.map((request) => (
+                {filteredLeaveData.map((request) => (
                   <tr key={request.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">
                       {request.employee}
@@ -228,23 +369,27 @@ export default function LeaveManagement() {
                       {request.status === "Pending" ? (
                         <div className="flex gap-2">
                           <Button
-                            onClick={() => handleApprove(request.employee)}
+                            onClick={() => handleApprove(request.id)}
                             size="sm"
                             className="bg-green-600 hover:bg-green-700"
                           >
-                            <CheckCircle className="w-4 h-4" />
+                            Approve
                           </Button>
                           <Button
-                            onClick={() => handleReject(request.employee)}
+                            onClick={() => handleReject(request.id)}
                             variant="outline"
                             size="sm"
                           >
-                            <XCircle className="w-4 h-4" />
+                            Reject
                           </Button>
                         </div>
                       ) : (
-                        <Button variant="outline" size="sm">
-                          View
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewLeave(request)}
+                        >
+                          View Details
                         </Button>
                       )}
                     </td>
@@ -255,6 +400,121 @@ export default function LeaveManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* View Leave Details Modal */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Leave Request Details</DialogTitle>
+            <DialogDescription>
+              Detailed information about the leave request
+            </DialogDescription>
+          </DialogHeader>
+          {selectedLeave && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Employee
+                    </h3>
+                    <p className="font-medium">{selectedLeave.employee}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Department
+                    </h3>
+                    <p className="font-medium">{selectedLeave.department}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Leave Type
+                    </h3>
+                    <p className="font-medium">{selectedLeave.type}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Applied Date
+                    </h3>
+                    <p className="font-medium">{selectedLeave.appliedDate}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">Dates</h3>
+                    <p className="font-medium">
+                      {selectedLeave.startDate} to {selectedLeave.endDate}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Duration
+                    </h3>
+                    <p className="font-medium">{selectedLeave.days} days</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Status
+                    </h3>
+                    <p>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                          selectedLeave.status
+                        )}`}
+                      >
+                        {selectedLeave.status}
+                      </span>
+                    </p>
+                  </div>
+                  {selectedLeave.rejectionReason && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">
+                        Rejection Reason
+                      </h3>
+                      <p className="font-medium text-red-600">
+                        {selectedLeave.rejectionReason}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">
+                  Reason for Leave
+                </h3>
+                <p className="font-medium">{selectedLeave.reason}</p>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Leave Balance
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="border rounded-lg p-3 text-center">
+                    <p className="text-sm text-gray-500">Annual</p>
+                    <p className="font-medium">
+                      {selectedLeave.balance.annual} days
+                    </p>
+                  </div>
+                  <div className="border rounded-lg p-3 text-center">
+                    <p className="text-sm text-gray-500">Sick</p>
+                    <p className="font-medium">
+                      {selectedLeave.balance.sick} days
+                    </p>
+                  </div>
+                  <div className="border rounded-lg p-3 text-center">
+                    <p className="text-sm text-gray-500">Casual</p>
+                    <p className="font-medium">
+                      {selectedLeave.balance.casual} days
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

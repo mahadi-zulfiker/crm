@@ -62,6 +62,13 @@ import MissingAttendance from "./Admin/CompanyManagement/MissingAttendance";
 import LoanList from "./Admin/CompanyManagement/LoanList";
 import LeaveManagement from "./Admin/CompanyManagement/LeaveManagement";
 import CompanyEmployeeManagement from "./Admin/CompanyManagement/EmployeeManagement";
+import ReportsAnalytics from "./Admin/CompanyManagement/ReportsAnalytics";
+import EmployeeCompanyManagement from "./Employee/CompanyManagement";
+import EmployeeLeaveManagementCompany from "./Employee/CompanyManagement/LeaveManagement";
+import EmployeeAttendanceCompany from "./Employee/CompanyManagement/Attendance";
+import EmployeeReportsAnalyticsCompany from "./Employee/CompanyManagement/ReportsAnalytics";
+import EmployeeLeaveManagement from "./Employee/LeaveManagement";
+import EmployeeLoanManagement from "./Employee/LoanManagement";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -204,6 +211,10 @@ const MainLayout = () => {
             "/dashboard/admin/companyManagement/employeeManagement" && (
             <CompanyEmployeeManagement />
           )}
+          {pathname ===
+            "/dashboard/admin/companyManagement/reportsAnalytics" && (
+            <ReportsAnalytics />
+          )}
 
           {pathname === "/dashboard/employee" && <Employee />}
           {pathname === "/dashboard/employee/appliedJobs" && <AppliedJobs />}
@@ -229,6 +240,30 @@ const MainLayout = () => {
           {pathname === "/dashboard/employee/noticeBoard" && <NoticeBoard />}
           {pathname === "/dashboard/employee/attendance" && <Attendance />}
           {pathname === "/dashboard/employee/company" && <Company />}
+          {pathname === "/dashboard/employee/companyManagement" && (
+            <EmployeeCompanyManagement />
+          )}
+          {pathname === "/dashboard/employee/companyManagement/attendance" && (
+            <EmployeeAttendanceCompany />
+          )}
+          {pathname ===
+            "/dashboard/employee/companyManagement/leaveManagement" && (
+            <EmployeeLeaveManagementCompany />
+          )}
+          {pathname ===
+            "/dashboard/employee/companyManagement/loanManagement" && (
+            <EmployeeLoanManagement />
+          )}
+          {pathname ===
+            "/dashboard/employee/companyManagement/reportsAnalytics" && (
+            <EmployeeReportsAnalyticsCompany />
+          )}
+          {pathname === "/dashboard/employee/leave" && (
+            <EmployeeLeaveManagement />
+          )}
+          {pathname === "/dashboard/employee/loan" && (
+            <EmployeeLoanManagement />
+          )}
         </div>
       </main>
     </div>
