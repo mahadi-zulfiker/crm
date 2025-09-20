@@ -161,7 +161,7 @@ const Navbar = ({ setHeaderHeight }) => {
 
     return (
         <div id="full-navbar" className={`relative z-50 ${isMobile ? 'sticky top-0' : ''}`}>
-            {/* Top Contact Bar */}
+            {/* Top Contact Bar - ORIGINAL STRUCTURE RESTORED */}
             <div className={`bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 text-white text-sm py-2 px-4 transition-all duration-300 ${isScrolled ? 'py-1' : 'py-2'} ${isMobile && isScrolled ? 'hidden' : ''}`}>
                 <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between">
                     <div className="flex items-center space-x-4 mb-2 sm:mb-0">
@@ -237,25 +237,25 @@ const Navbar = ({ setHeaderHeight }) => {
                         </Link>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden lg:flex items-center space-x-8">
-                            <Link href="/ourSupport" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group">
+                        <div className="hidden lg:flex items-center space-x-4 xl:space-x-6 2xl:space-x-8">
+                            <Link href="/ourSupport" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap">
                                 Our Support
                                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
                             </Link>
-                            <Link href="/environment" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group">
+                            <Link href="/environment" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap">
                                 Environment
                                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
                             </Link>
-                            <Link href="/socialValue" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group">
+                            <Link href="/socialValue" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap">
                                 Social Value
                                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
                             </Link>
-                            <Link href="/governance" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group">
+                            <Link href="/governance" className="relative text-gray-200 hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap">
                                 Governance
                                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
                             </Link>
                             
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 xl:space-x-3">
                                 <Link href="/employer" className="bg-transparent border-2 border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-gray-900 px-6 py-2 rounded-lg transition-all duration-300 font-medium hover:shadow-lg hover:scale-105 transform">
                                     Employers
                                 </Link>
@@ -280,8 +280,8 @@ const Navbar = ({ setHeaderHeight }) => {
             {/* Secondary Navigation Bar - Hidden on Mobile */}
             <nav className={`bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-lg ${isMobile ? 'hidden' : ''}`}>
                 <div className="container mx-auto px-4">
-                    <div className="hidden lg:flex items-center justify-center space-x-8 py-3">
-                        <Link href="/" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Home</Link>
+                    <div className="hidden lg:flex items-center justify-center space-x-2 xl:space-x-4 2xl:space-x-8 py-3">
+                        <Link href="/" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">Home</Link>
 
                         {/* Services Dropdown */}
                         <div
@@ -289,7 +289,7 @@ const Navbar = ({ setHeaderHeight }) => {
                             onMouseEnter={() => handleMouseEnter("services")}
                             onMouseLeave={handleMouseLeave}
                         >
-                            <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                            <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">
                                 <Link href="/services" className="flex items-center space-x-1">
                                     <span>Our Services</span>
                                     <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
@@ -321,7 +321,7 @@ const Navbar = ({ setHeaderHeight }) => {
                             onMouseEnter={() => handleMouseEnter("whyDemandRecruitment")}
                             onMouseLeave={handleMouseLeave}
                         >
-                            <Link href="/whyDemand" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                            <Link href="/whyDemand" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">
                                 <span>Why Demand Recruitment</span>
                                 <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
                             </Link>
@@ -348,11 +348,11 @@ const Navbar = ({ setHeaderHeight }) => {
                             )}
                         </div>
 
-                        <Link href="/insight" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Insights</Link>
-                        <Link href="/allJobs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Find a Job</Link>
-                        <Link href="/contactUs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Contact Us</Link>
-                        <Link href="/aboutUs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">About Us</Link>
-                        <Link href="/referAFriend" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform">Refer</Link>
+                        <Link href="/insight" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">Insights</Link>
+                        <Link href="/allJobs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">Find a Job</Link>
+                        <Link href="/contactUs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">Contact Us</Link>
+                        <Link href="/aboutUs" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">About Us</Link>
+                        <Link href="/referAFriend" className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">Refer</Link>
 
                         {/* Get Started Dropdown */}
                         <div
@@ -360,7 +360,7 @@ const Navbar = ({ setHeaderHeight }) => {
                             onMouseEnter={() => handleMouseEnter("getStarted")}
                             onMouseLeave={handleMouseLeave}
                         >
-                            <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                            <button className="px-3 py-2 rounded-md hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">
                                 <span>Get Started</span>
                                 <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
                             </button>
