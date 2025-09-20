@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -39,69 +39,8 @@ import {
 
 export default function EmployeeManagement() {
   const { toast } = useToast();
-  const [employees, setEmployees] = useState([
-    {
-      id: 1,
-      name: "John Smith",
-      department: "Engineering",
-      position: "Senior Developer",
-      email: "john@company.com",
-      phone: "+1 (555) 123-4567",
-      status: "Active",
-      joinDate: "2022-01-15",
-      salary: "$85,000",
-      manager: "Alice Johnson",
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      department: "Marketing",
-      position: "Marketing Manager",
-      email: "sarah@company.com",
-      phone: "+1 (555) 234-5678",
-      status: "Active",
-      joinDate: "2021-03-22",
-      salary: "$75,000",
-      manager: "Robert Wilson",
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      department: "Sales",
-      position: "Sales Executive",
-      email: "michael@company.com",
-      phone: "+1 (555) 345-6789",
-      status: "Active",
-      joinDate: "2023-02-10",
-      salary: "$65,000",
-      manager: "Emily Davis",
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      department: "HR",
-      position: "HR Specialist",
-      email: "emily@company.com",
-      phone: "+1 (555) 456-7890",
-      status: "On Leave",
-      joinDate: "2020-11-05",
-      salary: "$60,000",
-      manager: "Robert Wilson",
-    },
-    {
-      id: 5,
-      name: "Robert Wilson",
-      department: "Finance",
-      position: "Financial Analyst",
-      email: "robert@company.com",
-      phone: "+1 (555) 567-8901",
-      status: "Active",
-      joinDate: "2022-07-18",
-      salary: "$70,000",
-      manager: "Alice Johnson",
-    },
-  ]);
-
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -109,6 +48,53 @@ export default function EmployeeManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+
+  // Fetch employees from the database
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await fetch("/api/employeeManagement");
+        const data = await response.json();
+
+        if (response.ok) {
+          // Transform the data to match the existing structure
+          const transformedEmployees = data.map((employee) => ({
+            id: employee._id,
+            name: employee.name || `${employee.firstName} ${employee.lastName}`,
+            department: employee.department || "Not assigned",
+            position: employee.position || "Not assigned",
+            email: employee.email,
+            phone: employee.phone || "Not provided",
+            status: employee.status || "Active",
+            joinDate:
+              employee.joinDate || new Date().toISOString().split("T")[0],
+            salary: employee.salary
+              ? `$${employee.salary.toLocaleString()}`
+              : "Not provided",
+            manager: employee.manager || "Not assigned",
+          }));
+          setEmployees(transformedEmployees);
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch employees",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch employees",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const handleAddEmployee = () => {
     toast({
@@ -134,25 +120,79 @@ export default function EmployeeManagement() {
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteEmployee = (employeeId) => {
-    setEmployees(employees.filter((emp) => emp.id !== employeeId));
-    toast({
-      title: "Employee Deleted",
-      description: "Employee record has been removed.",
-    });
+  const handleDeleteEmployee = async (employeeId) => {
+    try {
+      const response = await fetch(`/api/employeeManagement?id=${employeeId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setEmployees(employees.filter((emp) => emp.id !== employeeId));
+        toast({
+          title: "Employee Deleted",
+          description: "Employee record has been removed.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to delete employee",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete employee",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleSaveEmployee = () => {
-    setEmployees(
-      employees.map((emp) =>
-        emp.id === editingEmployee.id ? editingEmployee : emp
-      )
-    );
-    setIsEditModalOpen(false);
-    toast({
-      title: "Employee Updated",
-      description: "Employee record has been updated successfully.",
-    });
+  const handleSaveEmployee = async () => {
+    try {
+      const response = await fetch("/api/employeeManagement", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: editingEmployee.id,
+          role: editingEmployee.position,
+          performance: "Good", // Placeholder for now
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setEmployees(
+          employees.map((emp) =>
+            emp.id === editingEmployee.id ? editingEmployee : emp
+          )
+        );
+        setIsEditModalOpen(false);
+        toast({
+          title: "Employee Updated",
+          description: "Employee record has been updated successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to update employee",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating employee:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update employee",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditInputChange = (field, value) => {
@@ -224,6 +264,17 @@ export default function EmployeeManagement() {
       joinDate.getFullYear() === now.getFullYear()
     );
   }).length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <p className="text-gray-600">Loading employees...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

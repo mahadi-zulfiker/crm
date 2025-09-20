@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -42,116 +42,62 @@ export default function LoanList() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for employee loans
-  const [loanData, setLoanData] = useState([
-    {
-      id: 1,
-      employee: "John Smith",
-      department: "Engineering",
-      loanType: "Personal Loan",
-      amount: 5000,
-      balance: 3000,
-      status: "Active",
-      nextPayment: "2023-06-20",
-      appliedDate: "2023-05-15",
-      approvalDate: "2023-05-20",
-      interestRate: 5.5,
-      repaymentMonths: 12,
-      monthlyInstallment: 450,
-      installments: [
-        { date: "2023-06-20", amount: 450, status: "Paid" },
-        { date: "2023-07-20", amount: 450, status: "Pending" },
-        { date: "2023-08-20", amount: 450, status: "Pending" },
-      ],
-    },
-    {
-      id: 2,
-      employee: "Sarah Johnson",
-      department: "Marketing",
-      loanType: "Home Loan",
-      amount: 50000,
-      balance: 45000,
-      status: "Active",
-      nextPayment: "2023-06-25",
-      appliedDate: "2023-01-10",
-      approvalDate: "2023-01-15",
-      interestRate: 3.5,
-      repaymentMonths: 120,
-      monthlyInstallment: 500,
-      installments: [
-        { date: "2023-02-15", amount: 500, status: "Paid" },
-        { date: "2023-03-15", amount: 500, status: "Paid" },
-        { date: "2023-04-15", amount: 500, status: "Paid" },
-        { date: "2023-05-15", amount: 500, status: "Paid" },
-        { date: "2023-06-15", amount: 500, status: "Paid" },
-        { date: "2023-07-15", amount: 500, status: "Pending" },
-      ],
-    },
-    {
-      id: 3,
-      employee: "Michael Brown",
-      department: "Sales",
-      loanType: "Car Loan",
-      amount: 25000,
-      balance: 15000,
-      status: "Active",
-      nextPayment: "2023-06-18",
-      appliedDate: "2023-03-01",
-      approvalDate: "2023-03-05",
-      interestRate: 4.2,
-      repaymentMonths: 48,
-      monthlyInstallment: 580,
-      installments: [
-        { date: "2023-04-05", amount: 580, status: "Paid" },
-        { date: "2023-05-05", amount: 580, status: "Paid" },
-        { date: "2023-06-05", amount: 580, status: "Paid" },
-        { date: "2023-07-05", amount: 580, status: "Pending" },
-      ],
-    },
-    {
-      id: 4,
-      employee: "Emily Davis",
-      department: "HR",
-      loanType: "Personal Loan",
-      amount: 10000,
-      balance: 0,
-      status: "Completed",
-      nextPayment: "-",
-      appliedDate: "2022-01-10",
-      approvalDate: "2022-01-15",
-      interestRate: 6.0,
-      repaymentMonths: 24,
-      monthlyInstallment: 450,
-      completedDate: "2024-01-15",
-      installments: [
-        { date: "2022-02-15", amount: 450, status: "Paid" },
-        { date: "2022-03-15", amount: 450, status: "Paid" },
-        // ... more installments
-        { date: "2024-01-15", amount: 450, status: "Paid" },
-      ],
-    },
-    {
-      id: 5,
-      employee: "Robert Wilson",
-      department: "Finance",
-      loanType: "Education Loan",
-      amount: 30000,
-      balance: 20000,
-      status: "Active",
-      nextPayment: "2023-06-30",
-      appliedDate: "2023-04-01",
-      approvalDate: "2023-04-05",
-      interestRate: 2.5,
-      repaymentMonths: 60,
-      monthlyInstallment: 550,
-      installments: [
-        { date: "2023-05-05", amount: 550, status: "Paid" },
-        { date: "2023-06-05", amount: 550, status: "Paid" },
-        { date: "2023-07-05", amount: 550, status: "Pending" },
-      ],
-    },
-  ]);
+  // State for loan requests from database
+  const [loanData, setLoanData] = useState([]);
+
+  // Fetch loan requests from the database
+  useEffect(() => {
+    const fetchLoanRequests = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/admin/loanManagement");
+        const data = await response.json();
+
+        if (response.ok) {
+          // Transform the data to match the existing structure
+          const transformedData = data.data.map((loan) => ({
+            id: loan._id,
+            employee: loan.employeeName || "Unknown Employee",
+            department: loan.department || "Not assigned",
+            loanType: loan.type || "Loan",
+            amount: loan.amount || 0,
+            balance: loan.balance || 0,
+            status: loan.status
+              ? loan.status.charAt(0).toUpperCase() + loan.status.slice(1)
+              : "Pending",
+            nextPayment: loan.nextPayment || "-",
+            appliedDate: loan.appliedDate || "",
+            approvalDate: loan.approvalDate || "",
+            interestRate: loan.interestRate || 0,
+            repaymentMonths: loan.repaymentMonths || 0,
+            monthlyInstallment: loan.monthlyInstallment || 0,
+            completedDate: loan.completedDate || "",
+            installments: loan.installments || [],
+          }));
+          setLoanData(transformedData);
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch loan requests",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching loan requests:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch loan requests",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLoanRequests();
+  }, []);
 
   const handleExport = () => {
     toast({
@@ -165,28 +111,89 @@ export default function LoanList() {
     setIsViewModalOpen(true);
   };
 
-  const handleApproveLoan = (id) => {
-    setLoanData(
-      loanData.map((loan) =>
-        loan.id === id ? { ...loan, status: "Active" } : loan
-      )
-    );
-    toast({
-      title: "Loan Approved",
-      description: "Loan request has been approved successfully.",
-    });
+  const handleApproveLoan = async (id) => {
+    try {
+      const response = await fetch("/api/admin/loanManagement", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+          status: "approved",
+          approvalDate: new Date().toISOString().split("T")[0],
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setLoanData(
+          loanData.map((loan) =>
+            loan.id === id ? { ...loan, status: "Active" } : loan
+          )
+        );
+        toast({
+          title: "Loan Approved",
+          description: "Loan request has been approved successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to approve loan request",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error approving loan request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to approve loan request",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRejectLoan = (id) => {
-    setLoanData(
-      loanData.map((loan) =>
-        loan.id === id ? { ...loan, status: "Rejected" } : loan
-      )
-    );
-    toast({
-      title: "Loan Rejected",
-      description: "Loan request has been rejected.",
-    });
+  const handleRejectLoan = async (id) => {
+    try {
+      const response = await fetch("/api/admin/loanManagement", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+          status: "rejected",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setLoanData(
+          loanData.map((loan) =>
+            loan.id === id ? { ...loan, status: "Rejected" } : loan
+          )
+        );
+        toast({
+          title: "Loan Rejected",
+          description: "Loan request has been rejected.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to reject loan request",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error rejecting loan request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reject loan request",
+        variant: "destructive",
+      });
+    }
   };
 
   // Get unique departments for filter

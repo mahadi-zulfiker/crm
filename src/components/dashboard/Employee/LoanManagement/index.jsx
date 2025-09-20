@@ -49,52 +49,32 @@ export default function EmployeeLoanManagement() {
       try {
         if (!session?.user?.id) return;
 
-        // In a real implementation, this would fetch from an API
-        // For now, we'll use mock data
-        const mockRequests = [
-          {
-            id: 1,
-            type: "Personal Loan",
-            amount: 5000,
-            purpose: "Home renovation",
-            status: "approved",
-            appliedDate: "2023-05-15",
-            approvalDate: "2023-05-20",
-            repaymentMonths: 12,
-            monthlyInstallment: 450,
-          },
-          {
-            id: 2,
-            type: "Education Loan",
-            amount: 10000,
-            purpose: "Professional course fees",
-            status: "pending",
-            appliedDate: "2023-06-01",
-            repaymentMonths: 24,
-          },
-        ];
+        // Fetch loan requests from the database
+        const response = await fetch(
+          `/api/loanManagement?employeeId=${session.user.id}`
+        );
+        const data = await response.json();
 
-        const mockHistory = [
-          {
-            id: 3,
-            type: "Car Loan",
-            amount: 15000,
-            purpose: "Purchase of vehicle",
-            status: "completed",
-            appliedDate: "2022-01-10",
-            approvalDate: "2022-01-15",
-            repaymentMonths: 36,
-            monthlyInstallment: 480,
-            completedDate: "2025-01-10",
-          },
-        ];
+        if (response.ok) {
+          // Separate active loans (pending/approved) from history (rejected/completed)
+          const activeLoans = data.data.filter(
+            (loan) => loan.status === "pending" || loan.status === "approved"
+          );
 
-        setLoanRequests(mockRequests);
-        setLoanHistory(mockHistory);
-        setLoading(false);
+          const historyLoans = data.data.filter(
+            (loan) => loan.status === "rejected" || loan.status === "completed"
+          );
+
+          setLoanRequests(activeLoans);
+          setLoanHistory(historyLoans);
+        } else {
+          console.error("Error fetching loan data:", data.error);
+          toast.error("Failed to fetch loan data");
+        }
       } catch (error) {
         console.error("Error fetching loan data:", error);
         toast.error("Failed to fetch loan data");
+      } finally {
         setLoading(false);
       }
     };
@@ -144,28 +124,39 @@ export default function EmployeeLoanManagement() {
     try {
       setSubmitting(true);
 
-      // In a real implementation, this would send to an API
-      // For now, we'll add to the local state
-      const newRequest = {
-        id: loanRequests.length + loanHistory.length + 1,
-        ...newLoanRequest,
-        amount: parseFloat(newLoanRequest.amount),
-        repaymentMonths: parseInt(newLoanRequest.repaymentMonths),
-        status: "pending",
-        appliedDate: new Date().toISOString().split("T")[0],
-      };
-
-      setLoanRequests((prev) => [newRequest, ...prev]);
-
-      // Reset form
-      setNewLoanRequest({
-        type: "",
-        amount: "",
-        purpose: "",
-        repaymentMonths: "",
+      // Submit to the database
+      const response = await fetch("/api/loanManagement", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: session?.user?.id,
+          type: newLoanRequest.type,
+          amount: parseFloat(newLoanRequest.amount),
+          purpose: newLoanRequest.purpose,
+          repaymentMonths: parseInt(newLoanRequest.repaymentMonths),
+        }),
       });
 
-      toast.success("Loan request submitted successfully!");
+      const data = await response.json();
+
+      if (response.ok) {
+        // Add the new request to the local state
+        setLoanRequests((prev) => [data.data, ...prev]);
+
+        // Reset form
+        setNewLoanRequest({
+          type: "",
+          amount: "",
+          purpose: "",
+          repaymentMonths: "",
+        });
+
+        toast.success("Loan request submitted successfully!");
+      } else {
+        toast.error(data.error || "Failed to submit loan request");
+      }
     } catch (error) {
       console.error("Error submitting loan request:", error);
       toast.error("Failed to submit loan request");
@@ -374,7 +365,7 @@ export default function EmployeeLoanManagement() {
                     .filter((loan) => loan.status === "approved")
                     .map((loan) => (
                       <div
-                        key={loan.id}
+                        key={loan._id || loan.id}
                         className="border border-gray-200 rounded-lg p-4"
                       >
                         <div className="flex justify-between items-start">
@@ -424,7 +415,11 @@ export default function EmployeeLoanManagement() {
                           <div>
                             <p className="text-sm text-gray-500">Approved On</p>
                             <p className="font-semibold">
-                              {new Date(loan.approvalDate).toLocaleDateString()}
+                              {loan.approvalDate
+                                ? new Date(
+                                    loan.approvalDate
+                                  ).toLocaleDateString()
+                                : "N/A"}
                             </p>
                           </div>
                         </div>
@@ -454,7 +449,7 @@ export default function EmployeeLoanManagement() {
                       .filter((loan) => loan.status === "pending")
                       .map((loan) => (
                         <div
-                          key={loan.id}
+                          key={loan._id || loan.id}
                           className="border border-gray-200 rounded-lg p-4"
                         >
                           <div className="flex justify-between items-start">
@@ -538,7 +533,10 @@ export default function EmployeeLoanManagement() {
                     </thead>
                     <tbody>
                       {loanHistory.map((loan) => (
-                        <tr key={loan.id} className="border-b hover:bg-gray-50">
+                        <tr
+                          key={loan._id || loan.id}
+                          className="border-b hover:bg-gray-50"
+                        >
                           <td className="py-3 px-4">{loan.type}</td>
                           <td className="py-3 px-4">
                             ${loan.amount?.toLocaleString()}
@@ -565,7 +563,7 @@ export default function EmployeeLoanManagement() {
                         .filter((loan) => loan.status === "completed")
                         .map((loan) => (
                           <tr
-                            key={loan.id}
+                            key={loan._id || loan.id}
                             className="border-b hover:bg-gray-50"
                           >
                             <td className="py-3 px-4">{loan.type}</td>

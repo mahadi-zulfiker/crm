@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -38,6 +38,56 @@ export default function AttendanceManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  // State for attendance data from database
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [weeklyReportData, setWeeklyReportData] = useState([]);
+  const [monthlyReportData, setMonthlyReportData] = useState([]);
+
+  // Fetch attendance data from the database
+  useEffect(() => {
+    const fetchAttendanceData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/admin/attendance?date=${selectedDate}`
+        );
+        const data = await response.json();
+
+        if (response.ok) {
+          // Transform the data to match the existing structure
+          const transformedData = data.data.map((record) => ({
+            id: record._id,
+            name: record.employeeName || "Unknown Employee",
+            department: record.employeeDepartment || "Not assigned",
+            status: record.status || "present",
+            date: record.date || selectedDate,
+            checkIn: record.checkIn || "09:00 AM",
+            checkOut: record.checkOut || "06:00 PM",
+          }));
+          setAttendanceData(transformedData);
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch attendance data",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching attendance data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch attendance data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAttendanceData();
+  }, [selectedDate]);
 
   const handleExport = (reportType) => {
     toast({
@@ -45,91 +95,6 @@ export default function AttendanceManagement() {
       description: `${reportType} data export has started. You'll receive a notification when it's ready.`,
     });
   };
-
-  // Mock data for attendance
-  const attendanceData = [
-    {
-      id: 1,
-      name: "John Smith",
-      department: "Engineering",
-      status: "present",
-      date: "2023-06-15",
-      checkIn: "09:00 AM",
-      checkOut: "06:00 PM",
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      department: "Marketing",
-      status: "absent",
-      date: "2023-06-15",
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      department: "Sales",
-      status: "leave",
-      date: "2023-06-15",
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      department: "HR",
-      status: "present",
-      date: "2023-06-15",
-      checkIn: "08:45 AM",
-      checkOut: "05:30 PM",
-    },
-    {
-      id: 5,
-      name: "Robert Wilson",
-      department: "Finance",
-      status: "present",
-      date: "2023-06-15",
-      checkIn: "09:15 AM",
-      checkOut: "06:15 PM",
-    },
-    {
-      id: 6,
-      name: "Alice Johnson",
-      department: "Engineering",
-      status: "present",
-      date: "2023-06-15",
-      checkIn: "08:55 AM",
-      checkOut: "05:45 PM",
-    },
-    {
-      id: 7,
-      name: "David Miller",
-      department: "Marketing",
-      status: "absent",
-      date: "2023-06-15",
-    },
-    {
-      id: 8,
-      name: "Jennifer Lee",
-      department: "Sales",
-      status: "leave",
-      date: "2023-06-15",
-    },
-  ];
-
-  // Mock data for weekly report
-  const weeklyReportData = [
-    { day: "Mon", present: 125, absent: 10, leave: 5 },
-    { day: "Tue", present: 128, absent: 8, leave: 4 },
-    { day: "Wed", present: 130, absent: 5, leave: 5 },
-    { day: "Thu", present: 127, absent: 9, leave: 4 },
-    { day: "Fri", present: 120, absent: 15, leave: 5 },
-  ];
-
-  // Mock data for monthly report
-  const monthlyReportData = [
-    { week: "Week 1", present: 600, absent: 30, leave: 20 },
-    { week: "Week 2", present: 580, absent: 40, leave: 30 },
-    { week: "Week 3", present: 620, absent: 20, leave: 10 },
-    { week: "Week 4", present: 590, absent: 35, leave: 25 },
-  ];
 
   // Get unique departments for filter
   const departments = [...new Set(attendanceData.map((emp) => emp.department))];
