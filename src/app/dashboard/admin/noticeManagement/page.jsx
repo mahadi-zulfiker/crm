@@ -1,7 +1,13 @@
 "use client";
 
 import NoticeManagement from "@/components/dashboard/Admin/NoticeManagement";
+import MainLayout from "@/components/dashboard/MainLayout";
 
 export default function NoticeManagementPage() {
-  return <NoticeManagement />;
+  return (
+    <MainLayout>
+
+      <NoticeManagement />
+    </MainLayout>
+  );
 }
