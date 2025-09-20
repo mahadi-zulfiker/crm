@@ -41,7 +41,8 @@ export async function GET() {
 
 export async function POST(req) {
   try {
-    const { username, email, userType, fullName, phone } = await req.json();
+    const { username, email, userType, fullName, phone, isCompanyEmployee } =
+      await req.json();
 
     if (!username || !email || !userType) {
       return NextResponse.json(
@@ -84,6 +85,23 @@ export async function POST(req) {
 
     const result = await usersCollection.insertOne(newUser);
 
+    // If this is a company employee, also add to CompanyEmployees collection
+    if (isCompanyEmployee) {
+      const companyEmployeesCollection = db.collection("CompanyEmployees");
+      const companyEmployee = {
+        ...newUser,
+        userId: result.insertedId,
+        department: "Not assigned",
+        position: "Not assigned",
+        status: "Active",
+        joinDate: new Date().toISOString().split("T")[0],
+        salary: 0,
+        manager: "Not assigned",
+      };
+
+      await companyEmployeesCollection.insertOne(companyEmployee);
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -125,6 +143,10 @@ export async function DELETE(req) {
     const db = await connectMongoDB();
     const usersCollection = db.collection("users");
 
+    // Also delete from CompanyEmployees collection if exists
+    const companyEmployeesCollection = db.collection("CompanyEmployees");
+    await companyEmployeesCollection.deleteOne({ userId: new ObjectId(id) });
+
     const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {
@@ -159,7 +181,14 @@ export async function DELETE(req) {
 export async function PUT(req) {
   try {
     const body = await req.json();
-    const { id, job, status, userType } = body;
+    const {
+      id,
+      job,
+      status,
+      userType,
+      isCompanyEmployee,
+      ...companyEmployeeData
+    } = body;
 
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -193,6 +222,15 @@ export async function PUT(req) {
           error: "User not found",
         },
         { status: 404 }
+      );
+    }
+
+    // If this is a company employee update, also update CompanyEmployees collection
+    if (isCompanyEmployee) {
+      const companyEmployeesCollection = db.collection("CompanyEmployees");
+      await companyEmployeesCollection.updateOne(
+        { userId: new ObjectId(id) },
+        { $set: companyEmployeeData }
       );
     }
 

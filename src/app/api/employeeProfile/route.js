@@ -13,18 +13,24 @@ export async function GET(req) {
     }
 
     const db = await connectMongoDB();
-    const client = await db.collection("users").findOne({ email });
+    // First try to find in CompanyEmployees collection
+    let employee = await db.collection("CompanyEmployees").findOne({ email });
 
-    if (!client) {
+    // If not found, try in users collection (for backward compatibility)
+    if (!employee) {
+      employee = await db.collection("users").findOne({ email });
+    }
+
+    if (!employee) {
       return NextResponse.json(
         { error: "Employee not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(client);
+    return NextResponse.json(employee);
   } catch (error) {
-    console.error("Error fetching client profile:", error);
+    console.error("Error fetching employee profile:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
@@ -43,9 +49,17 @@ export async function PUT(req) {
     }
 
     const db = await connectMongoDB();
-    const result = await db
-      .collection("users")
+    // Update in CompanyEmployees collection
+    let result = await db
+      .collection("CompanyEmployees")
       .updateOne({ _id: new ObjectId(_id) }, { $set: updateData });
+
+    // If not found, also update in users collection (for backward compatibility)
+    if (result.modifiedCount === 0) {
+      result = await db
+        .collection("users")
+        .updateOne({ _id: new ObjectId(_id) }, { $set: updateData });
+    }
 
     if (!result.modifiedCount) {
       return NextResponse.json(
@@ -59,7 +73,7 @@ export async function PUT(req) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error updating client profile:", error);
+    console.error("Error updating employee profile:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

@@ -60,13 +60,19 @@ export default function Attendance() {
         const data = await response.json();
 
         if (response.ok) {
-          setAttendanceHistory(data.data || []);
+          // Transform data to match existing structure
+          const transformedData = data.data.map((record) => ({
+            ...record,
+            date: record.date || record.createdAt, // Handle different date field names
+          }));
+          setAttendanceHistory(transformedData || []);
         }
       } catch (error) {
         console.error("Error fetching attendance history:", error);
         toast.error("Failed to fetch attendance history");
       } finally {
         setHistoryLoading(false);
+        setLoading(false);
       }
     };
 
@@ -98,7 +104,12 @@ export default function Attendance() {
         );
         const historyData = await historyResponse.json();
         if (historyResponse.ok) {
-          setAttendanceHistory(historyData.data || []);
+          // Transform data to match existing structure
+          const transformedData = historyData.data.map((record) => ({
+            ...record,
+            date: record.date || record.createdAt, // Handle different date field names
+          }));
+          setAttendanceHistory(transformedData || []);
         }
         toast.success(`Attendance marked as ${status} successfully!`);
       } else {

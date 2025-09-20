@@ -5,30 +5,39 @@ import { connectMongoDB } from "../../../lib/mongodb";
 export async function GET() {
   try {
     const db = await connectMongoDB();
-    const usersCollection = db.collection("users");
+    const companyEmployeesCollection = db.collection("CompanyEmployees");
     const attendanceCollection = db.collection("attendance");
 
-    // Get total employees
-    const totalEmployees = await usersCollection.countDocuments({
-      userType: "Employee",
-    });
+    // Get total company employees
+    const totalEmployees = await companyEmployeesCollection.countDocuments({});
 
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split("T")[0];
 
-    // Get employees present today
+    // Get company employees present today
+    // First get all company employee IDs
+    const companyEmployees = await companyEmployeesCollection
+      .find({}, { projection: { _id: 1 } })
+      .toArray();
+    const companyEmployeeIds = companyEmployees.map((emp) =>
+      emp._id.toString()
+    );
+
+    // Then get attendance records for these employees
     const presentToday = await attendanceCollection.countDocuments({
       date: today,
       status: "present",
+      employeeId: { $in: companyEmployeeIds },
     });
 
-    // Get employees on leave today
+    // Get company employees on leave today
     const onLeaveToday = await attendanceCollection.countDocuments({
       date: today,
       status: "leave",
+      employeeId: { $in: companyEmployeeIds },
     });
 
-    // Get employees absent today (total employees - present - on leave)
+    // Get company employees absent today (total employees - present - on leave)
     const absentToday = totalEmployees - presentToday - onLeaveToday;
 
     return NextResponse.json(
