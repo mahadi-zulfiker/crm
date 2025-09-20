@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -24,14 +24,62 @@ import {
   Clock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSession } from "next-auth/react";
 
 export default function Attendance() {
   const { toast } = useToast();
+  const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMonth, setFilterMonth] = useState("all");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch attendance data from the database
+  useEffect(() => {
+    const fetchAttendanceData = async () => {
+      try {
+        if (!session?.user?.id) return;
+        
+        setLoading(true);
+        const response = await fetch(
+          `/api/employee/attendance?employeeId=${session.user.id}`
+        );
+        const data = await response.json();
+
+        if (response.ok) {
+          // Transform the data to match the existing structure
+          const transformedData = data.data.map((record) => ({
+            date: record.date,
+            status: record.status || "present",
+            checkIn: record.checkIn || "-",
+            checkOut: record.checkOut || "-",
+            hours: record.hours || "-",
+          }));
+          setAttendanceData(transformedData);
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch attendance data",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching attendance data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch attendance data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAttendanceData();
+  }, [session]);
 
   const handleExport = () => {
     toast({
@@ -40,94 +88,6 @@ export default function Attendance() {
         "Your attendance report export has started. You'll receive a notification when it's ready.",
     });
   };
-
-  // Mock data for attendance records
-  const attendanceData = [
-    {
-      date: "2023-06-01",
-      status: "present",
-      checkIn: "09:00",
-      checkOut: "17:30",
-      hours: "8.5",
-    },
-    {
-      date: "2023-06-02",
-      status: "present",
-      checkIn: "08:45",
-      checkOut: "17:15",
-      hours: "8.5",
-    },
-    {
-      date: "2023-06-03",
-      status: "weekend",
-      checkIn: "-",
-      checkOut: "-",
-      hours: "-",
-    },
-    {
-      date: "2023-06-04",
-      status: "weekend",
-      checkIn: "-",
-      checkOut: "-",
-      hours: "-",
-    },
-    {
-      date: "2023-06-05",
-      status: "present",
-      checkIn: "09:05",
-      checkOut: "17:40",
-      hours: "8.5",
-    },
-    {
-      date: "2023-06-06",
-      status: "present",
-      checkIn: "09:00",
-      checkOut: "17:30",
-      hours: "8.5",
-    },
-    {
-      date: "2023-06-07",
-      status: "absent",
-      checkIn: "-",
-      checkOut: "-",
-      hours: "-",
-    },
-    {
-      date: "2023-06-08",
-      status: "present",
-      checkIn: "08:55",
-      checkOut: "17:25",
-      hours: "8.5",
-    },
-    {
-      date: "2023-06-09",
-      status: "present",
-      checkIn: "09:00",
-      checkOut: "17:30",
-      hours: "8.5",
-    },
-    {
-      date: "2023-06-10",
-      status: "weekend",
-      checkIn: "-",
-      checkOut: "-",
-      hours: "-",
-    },
-    {
-      date: "2023-06-11",
-      status: "weekend",
-      checkIn: "-",
-      checkOut: "-",
-      hours: "-",
-    },
-    {
-      date: "2023-06-12",
-      status: "present",
-      checkIn: "09:10",
-      checkOut: "17:45",
-      hours: "8.5",
-    },
-  ];
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -139,6 +99,8 @@ export default function Attendance() {
         return "bg-gray-100 text-gray-800";
       case "holiday":
         return "bg-blue-100 text-blue-800";
+      case "leave":
+        return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -154,6 +116,8 @@ export default function Attendance() {
         return "Weekend";
       case "holiday":
         return "Holiday";
+      case "leave":
+        return "On Leave";
       default:
         return status;
     }
@@ -173,11 +137,25 @@ export default function Attendance() {
   const absentDays = attendanceData.filter(
     (record) => record.status === "absent"
   ).length;
+  const leaveDays = attendanceData.filter(
+    (record) => record.status === "leave"
+  ).length;
   const totalDays = attendanceData.filter(
     (record) => record.status !== "weekend"
   ).length;
   const attendanceRate =
-    totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+    totalDays > 0 ? Math.round(((presentDays + leaveDays) / totalDays) * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <p className="text-gray-600">Loading attendance data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -201,13 +179,22 @@ export default function Attendance() {
           </div>
           <Select value={filterMonth} onValueChange={setFilterMonth}>
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by Month" />
+              <SelectValue placeholder="Filter by month" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Months</SelectItem>
-              <SelectItem value="2023-06">June 2023</SelectItem>
-              <SelectItem value="2023-05">May 2023</SelectItem>
+              <SelectItem value="2023-01">January 2023</SelectItem>
+              <SelectItem value="2023-02">February 2023</SelectItem>
+              <SelectItem value="2023-03">March 2023</SelectItem>
               <SelectItem value="2023-04">April 2023</SelectItem>
+              <SelectItem value="2023-05">May 2023</SelectItem>
+              <SelectItem value="2023-06">June 2023</SelectItem>
+              <SelectItem value="2023-07">July 2023</SelectItem>
+              <SelectItem value="2023-08">August 2023</SelectItem>
+              <SelectItem value="2023-09">September 2023</SelectItem>
+              <SelectItem value="2023-10">October 2023</SelectItem>
+              <SelectItem value="2023-11">November 2023</SelectItem>
+              <SelectItem value="2023-12">December 2023</SelectItem>
             </SelectContent>
           </Select>
           <Button onClick={handleExport} className="flex items-center gap-2">
@@ -217,7 +204,7 @@ export default function Attendance() {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="bg-white shadow-sm border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -226,7 +213,7 @@ export default function Attendance() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{presentDays}</div>
-            <p className="text-xs text-gray-500">This month</p>
+            <p className="text-xs text-gray-500">Days you were present</p>
           </CardContent>
         </Card>
 
@@ -237,7 +224,18 @@ export default function Attendance() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{absentDays}</div>
-            <p className="text-xs text-gray-500">This month</p>
+            <p className="text-xs text-gray-500">Days you were absent</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white shadow-sm border-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Leave Days</CardTitle>
+            <Clock className="w-4 h-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{leaveDays}</div>
+            <p className="text-xs text-gray-500">Days on leave</p>
           </CardContent>
         </Card>
 
@@ -246,22 +244,11 @@ export default function Attendance() {
             <CardTitle className="text-sm font-medium">
               Attendance Rate
             </CardTitle>
-            <Clock className="w-4 h-4 text-blue-600" />
+            <Calendar className="w-4 h-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{attendanceRate}%</div>
-            <p className="text-xs text-gray-500">This month</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-sm border-0">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Working Days</CardTitle>
-            <Calendar className="w-4 h-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalDays}</div>
-            <p className="text-xs text-gray-500">This month</p>
+            <p className="text-xs text-gray-500">Overall attendance rate</p>
           </CardContent>
         </Card>
       </div>
@@ -269,12 +256,10 @@ export default function Attendance() {
       {/* Attendance Records */}
       <Card className="bg-white shadow-sm border-0">
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Attendance Records</CardTitle>
-              <CardDescription>Your daily attendance history</CardDescription>
-            </div>
-          </div>
+          <CardTitle>Attendance Records</CardTitle>
+          <CardDescription>
+            Your attendance history and records
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -289,30 +274,31 @@ export default function Attendance() {
                 </tr>
               </thead>
               <tbody>
-                {filteredAttendance.map((record, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      {new Date(record.date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
+                {filteredAttendance.length > 0 ? (
+                  filteredAttendance.map((record, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4">{record.date}</td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                            record.status
+                          )}`}
+                        >
+                          {getStatusText(record.status)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">{record.checkIn}</td>
+                      <td className="py-3 px-4">{record.checkOut}</td>
+                      <td className="py-3 px-4">{record.hours}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="py-3 px-4 text-center text-gray-500">
+                      No attendance records found
                     </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
-                          record.status
-                        )}`}
-                      >
-                        {getStatusText(record.status)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">{record.checkIn}</td>
-                    <td className="py-3 px-4">{record.checkOut}</td>
-                    <td className="py-3 px-4">{record.hours}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

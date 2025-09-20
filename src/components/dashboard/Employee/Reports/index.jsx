@@ -39,70 +39,44 @@ export default function EmployeeReports() {
       try {
         if (!session?.user?.id) return;
 
-        // In a real implementation, this would fetch from an API
-        // For now, we'll use mock data
-        const mockAttendance = [
-          { date: "2023-06-01", status: "present" },
-          { date: "2023-06-02", status: "present" },
-          { date: "2023-06-03", status: "weekend" },
-          { date: "2023-06-04", status: "weekend" },
-          { date: "2023-06-05", status: "present" },
-          { date: "2023-06-06", status: "absent" },
-          { date: "2023-06-07", status: "present" },
-          { date: "2023-06-08", status: "present" },
-          { date: "2023-06-09", status: "leave" },
-          { date: "2023-06-10", status: "weekend" },
-          { date: "2023-06-11", status: "weekend" },
-        ];
+        // Fetch attendance data
+        const attendanceResponse = await fetch(
+          `/api/attendance/history?employeeId=${session.user.id}`
+        );
+        const attendanceResult = await attendanceResponse.json();
 
-        const mockLeave = [
-          {
-            id: 1,
-            type: "vacation",
-            startDate: "2023-06-15",
-            endDate: "2023-06-20",
-            status: "approved",
-          },
-          {
-            id: 2,
-            type: "sick",
-            startDate: "2023-06-10",
-            endDate: "2023-06-12",
-            status: "pending",
-          },
-          {
-            id: 3,
-            type: "casual",
-            startDate: "2023-05-20",
-            endDate: "2023-05-21",
-            status: "rejected",
-          },
-        ];
+        // Fetch leave data
+        const leaveResponse = await fetch(
+          `/api/leaveManagement?employeeId=${session.user.id}`
+        );
+        const leaveResult = await leaveResponse.json();
 
-        const mockLoan = [
-          {
-            id: 1,
-            type: "Personal Loan",
-            amount: 5000,
-            status: "approved",
-            appliedDate: "2023-05-15",
-          },
-          {
-            id: 2,
-            type: "Education Loan",
-            amount: 10000,
-            status: "pending",
-            appliedDate: "2023-06-01",
-          },
-        ];
+        // Fetch loan data
+        const loanResponse = await fetch(
+          `/api/loanManagement?employeeId=${session.user.id}`
+        );
+        const loanResult = await loanResponse.json();
 
-        setAttendanceData(mockAttendance);
-        setLeaveData(mockLeave);
-        setLoanData(mockLoan);
-        setLoading(false);
+        if (attendanceResponse.ok) {
+          // Transform data to match existing structure
+          const transformedAttendance = attendanceResult.data.map((record) => ({
+            ...record,
+            date: record.date || record.createdAt, // Handle different date field names
+          }));
+          setAttendanceData(transformedAttendance);
+        }
+
+        if (leaveResponse.ok) {
+          setLeaveData(leaveResult.data);
+        }
+
+        if (loanResponse.ok) {
+          setLoanData(loanResult.data);
+        }
       } catch (error) {
         console.error("Error fetching report data:", error);
         toast.error("Failed to fetch report data");
+      } finally {
         setLoading(false);
       }
     };
@@ -145,6 +119,8 @@ export default function EmployeeReports() {
         return "bg-yellow-100 text-yellow-800";
       case "rejected":
         return "bg-red-100 text-red-800";
+      case "completed":
+        return "bg-blue-100 text-blue-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -486,7 +462,7 @@ export default function EmployeeReports() {
                   <tbody>
                     {leaveData.map((request) => (
                       <tr
-                        key={request.id}
+                        key={request._id || request.id}
                         className="border-b hover:bg-gray-50"
                       >
                         <td className="py-3 px-4">{request.type}</td>
@@ -505,7 +481,7 @@ export default function EmployeeReports() {
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          {new Date(request.startDate).toLocaleDateString()}
+                          {new Date(request.appliedDate).toLocaleDateString()}
                         </td>
                       </tr>
                     ))}
@@ -550,7 +526,10 @@ export default function EmployeeReports() {
                   </thead>
                   <tbody>
                     {loanData.map((loan) => (
-                      <tr key={loan.id} className="border-b hover:bg-gray-50">
+                      <tr
+                        key={loan._id || loan.id}
+                        className="border-b hover:bg-gray-50"
+                      >
                         <td className="py-3 px-4">{loan.type}</td>
                         <td className="py-3 px-4">
                           ${loan.amount?.toLocaleString()}

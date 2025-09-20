@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -41,121 +41,145 @@ export default function LeaveManagement() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for leave requests
-  const [leaveData, setLeaveData] = useState([
-    {
-      id: 1,
-      employee: "John Smith",
-      department: "Engineering",
-      type: "Annual Leave",
-      startDate: "2023-06-20",
-      endDate: "2023-06-25",
-      days: 5,
-      status: "Pending",
-      reason: "Family vacation",
-      appliedDate: "2023-06-01",
-      balance: {
-        annual: 15,
-        sick: 10,
-        casual: 10,
-      },
-    },
-    {
-      id: 2,
-      employee: "Sarah Johnson",
-      department: "Marketing",
-      type: "Sick Leave",
-      startDate: "2023-06-18",
-      endDate: "2023-06-20",
-      days: 3,
-      status: "Approved",
-      reason: "Medical appointment",
-      appliedDate: "2023-06-15",
-      balance: {
-        annual: 12,
-        sick: 7,
-        casual: 10,
-      },
-    },
-    {
-      id: 3,
-      employee: "Michael Brown",
-      department: "Sales",
-      type: "Personal Leave",
-      startDate: "2023-06-22",
-      endDate: "2023-06-23",
-      days: 2,
-      status: "Pending",
-      reason: "Personal matters",
-      appliedDate: "2023-06-18",
-      balance: {
-        annual: 15,
-        sick: 10,
-        casual: 8,
-      },
-    },
-    {
-      id: 4,
-      employee: "Emily Davis",
-      department: "HR",
-      type: "Maternity Leave",
-      startDate: "2023-07-01",
-      endDate: "2023-09-30",
-      days: 90,
-      status: "Approved",
-      reason: "Maternity leave",
-      appliedDate: "2023-05-15",
-      balance: {
-        annual: 10,
-        sick: 10,
-        casual: 10,
-      },
-    },
-    {
-      id: 5,
-      employee: "Robert Wilson",
-      department: "Finance",
-      type: "Annual Leave",
-      startDate: "2023-06-15",
-      endDate: "2023-06-17",
-      days: 3,
-      status: "Rejected",
-      reason: "Annual conference",
-      appliedDate: "2023-06-01",
-      rejectionReason: "Team understaffed during that period",
-      balance: {
-        annual: 12,
-        sick: 10,
-        casual: 10,
-      },
-    },
-  ]);
+  // State for leave requests from database
+  const [leaveData, setLeaveData] = useState([]);
 
-  const handleApprove = (id) => {
-    setLeaveData(
-      leaveData.map((leave) =>
-        leave.id === id ? { ...leave, status: "Approved" } : leave
-      )
-    );
-    toast({
-      title: "Leave Approved",
-      description: "Leave request has been approved successfully.",
-    });
+  // Fetch leave requests from the database
+  useEffect(() => {
+    const fetchLeaveRequests = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/admin/leaveManagement");
+        const data = await response.json();
+
+        if (response.ok) {
+          // Transform the data to match the existing structure
+          const transformedData = data.data.map((request) => ({
+            id: request._id,
+            employee: request.employeeName || "Unknown Employee",
+            department: request.department || "Not assigned",
+            type: request.type || "Leave",
+            startDate: request.startDate || "",
+            endDate: request.endDate || "",
+            days: request.days || 0,
+            status: request.status
+              ? request.status.charAt(0).toUpperCase() + request.status.slice(1)
+              : "Pending",
+            reason: request.reason || "",
+            appliedDate: request.appliedDate || "",
+            balance: {
+              annual: 15,
+              sick: 10,
+              casual: 10,
+            },
+          }));
+          setLeaveData(transformedData);
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch leave requests",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching leave requests:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch leave requests",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaveRequests();
+  }, []);
+
+  const handleApprove = async (id) => {
+    try {
+      const response = await fetch("/api/admin/leaveManagement", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+          status: "approved",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setLeaveData(
+          leaveData.map((leave) =>
+            leave.id === id ? { ...leave, status: "Approved" } : leave
+          )
+        );
+        toast({
+          title: "Leave Approved",
+          description: "Leave request has been approved successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to approve leave request",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error approving leave request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to approve leave request",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleReject = (id, rejectionReason = "") => {
-    setLeaveData(
-      leaveData.map((leave) =>
-        leave.id === id
-          ? { ...leave, status: "Rejected", rejectionReason }
-          : leave
-      )
-    );
-    toast({
-      title: "Leave Rejected",
-      description: "Leave request has been rejected.",
-    });
+  const handleReject = async (id, rejectionReason = "") => {
+    try {
+      const response = await fetch("/api/admin/leaveManagement", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+          status: "rejected",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setLeaveData(
+          leaveData.map((leave) =>
+            leave.id === id ? { ...leave, status: "Rejected" } : leave
+          )
+        );
+        toast({
+          title: "Leave Rejected",
+          description: "Leave request has been rejected.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to reject leave request",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error rejecting leave request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reject leave request",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleExport = () => {

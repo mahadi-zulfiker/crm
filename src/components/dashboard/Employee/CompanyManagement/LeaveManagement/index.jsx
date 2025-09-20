@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -25,12 +25,120 @@ import {
   Clock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSession } from "next-auth/react";
 
 export default function LeaveManagement() {
   const { toast } = useToast();
+  const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [leaveData, setLeaveData] = useState([]);
+  const [leaveBalance, setLeaveBalance] = useState({
+    annual: { total: 20, used: 0, remaining: 20 },
+    sick: { total: 10, used: 0, remaining: 10 },
+    casual: { total: 5, used: 0, remaining: 5 },
+    maternity: { total: 90, used: 0, remaining: 90 },
+  });
+  const [loading, setLoading] = useState(true);
+  const [newLeaveRequest, setNewLeaveRequest] = useState({
+    type: "",
+    startDate: "",
+    endDate: "",
+    reason: "",
+  });
+
+  // Fetch leave data from the database
+  useEffect(() => {
+    const fetchLeaveData = async () => {
+      try {
+        if (!session?.user?.id) return;
+        
+        setLoading(true);
+        const response = await fetch(
+          `/api/employee/leave?employeeId=${session.user.id}`
+        );
+        const data = await response.json();
+
+        if (response.ok) {
+          setLeaveData(data.data);
+          // Calculate leave balance based on fetched data
+          calculateLeaveBalance(data.data);
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch leave data",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching leave data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch leave data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaveData();
+  }, [session]);
+
+  const calculateLeaveBalance = (leaveRequests) => {
+    // Calculate used leave days by type
+    const usedLeave = {
+      annual: 0,
+      sick: 0,
+      casual: 0,
+      maternity: 0,
+    };
+
+    leaveRequests.forEach(request => {
+      if (request.status === "approved") {
+        const days = Math.ceil((new Date(request.endDate) - new Date(request.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+        switch (request.type.toLowerCase()) {
+          case "annual":
+            usedLeave.annual += days;
+            break;
+          case "sick":
+            usedLeave.sick += days;
+            break;
+          case "casual":
+            usedLeave.casual += days;
+            break;
+          case "maternity":
+            usedLeave.maternity += days;
+            break;
+        }
+      }
+    });
+
+    // Update leave balance state
+    setLeaveBalance({
+      annual: { 
+        total: 20, 
+        used: usedLeave.annual, 
+        remaining: Math.max(0, 20 - usedLeave.annual) 
+      },
+      sick: { 
+        total: 10, 
+        used: usedLeave.sick, 
+        remaining: Math.max(0, 10 - usedLeave.sick) 
+      },
+      casual: { 
+        total: 5, 
+        used: usedLeave.casual, 
+        remaining: Math.max(0, 5 - usedLeave.casual) 
+      },
+      maternity: { 
+        total: 90, 
+        used: usedLeave.maternity, 
+        remaining: Math.max(0, 90 - usedLeave.maternity) 
+      },
+    });
+  };
 
   const handleExport = () => {
     toast({
@@ -46,53 +154,74 @@ export default function LeaveManagement() {
 
   const handleCloseModal = () => {
     setIsLeaveModalOpen(false);
+    // Reset form
+    setNewLeaveRequest({
+      type: "",
+      startDate: "",
+      endDate: "",
+      reason: "",
+    });
   };
 
-  // Mock data for leave records
-  const leaveData = [
-    {
-      id: 1,
-      type: "Annual Leave",
-      startDate: "2023-06-15",
-      endDate: "2023-06-17",
-      days: 3,
-      status: "approved",
-      reason: "Family vacation",
-    },
-    {
-      id: 2,
-      type: "Sick Leave",
-      startDate: "2023-05-20",
-      endDate: "2023-05-22",
-      days: 3,
-      status: "approved",
-      reason: "Medical appointment",
-    },
-    {
-      id: 3,
-      type: "Casual Leave",
-      startDate: "2023-07-10",
-      endDate: "2023-07-10",
-      days: 1,
-      status: "pending",
-      reason: "Personal work",
-    },
-    {
-      id: 4,
-      type: "Maternity Leave",
-      startDate: "2023-08-01",
-      endDate: "2023-08-15",
-      days: 15,
-      status: "rejected",
-      reason: "Planning for baby",
-    },
-  ];
+  const handleInputChange = (field, value) => {
+    setNewLeaveRequest(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-  const leaveBalance = {
-    annual: { total: 20, used: 5, remaining: 15 },
-    sick: { total: 10, used: 3, remaining: 7 },
-    casual: { total: 5, used: 1, remaining: 4 },
-    maternity: { total: 90, used: 0, remaining: 90 },
+  const handleSubmitLeaveRequest = async () => {
+    try {
+      if (!session?.user?.id) {
+        toast({
+          title: "Error",
+          description: "User not authenticated",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await fetch("/api/employee/leave", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: session.user.id,
+          ...newLeaveRequest
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Leave request submitted successfully",
+        });
+        
+        // Add new request to the list
+        setLeaveData(prev => [...prev, data.data]);
+        
+        // Recalculate leave balance
+        calculateLeaveBalance([...leaveData, data.data]);
+        
+        handleCloseModal();
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to submit leave request",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting leave request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit leave request",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status) => {
@@ -116,6 +245,17 @@ export default function LeaveManagement() {
       filterStatus === "all" || record.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <p className="text-gray-600">Loading leave data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -249,29 +389,44 @@ export default function LeaveManagement() {
                 </tr>
               </thead>
               <tbody>
-                {filteredLeave.map((record) => (
-                  <tr key={record.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4">{record.type}</td>
-                    <td className="py-3 px-4">
-                      {new Date(record.startDate).toLocaleDateString("en-US")}
-                    </td>
-                    <td className="py-3 px-4">
-                      {new Date(record.endDate).toLocaleDateString("en-US")}
-                    </td>
-                    <td className="py-3 px-4">{record.days}</td>
-                    <td className="py-3 px-4">{record.reason}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
-                          record.status
-                        )}`}
-                      >
-                        {record.status.charAt(0).toUpperCase() +
-                          record.status.slice(1)}
-                      </span>
+                {filteredLeave.length > 0 ? (
+                  filteredLeave.map((record) => {
+                    // Calculate number of days
+                    const startDate = new Date(record.startDate);
+                    const endDate = new Date(record.endDate);
+                    const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    return (
+                      <tr key={record._id} className="border-b hover:bg-gray-50">
+                        <td className="py-3 px-4">{record.type}</td>
+                        <td className="py-3 px-4">
+                          {startDate.toLocaleDateString("en-US")}
+                        </td>
+                        <td className="py-3 px-4">
+                          {endDate.toLocaleDateString("en-US")}
+                        </td>
+                        <td className="py-3 px-4">{days}</td>
+                        <td className="py-3 px-4">{record.reason}</td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
+                              record.status
+                            )}`}
+                          >
+                            {record.status.charAt(0).toUpperCase() +
+                              record.status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="py-3 px-4 text-center text-gray-500">
+                      No leave records found
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -288,15 +443,18 @@ export default function LeaveManagement() {
                 <label className="block text-sm font-medium mb-1">
                   Leave Type
                 </label>
-                <Select>
+                <Select 
+                  value={newLeaveRequest.type} 
+                  onValueChange={(value) => handleInputChange("type", value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select leave type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="annual">Annual Leave</SelectItem>
-                    <SelectItem value="sick">Sick Leave</SelectItem>
-                    <SelectItem value="casual">Casual Leave</SelectItem>
-                    <SelectItem value="maternity">Maternity Leave</SelectItem>
+                    <SelectItem value="Annual">Annual Leave</SelectItem>
+                    <SelectItem value="Sick">Sick Leave</SelectItem>
+                    <SelectItem value="Casual">Casual Leave</SelectItem>
+                    <SelectItem value="Maternity">Maternity Leave</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -304,24 +462,37 @@ export default function LeaveManagement() {
                 <label className="block text-sm font-medium mb-1">
                   Start Date
                 </label>
-                <Input type="date" />
+                <Input 
+                  type="date" 
+                  value={newLeaveRequest.startDate}
+                  onChange={(e) => handleInputChange("startDate", e.target.value)}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">
                   End Date
                 </label>
-                <Input type="date" />
+                <Input 
+                  type="date" 
+                  value={newLeaveRequest.endDate}
+                  onChange={(e) => handleInputChange("endDate", e.target.value)}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Reason</label>
-                <Input type="text" placeholder="Reason for leave" />
+                <Input 
+                  type="text" 
+                  placeholder="Reason for leave"
+                  value={newLeaveRequest.reason}
+                  onChange={(e) => handleInputChange("reason", e.target.value)}
+                />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <Button variant="outline" onClick={handleCloseModal}>
                 Cancel
               </Button>
-              <Button onClick={handleCloseModal}>Submit</Button>
+              <Button onClick={handleSubmitLeaveRequest}>Submit</Button>
             </div>
           </div>
         </div>

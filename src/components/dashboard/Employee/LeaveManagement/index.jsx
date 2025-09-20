@@ -17,15 +17,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, CheckCircle, XCircle, Plus, History } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Plus,
+  History,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function EmployeeLeaveManagement() {
   const { data: session } = useSession();
@@ -49,43 +51,22 @@ export default function EmployeeLeaveManagement() {
       try {
         if (!session?.user?.id) return;
 
-        // In a real implementation, this would fetch from an API
-        // For now, we'll use mock data
-        const mockRequests = [
-          {
-            id: 1,
-            type: "vacation",
-            startDate: "2023-06-15",
-            endDate: "2023-06-20",
-            reason: "Family vacation",
-            status: "approved",
-            appliedDate: "2023-06-01",
-          },
-          {
-            id: 2,
-            type: "sick",
-            startDate: "2023-06-10",
-            endDate: "2023-06-12",
-            reason: "Medical appointment",
-            status: "pending",
-            appliedDate: "2023-06-09",
-          },
-          {
-            id: 3,
-            type: "casual",
-            startDate: "2023-05-20",
-            endDate: "2023-05-21",
-            reason: "Personal work",
-            status: "rejected",
-            appliedDate: "2023-05-18",
-          },
-        ];
+        // Fetch leave requests from the database
+        const response = await fetch(
+          `/api/leaveManagement?employeeId=${session.user.id}`
+        );
+        const data = await response.json();
 
-        setLeaveRequests(mockRequests);
-        setLoading(false);
+        if (response.ok) {
+          setLeaveRequests(data.data || []);
+        } else {
+          console.error("Error fetching leave data:", data.error);
+          toast.error("Failed to fetch leave data");
+        }
       } catch (error) {
         console.error("Error fetching leave data:", error);
         toast.error("Failed to fetch leave data");
+      } finally {
         setLoading(false);
       }
     };
@@ -110,41 +91,61 @@ export default function EmployeeLeaveManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
-    if (!newLeaveRequest.type || !newLeaveRequest.startDate || !newLeaveRequest.endDate || !newLeaveRequest.reason) {
+    if (
+      !newLeaveRequest.type ||
+      !newLeaveRequest.startDate ||
+      !newLeaveRequest.endDate ||
+      !newLeaveRequest.reason
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    if (new Date(newLeaveRequest.startDate) > new Date(newLeaveRequest.endDate)) {
+    if (
+      new Date(newLeaveRequest.startDate) > new Date(newLeaveRequest.endDate)
+    ) {
       toast.error("End date must be after start date");
       return;
     }
 
     try {
       setSubmitting(true);
-      
-      // In a real implementation, this would send to an API
-      // For now, we'll add to the local state
-      const newRequest = {
-        id: leaveRequests.length + 1,
-        ...newLeaveRequest,
-        status: "pending",
-        appliedDate: new Date().toISOString().split("T")[0],
-      };
 
-      setLeaveRequests((prev) => [newRequest, ...prev]);
-      
-      // Reset form
-      setNewLeaveRequest({
-        type: "",
-        startDate: "",
-        endDate: "",
-        reason: "",
+      // Submit to the database
+      const response = await fetch("/api/leaveManagement", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: session?.user?.id,
+          type: newLeaveRequest.type,
+          startDate: newLeaveRequest.startDate,
+          endDate: newLeaveRequest.endDate,
+          reason: newLeaveRequest.reason,
+        }),
       });
-      
-      toast.success("Leave request submitted successfully!");
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Add the new request to the local state
+        setLeaveRequests((prev) => [data.data, ...prev]);
+
+        // Reset form
+        setNewLeaveRequest({
+          type: "",
+          startDate: "",
+          endDate: "",
+          reason: "",
+        });
+
+        toast.success("Leave request submitted successfully!");
+      } else {
+        toast.error(data.error || "Failed to submit leave request");
+      }
     } catch (error) {
       console.error("Error submitting leave request:", error);
       toast.error("Failed to submit leave request");
@@ -202,7 +203,9 @@ export default function EmployeeLeaveManagement() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Leave Management</h1>
-        <p className="text-gray-600">Request leave and track your leave status</p>
+        <p className="text-gray-600">
+          Request leave and track your leave status
+        </p>
       </div>
 
       {/* Leave Balance Cards */}
@@ -231,11 +234,15 @@ export default function EmployeeLeaveManagement() {
 
         <Card className="bg-white shadow-sm border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vacation Leave</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Vacation Leave
+            </CardTitle>
             <Plus className="w-4 h-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{leaveBalance.vacation} days</div>
+            <div className="text-2xl font-bold">
+              {leaveBalance.vacation} days
+            </div>
             <p className="text-xs text-gray-500">Available balance</p>
           </CardContent>
         </Card>
@@ -263,8 +270,8 @@ export default function EmployeeLeaveManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="type">Leave Type</Label>
-                    <Select 
-                      value={newLeaveRequest.type} 
+                    <Select
+                      value={newLeaveRequest.type}
                       onValueChange={handleSelectChange}
                       disabled={submitting}
                     >
@@ -310,7 +317,11 @@ export default function EmployeeLeaveManagement() {
                     <div className="p-3 bg-gray-50 rounded-md">
                       {newLeaveRequest.startDate && newLeaveRequest.endDate ? (
                         <span>
-                          {calculateLeaveDays(newLeaveRequest.startDate, newLeaveRequest.endDate)} days
+                          {calculateLeaveDays(
+                            newLeaveRequest.startDate,
+                            newLeaveRequest.endDate
+                          )}{" "}
+                          days
                         </span>
                       ) : (
                         <span className="text-gray-500">Select dates</span>
@@ -333,8 +344,8 @@ export default function EmployeeLeaveManagement() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={submitting}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
@@ -380,21 +391,30 @@ export default function EmployeeLeaveManagement() {
                     </thead>
                     <tbody>
                       {leaveRequests.map((request) => (
-                        <tr key={request.id} className="border-b hover:bg-gray-50">
+                        <tr
+                          key={request._id || request.id}
+                          className="border-b hover:bg-gray-50"
+                        >
                           <td className="py-3 px-4">
                             <span
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(
                                 request.type
                               )}`}
                             >
-                              {request.type.charAt(0).toUpperCase() + request.type.slice(1)}
+                              {request.type.charAt(0).toUpperCase() +
+                                request.type.slice(1)}
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            {new Date(request.startDate).toLocaleDateString()} - {new Date(request.endDate).toLocaleDateString()}
+                            {new Date(request.startDate).toLocaleDateString()} -{" "}
+                            {new Date(request.endDate).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4">
-                            {calculateLeaveDays(request.startDate, request.endDate)} days
+                            {calculateLeaveDays(
+                              request.startDate,
+                              request.endDate
+                            )}{" "}
+                            days
                           </td>
                           <td className="py-3 px-4 max-w-xs truncate">
                             {request.reason}
@@ -408,7 +428,8 @@ export default function EmployeeLeaveManagement() {
                                 request.status
                               )}`}
                             >
-                              {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                              {request.status.charAt(0).toUpperCase() +
+                                request.status.slice(1)}
                             </span>
                           </td>
                         </tr>
