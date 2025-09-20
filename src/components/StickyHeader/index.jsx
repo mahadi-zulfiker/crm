@@ -114,10 +114,10 @@ const StickyHeader = ({ thresholdHeight }) => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-6">
+            <div className="hidden lg:flex items-center space-x-2 xl:space-x-4 2xl:space-x-6">
               <Link
                 href="/"
-                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group"
+                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap"
               >
                 Home
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
@@ -129,7 +129,7 @@ const StickyHeader = ({ thresholdHeight }) => {
                 onMouseEnter={() => handleMouseEnter("services")}
                 onMouseLeave={handleMouseLeave}
               >
-                <button className="px-3 py-2 rounded-md text-white hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                <button className="px-2 xs:px-3 py-2 rounded-md text-white hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">
                   <Link href="/services" className="flex items-center space-x-1">
                     <span>Our Services</span>
                     <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
@@ -182,7 +182,7 @@ const StickyHeader = ({ thresholdHeight }) => {
                 onMouseEnter={() => handleMouseEnter("whyDemandRecruitment")}
                 onMouseLeave={handleMouseLeave}
               >
-                <Link href="/whyDemand" className="px-3 py-2 rounded-md text-white hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                <Link href="/whyDemand" className="px-2 xs:px-3 py-2 rounded-md text-white hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">
                   <span>Why Demand Recruitment</span>
                   <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
                 </Link>
@@ -250,35 +250,35 @@ const StickyHeader = ({ thresholdHeight }) => {
 
               <Link
                 href="/insight"
-                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group"
+                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap"
               >
                 Insights
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
                 href="/allJobs"
-                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group"
+                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap"
               >
                 Find a Job
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
                 href="/contactUs"
-                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group"
+                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap"
               >
                 Contact Us
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
                 href="/aboutUs"
-                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group"
+                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap"
               >
                 About Us
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
                 href="/referAFriend"
-                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group"
+                className="relative text-white hover:text-teal-400 transition-all duration-300 font-medium group text-sm 2xl:text-base whitespace-nowrap"
               >
                 Refer
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-400 transition-all duration-300 group-hover:w-full"></span>
@@ -290,7 +290,7 @@ const StickyHeader = ({ thresholdHeight }) => {
                 onMouseEnter={() => handleMouseEnter("getStarted")}
                 onMouseLeave={handleMouseLeave}
               >
-                <button className="px-3 py-2 rounded-md text-white hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform">
+                <button className="px-2 xs:px-3 py-2 rounded-md text-white hover:text-teal-400 hover:bg-gray-800 transition-all duration-300 font-medium flex items-center space-x-1 group-hover:scale-105 transform text-sm 2xl:text-base whitespace-nowrap">
                   <span>Get Started</span>
                   <FaChevronDown className="text-xs transition-transform duration-300 group-hover:rotate-180" />
                 </button>
@@ -333,16 +333,16 @@ const StickyHeader = ({ thresholdHeight }) => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center space-x-3 ml-4">
+              <div className="flex items-center space-x-2 xl:space-x-3 ml-2 xl:ml-4">
                 <Link
                   href="/employer"
-                  className="bg-transparent border-2 border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-gray-900 px-4 py-2 rounded-lg transition-all duration-300 font-medium hover:shadow-lg hover:scale-105 transform"
+                  className="bg-transparent border-2 border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-gray-900 px-4 py-2 rounded-lg transition-all duration-300 font-medium hover:shadow-lg hover:scale-105 transform text-sm"
                 >
                   Employers
                 </Link>
                 <Link
                   href="/employees"
-                  className="bg-gradient-to-r from-teal-400 to-teal-500 hover:from-teal-500 hover:to-teal-600 text-gray-900 px-4 py-2 rounded-lg transition-all duration-300 font-medium hover:shadow-lg hover:scale-105 transform"
+                  className="bg-gradient-to-r from-teal-400 to-teal-500 hover:from-teal-500 hover:to-teal-600 text-gray-900 px-4 py-2 rounded-lg transition-all duration-300 font-medium hover:shadow-lg hover:scale-105 transform text-sm"
                 >
                   Employee
                 </Link>
