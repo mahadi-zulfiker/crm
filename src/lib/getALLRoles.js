@@ -17,6 +17,7 @@ import {
   WalletCards,
   Search,
   Bell,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function getALLRoles() {
@@ -24,7 +25,7 @@ export default function getALLRoles() {
     client: [
       {
         title: "Dashboard",
-        icon: Home,
+        icon: LayoutDashboard,
         href: "/dashboard/client",
       },
       {
@@ -48,7 +49,6 @@ export default function getALLRoles() {
           //   },
         ],
       },
-
       {
         title: "Payment History",
         icon: WalletCards,
@@ -64,7 +64,7 @@ export default function getALLRoles() {
         icon: User,
         href: "/dashboard/client/clientProfileManagement",
       },
-   
+
       {
         title: "Home",
         icon: HomeIcon,
@@ -79,7 +79,7 @@ export default function getALLRoles() {
     user: [
       {
         title: "Dashboard",
-        icon: Home,
+        icon: LayoutDashboard,
         href: "/dashboard/employee",
       },
 
@@ -154,7 +154,7 @@ export default function getALLRoles() {
         icon: User,
         href: "/dashboard/employee/profileManagement",
       },
-      
+
       {
         title: "Home",
         icon: HomeIcon,
@@ -169,7 +169,7 @@ export default function getALLRoles() {
     vendor: [
       {
         title: "Dashboard",
-        icon: Home,
+        icon: LayoutDashboard,
         href: "/dashboard/vendor",
       },
       {
@@ -213,6 +213,11 @@ export default function getALLRoles() {
         icon: DollarSign,
       },
       {
+        title: "Home",
+        icon: HomeIcon,
+        href: "/",
+      },
+      {
         title: "Settings",
         icon: Settings,
       },
@@ -220,7 +225,7 @@ export default function getALLRoles() {
     admin: [
       {
         title: "Dashboard",
-        icon: Home,
+        icon: LayoutDashboard,
         href: "/dashboard/admin",
       },
       {
@@ -306,6 +311,11 @@ export default function getALLRoles() {
         title: "Profile",
         icon: User,
         href: "/dashboard/admin/adminProfileManagement",
+      },
+      {
+        title: "Home",
+        icon: HomeIcon,
+        href: "/",
       },
       {
         title: "Settings",
