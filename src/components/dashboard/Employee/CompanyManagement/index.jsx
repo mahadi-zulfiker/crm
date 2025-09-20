@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -18,57 +18,115 @@ import {
   CalendarDays,
 } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CompanyManagement() {
-  const companyStats = [
+  const { toast } = useToast();
+  const { data: session } = useSession();
+  const [companyStats, setCompanyStats] = useState([
     {
       title: "Total Departments",
-      value: "12",
+      value: "0",
       icon: Building,
-      change: "+2 from last month",
+      change: "+0 from last month",
     },
     {
       title: "Total Employees",
-      value: "142",
+      value: "0",
       icon: Users,
-      change: "+5 from last month",
+      change: "+0 from last month",
     },
     {
       title: "Present Today",
-      value: "128",
+      value: "0",
       icon: UserCheck,
-      change: "90% attendance rate",
+      change: "0% attendance rate",
     },
     {
       title: "Absent Today",
-      value: "14",
+      value: "0",
       icon: UserX,
-      change: "10% absence rate",
+      change: "0% absence rate",
     },
-  ];
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch company statistics from the database
+  useEffect(() => {
+    const fetchCompanyStats = async () => {
+      try {
+        if (!session?.user?.id) return;
+        
+        setLoading(true);
+        // In a real implementation, this would fetch from an API
+        // For now, we'll use mock data but with a loading state
+        setTimeout(() => {
+          const updatedStats = [
+            {
+              title: "Total Departments",
+              value: "12",
+              icon: Building,
+              change: "+2 from last month",
+            },
+            {
+              title: "Total Employees",
+              value: "142",
+              icon: Users,
+              change: "+5 from last month",
+            },
+            {
+              title: "Present Today",
+              value: "128",
+              icon: UserCheck,
+              change: "90% attendance rate",
+            },
+            {
+              title: "Absent Today",
+              value: "14",
+              icon: UserX,
+              change: "10% absence rate",
+            },
+          ];
+          setCompanyStats(updatedStats);
+          setLoading(false);
+        }, 500);
+      } catch (error) {
+        console.error("Error fetching company stats:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch company statistics",
+          variant: "destructive",
+        });
+        setLoading(false);
+      }
+    };
+
+    fetchCompanyStats();
+  }, [session]);
 
   const managementSections = [
     {
       title: "Attendance",
       description: "View your attendance records and history",
       icon: Calendar,
-      href: "/dashboard/employee/attendance",
+      href: "/dashboard/employee/companyManagement/attendance",
     },
     {
       title: "Leave Management",
       description: "Apply for leave and view leave balance",
       icon: CalendarDays,
-      href: "/dashboard/employee/leave",
+      href: "/dashboard/employee/companyManagement/leaveManagement",
     },
     {
       title: "Loan Management",
       description: "View and apply for employee loans",
       icon: CreditCard,
-      href: "/dashboard/employee/loan",
+      href: "/dashboard/employee/companyManagement/loanManagement",
     },
     {
       title: "Reports & Analytics",
-      description: "View company reports and analytics",
+      description: "View personal reports and analytics",
       icon: FileText,
       href: "/dashboard/employee/companyManagement/reportsAnalytics",
     },
@@ -95,6 +153,17 @@ export default function CompanyManagement() {
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <p className="text-gray-600">Loading company data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -103,7 +172,7 @@ export default function CompanyManagement() {
           Access company information and manage your employment details
         </p>
       </div>
-      {/* Stats Cards */})
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {companyStats.map((stat, index) => {
           const IconComponent = stat.icon;

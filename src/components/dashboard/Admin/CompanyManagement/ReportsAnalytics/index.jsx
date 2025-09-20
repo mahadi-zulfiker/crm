@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -38,6 +38,78 @@ export default function ReportsAnalytics() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [selectedDateRange, setSelectedDateRange] = useState("monthly");
+  const [loading, setLoading] = useState(false);
+
+  // State for report data from database
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [employeeStats, setEmployeeStats] = useState([]);
+  const [leaveData, setLeaveData] = useState({});
+  const [loanData, setLoanData] = useState({});
+
+  // Fetch report data from the database
+  useEffect(() => {
+    const fetchReportData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch attendance data
+        const attendanceResponse = await fetch(
+          "/api/admin/reports/attendance?days=7"
+        );
+        const attendanceResult = await attendanceResponse.json();
+
+        // Fetch employee statistics
+        const employeeResponse = await fetch("/api/admin/reports/employees");
+        const employeeResult = await employeeResponse.json();
+
+        // Fetch leave data
+        const leaveResponse = await fetch("/api/admin/reports/leave?months=1");
+        const leaveResult = await leaveResponse.json();
+
+        // Fetch loan data
+        const loanResponse = await fetch("/api/admin/reports/loans?months=1");
+        const loanResult = await loanResponse.json();
+
+        if (attendanceResponse.ok) {
+          setAttendanceData(attendanceResult.data);
+        } else {
+          console.error(
+            "Error fetching attendance data:",
+            attendanceResult.error
+          );
+        }
+
+        if (employeeResponse.ok) {
+          setEmployeeStats(employeeResult.data);
+        } else {
+          console.error("Error fetching employee data:", employeeResult.error);
+        }
+
+        if (leaveResponse.ok) {
+          setLeaveData(leaveResult.data);
+        } else {
+          console.error("Error fetching leave data:", leaveResult.error);
+        }
+
+        if (loanResponse.ok) {
+          setLoanData(loanResult.data);
+        } else {
+          console.error("Error fetching loan data:", loanResult.error);
+        }
+      } catch (error) {
+        console.error("Error fetching report data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch report data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReportData();
+  }, []);
 
   const handleExport = (reportType) => {
     toast({
@@ -45,32 +117,6 @@ export default function ReportsAnalytics() {
       description: `${reportType} report export has started. You'll receive a notification when it's ready.`,
     });
   };
-
-  // Mock data for attendance reports
-  const attendanceData = [
-    { date: "2023-06-01", present: 125, absent: 10, leave: 5 },
-    { date: "2023-06-02", present: 128, absent: 8, leave: 4 },
-    { date: "2023-06-03", present: 130, absent: 5, leave: 5 },
-    { date: "2023-06-04", present: 127, absent: 9, leave: 4 },
-    { date: "2023-06-05", present: 120, absent: 15, leave: 5 },
-  ];
-
-  // Mock data for employee statistics
-  const employeeStats = [
-    { department: "Engineering", total: 42, present: 38, absent: 2, leave: 2 },
-    { department: "Marketing", total: 28, present: 25, absent: 1, leave: 2 },
-    { department: "Sales", total: 35, present: 32, absent: 2, leave: 1 },
-    { department: "HR", total: 15, present: 14, absent: 1, leave: 0 },
-    { department: "Finance", total: 22, present: 20, absent: 1, leave: 1 },
-  ];
-
-  // Mock data for loan statistics
-  const loanStats = [
-    { type: "Personal Loan", count: 12, totalAmount: 150000 },
-    { type: "Home Loan", count: 8, totalAmount: 800000 },
-    { type: "Car Loan", count: 5, totalAmount: 125000 },
-    { type: "Education Loan", count: 7, totalAmount: 210000 },
-  ];
 
   // Get unique departments for filter
   const departments = [
@@ -115,11 +161,21 @@ export default function ReportsAnalytics() {
   const attendanceRate =
     totalEmployees > 0 ? Math.round((totalPresent / totalEmployees) * 100) : 0;
 
-  const totalLoans = loanStats.reduce((sum, stat) => sum + stat.count, 0);
-  const totalLoanAmount = loanStats.reduce(
-    (sum, stat) => sum + stat.totalAmount,
-    0
-  );
+  const totalLoans = loanData.loanStats
+    ? loanData.loanStats.reduce((sum, stat) => sum + stat.count, 0)
+    : 0;
+  const totalLoanAmount = loanData.summary ? loanData.summary.totalAmount : 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <p className="text-gray-600">Loading reports...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -262,7 +318,7 @@ export default function ReportsAnalytics() {
                       Daily Attendance Trend
                     </CardTitle>
                     <CardDescription>
-                      Attendance pattern over the last 5 days
+                      Attendance pattern over the last 7 days
                     </CardDescription>
                   </div>
                   <Button
@@ -291,17 +347,35 @@ export default function ReportsAnalytics() {
                       <div className="flex flex-col items-center w-full gap-1">
                         <div
                           className="w-full bg-green-500 rounded-t"
-                          style={{ height: `${(day.present / 150) * 100}%` }}
+                          style={{
+                            height: `${
+                              (day.present /
+                                (day.present + day.absent + day.leave + 1)) *
+                              100
+                            }%`,
+                          }}
                           title={`${day.present} present`}
                         ></div>
                         <div
                           className="w-full bg-red-500"
-                          style={{ height: `${(day.absent / 150) * 100}%` }}
+                          style={{
+                            height: `${
+                              (day.absent /
+                                (day.present + day.absent + day.leave + 1)) *
+                              100
+                            }%`,
+                          }}
                           title={`${day.absent} absent`}
                         ></div>
                         <div
                           className="w-full bg-yellow-500 rounded-b"
-                          style={{ height: `${(day.leave / 150) * 100}%` }}
+                          style={{
+                            height: `${
+                              (day.leave /
+                                (day.present + day.absent + day.leave + 1)) *
+                              100
+                            }%`,
+                          }}
                           title={`${day.leave} on leave`}
                         ></div>
                       </div>
@@ -578,7 +652,9 @@ export default function ReportsAnalytics() {
                 <Calendar className="w-4 h-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">42</div>
+                <div className="text-2xl font-bold">
+                  {leaveData.summary?.totalRequests || 0}
+                </div>
                 <p className="text-xs text-gray-500">This month</p>
               </CardContent>
             </Card>
@@ -591,7 +667,9 @@ export default function ReportsAnalytics() {
                 <UserCheck className="w-4 h-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">35</div>
+                <div className="text-2xl font-bold">
+                  {leaveData.summary?.approvedRequests || 0}
+                </div>
                 <p className="text-xs text-gray-500">This month</p>
               </CardContent>
             </Card>
@@ -604,7 +682,9 @@ export default function ReportsAnalytics() {
                 <Calendar className="w-4 h-4 text-yellow-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">5</div>
+                <div className="text-2xl font-bold">
+                  {leaveData.summary?.pendingRequests || 0}
+                </div>
                 <p className="text-xs text-gray-500">Awaiting approval</p>
               </CardContent>
             </Card>
@@ -617,7 +697,9 @@ export default function ReportsAnalytics() {
                 <UserX className="w-4 h-4 text-red-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">2</div>
+                <div className="text-2xl font-bold">
+                  {leaveData.summary?.rejectedRequests || 0}
+                </div>
                 <p className="text-xs text-gray-500">This month</p>
               </CardContent>
             </Card>
@@ -645,26 +727,31 @@ export default function ReportsAnalytics() {
             <CardContent>
               <div className="h-64 flex flex-col items-center justify-center">
                 <div className="text-center mb-6">
-                  <div className="text-3xl font-bold">42</div>
+                  <div className="text-3xl font-bold">
+                    {leaveData.summary?.totalRequests || 0}
+                  </div>
                   <div className="text-gray-500">Total Leave Requests</div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
-                    <span className="text-sm">Annual (18)</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>
-                    <span className="text-sm">Sick (12)</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-yellow-500 rounded mr-2"></div>
-                    <span className="text-sm">Casual (8)</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-purple-500 rounded mr-2"></div>
-                    <span className="text-sm">Maternity (4)</span>
-                  </div>
+                  {leaveData.loanStats &&
+                    leaveData.loanStats.map((stat, index) => (
+                      <div key={index} className="flex items-center">
+                        <div
+                          className="w-3 h-3 rounded mr-2"
+                          style={{
+                            backgroundColor: [
+                              "#10b981",
+                              "#3b82f6",
+                              "#f59e0b",
+                              "#8b5cf6",
+                            ][index % 4],
+                          }}
+                        ></div>
+                        <span className="text-sm">
+                          {stat.type} ({stat.count})
+                        </span>
+                      </div>
+                    ))}
                 </div>
               </div>
             </CardContent>
@@ -681,7 +768,9 @@ export default function ReportsAnalytics() {
                 <DollarSign className="w-4 h-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalLoans}</div>
+                <div className="text-2xl font-bold">
+                  {loanData.summary?.totalLoans || 0}
+                </div>
                 <p className="text-xs text-gray-500">Active and completed</p>
               </CardContent>
             </Card>
@@ -695,7 +784,7 @@ export default function ReportsAnalytics() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  ${totalLoanAmount.toLocaleString()}
+                  ${loanData.summary?.totalAmount?.toLocaleString() || 0}
                 </div>
                 <p className="text-xs text-gray-500">Loaned to employees</p>
               </CardContent>
@@ -709,7 +798,9 @@ export default function ReportsAnalytics() {
                 <CreditCard className="w-4 h-4 text-purple-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">24</div>
+                <div className="text-2xl font-bold">
+                  {loanData.summary?.approvedLoans || 0}
+                </div>
                 <p className="text-xs text-gray-500">Currently processing</p>
               </CardContent>
             </Card>
@@ -722,7 +813,9 @@ export default function ReportsAnalytics() {
                 <DollarSign className="w-4 h-4 text-red-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$450,000</div>
+                <div className="text-2xl font-bold">
+                  ${loanData.summary?.outstandingAmount?.toLocaleString() || 0}
+                </div>
                 <p className="text-xs text-gray-500">Remaining balance</p>
               </CardContent>
             </Card>
@@ -760,30 +853,35 @@ export default function ReportsAnalytics() {
                     </tr>
                   </thead>
                   <tbody>
-                    {loanStats.map((stat, index) => {
-                      const percentage =
-                        totalLoans > 0
-                          ? Math.round((stat.count / totalLoans) * 100)
-                          : 0;
-                      return (
-                        <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4 font-medium">{stat.type}</td>
-                          <td className="py-3 px-4">{stat.count}</td>
-                          <td className="py-3 px-4">
-                            ${stat.totalAmount.toLocaleString()}
-                          </td>
-                          <td className="py-3 px-4">{percentage}%</td>
-                          <td className="py-3 px-4">
-                            <div className="w-32 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${percentage}%` }}
-                              ></div>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {loanData.loanStats &&
+                      loanData.loanStats.map((stat, index) => {
+                        const percentage =
+                          loanData.summary?.totalLoans > 0
+                            ? Math.round(
+                                (stat.count / loanData.summary.totalLoans) * 100
+                              )
+                            : 0;
+                        return (
+                          <tr key={index} className="border-b hover:bg-gray-50">
+                            <td className="py-3 px-4 font-medium">
+                              {stat.type}
+                            </td>
+                            <td className="py-3 px-4">{stat.count}</td>
+                            <td className="py-3 px-4">
+                              ${stat.totalAmount?.toLocaleString()}
+                            </td>
+                            <td className="py-3 px-4">{percentage}%</td>
+                            <td className="py-3 px-4">
+                              <div className="w-32 bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full"
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
