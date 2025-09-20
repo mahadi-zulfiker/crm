@@ -64,11 +64,7 @@ export default function getALLRoles() {
         icon: User,
         href: "/dashboard/client/clientProfileManagement",
       },
-      {
-        title: "Messages",
-        icon: MessageSquare,
-        href: "/dashboard/client/vendorInteraction",
-      },
+   
       {
         title: "Home",
         icon: HomeIcon,
@@ -158,11 +154,7 @@ export default function getALLRoles() {
         icon: User,
         href: "/dashboard/employee/profileManagement",
       },
-      {
-        title: "Messages",
-        icon: MessageSquare,
-        href: "/dashboard/employee/messages",
-      },
+      
       {
         title: "Home",
         icon: HomeIcon,
