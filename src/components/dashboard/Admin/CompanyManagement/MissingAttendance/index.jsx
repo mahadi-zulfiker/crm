@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -12,6 +12,59 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function MissingAttendance() {
   const { toast } = useToast();
+  const [employees, setEmployees] = useState([]);
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [daysToCheck, setDaysToCheck] = useState(5); // Default to checking last 5 days
+
+  // Fetch employees and attendance data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch all employees
+        const employeesResponse = await fetch("/api/employeeManagement");
+        const employeesData = await employeesResponse.json();
+
+        if (!employeesResponse.ok) {
+          throw new Error(employeesData.error || "Failed to fetch employees");
+        }
+
+        // Fetch attendance data for the last N days
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - daysToCheck);
+
+        const attendanceResponse = await fetch(
+          `/api/admin/attendance?startDate=${
+            startDate.toISOString().split("T")[0]
+          }&endDate=${endDate.toISOString().split("T")[0]}`
+        );
+        const attendanceData = await attendanceResponse.json();
+
+        if (!attendanceResponse.ok) {
+          throw new Error(
+            attendanceData.error || "Failed to fetch attendance data"
+          );
+        }
+
+        setEmployees(employeesData);
+        setAttendanceRecords(attendanceData.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to fetch data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [daysToCheck]);
 
   const handleNotify = (employeeName) => {
     toast({
@@ -28,44 +81,118 @@ export default function MissingAttendance() {
     });
   };
 
-  // Mock data for employees with missing attendance
-  const missingAttendanceData = [
-    {
-      id: 1,
-      name: "Alice Johnson",
-      department: "Marketing",
-      lastAttendance: "2023-06-12",
-      daysMissing: 3,
-    },
-    {
-      id: 2,
-      name: "Robert Chen",
-      department: "Engineering",
-      lastAttendance: "2023-06-10",
-      daysMissing: 5,
-    },
-    {
-      id: 3,
-      name: "Priya Sharma",
-      department: "Sales",
-      lastAttendance: "2023-06-13",
-      daysMissing: 2,
-    },
-    {
-      id: 4,
-      name: "James Wilson",
-      department: "HR",
-      lastAttendance: "2023-06-11",
-      daysMissing: 4,
-    },
-    {
-      id: 5,
-      name: "Maria Garcia",
-      department: "Finance",
-      lastAttendance: "2023-06-14",
-      daysMissing: 1,
-    },
-  ];
+  // Process data to find employees with missing attendance
+  const getMissingAttendanceData = () => {
+    if (employees.length === 0 || attendanceRecords.length === 0) {
+      return [];
+    }
+
+    // Create a map of employee IDs to employee data
+    const employeeMap = {};
+    employees.forEach((employee) => {
+      employeeMap[employee._id] = employee;
+    });
+
+    // Group attendance records by employee
+    const attendanceByEmployee = {};
+    attendanceRecords.forEach((record) => {
+      if (!attendanceByEmployee[record.employeeId]) {
+        attendanceByEmployee[record.employeeId] = [];
+      }
+      attendanceByEmployee[record.employeeId].push(record);
+    });
+
+    // Find employees with missing attendance
+    const missingAttendance = [];
+    const today = new Date();
+
+    employees.forEach((employee) => {
+      const employeeAttendance = attendanceByEmployee[employee._id] || [];
+
+      // If employee has no attendance records in the period
+      if (employeeAttendance.length === 0) {
+        // Calculate days since join date or days in period
+        const joinDate = new Date(employee.joinDate);
+        const daysSinceJoin = Math.floor(
+          (today - joinDate) / (1000 * 60 * 60 * 24)
+        );
+        const relevantDays = Math.min(daysSinceJoin, daysToCheck);
+
+        if (relevantDays > 0) {
+          missingAttendance.push({
+            id: employee._id,
+            name: employee.name,
+            department: employee.department || "Not assigned",
+            lastAttendance: employee.joinDate,
+            daysMissing: relevantDays,
+          });
+        }
+      } else {
+        // Find the most recent attendance date
+        const sortedAttendance = [...employeeAttendance].sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
+        );
+
+        const lastAttendanceDate = new Date(sortedAttendance[0].date);
+        const daysSinceLastAttendance = Math.floor(
+          (today - lastAttendanceDate) / (1000 * 60 * 60 * 24)
+        );
+
+        // If employee hasn't marked attendance in the last N days
+        if (daysSinceLastAttendance >= daysToCheck) {
+          missingAttendance.push({
+            id: employee._id,
+            name: employee.name,
+            department: employee.department || "Not assigned",
+            lastAttendance: sortedAttendance[0].date,
+            daysMissing: daysSinceLastAttendance,
+          });
+        }
+      }
+    });
+
+    return missingAttendance;
+  };
+
+  // Calculate summary statistics
+  const getStats = () => {
+    const missingData = getMissingAttendanceData();
+
+    if (missingData.length === 0) {
+      return {
+        totalMissing: 0,
+        avgDaysMissing: 0,
+        highPriority: 0,
+      };
+    }
+
+    const totalMissing = missingData.length;
+    const totalDaysMissing = missingData.reduce(
+      (sum, emp) => sum + emp.daysMissing,
+      0
+    );
+    const avgDaysMissing = Math.round(totalDaysMissing / totalMissing);
+    const highPriority = missingData.filter(
+      (emp) => emp.daysMissing >= 5
+    ).length;
+
+    return {
+      totalMissing,
+      avgDaysMissing,
+      highPriority,
+    };
+  };
+
+  const missingAttendanceData = getMissingAttendanceData();
+  const stats = getStats();
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -98,8 +225,10 @@ export default function MissingAttendance() {
             <AlertTriangle className="w-4 h-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-gray-500">As of June 15, 2023</p>
+            <div className="text-2xl font-bold">{stats.totalMissing}</div>
+            <p className="text-xs text-gray-500">
+              As of {new Date().toLocaleDateString()}
+            </p>
           </CardContent>
         </Card>
 
@@ -111,7 +240,7 @@ export default function MissingAttendance() {
             <UserX className="w-4 h-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{stats.avgDaysMissing}</div>
             <p className="text-xs text-gray-500">Days per employee</p>
           </CardContent>
         </Card>
@@ -122,7 +251,7 @@ export default function MissingAttendance() {
             <AlertTriangle className="w-4 h-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{stats.highPriority}</div>
             <p className="text-xs text-gray-500">Missing 5+ days</p>
           </CardContent>
         </Card>
@@ -133,54 +262,61 @@ export default function MissingAttendance() {
         <CardHeader>
           <CardTitle>Employees with Missing Attendance</CardTitle>
           <CardDescription>
-            Employees who haven't marked attendance in the last 5 days
+            Employees who haven't marked attendance in the last {daysToCheck}{" "}
+            days
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4">Employee</th>
-                  <th className="text-left py-3 px-4">Department</th>
-                  <th className="text-left py-3 px-4">Last Attendance</th>
-                  <th className="text-left py-3 px-4">Days Missing</th>
-                  <th className="text-left py-3 px-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {missingAttendanceData.map((employee) => (
-                  <tr key={employee.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{employee.name}</td>
-                    <td className="py-3 px-4">{employee.department}</td>
-                    <td className="py-3 px-4">{employee.lastAttendance}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          employee.daysMissing > 3
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {employee.daysMissing} days
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Button
-                        onClick={() => handleNotify(employee.name)}
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-1"
-                      >
-                        <Send className="w-3 h-3" />
-                        Notify
-                      </Button>
-                    </td>
+          {missingAttendanceData.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No employees with missing attendance found.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4">Employee</th>
+                    <th className="text-left py-3 px-4">Department</th>
+                    <th className="text-left py-3 px-4">Last Attendance</th>
+                    <th className="text-left py-3 px-4">Days Missing</th>
+                    <th className="text-left py-3 px-4">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {missingAttendanceData.map((employee) => (
+                    <tr key={employee.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-medium">{employee.name}</td>
+                      <td className="py-3 px-4">{employee.department}</td>
+                      <td className="py-3 px-4">{employee.lastAttendance}</td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            employee.daysMissing > 3
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {employee.daysMissing} days
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <Button
+                          onClick={() => handleNotify(employee.name)}
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-1"
+                        >
+                          <Send className="w-3 h-3" />
+                          Notify
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

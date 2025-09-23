@@ -16,6 +16,9 @@ import {
   FileText,
   CreditCard,
   CalendarDays,
+  Clock,
+  CalendarCheck,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -24,85 +27,96 @@ import { useToast } from "@/hooks/use-toast";
 export default function CompanyManagement() {
   const { toast } = useToast();
   const { data: session } = useSession();
-  const [companyStats, setCompanyStats] = useState([
+  const [employeeStats, setEmployeeStats] = useState([
     {
-      title: "Total Departments",
-      value: "0",
-      icon: Building,
-      change: "+0 from last month",
-    },
-    {
-      title: "Total Employees",
-      value: "0",
-      icon: Users,
-      change: "+0 from last month",
-    },
-    {
-      title: "Present Today",
-      value: "0",
+      title: "Attendance Rate",
+      value: "0%",
       icon: UserCheck,
-      change: "0% attendance rate",
+      change: "0 days present",
     },
     {
-      title: "Absent Today",
+      title: "Leave Balance",
       value: "0",
-      icon: UserX,
-      change: "0% absence rate",
+      icon: CalendarDays,
+      change: "0 pending requests",
+    },
+    {
+      title: "Active Loans",
+      value: "0",
+      icon: CreditCard,
+      change: "0 approved, 0 pending",
+    },
+    {
+      title: "Total Hours",
+      value: "0",
+      icon: Clock,
+      change: "This month",
     },
   ]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch company statistics from the database
+  // Fetch employee statistics from the database
   useEffect(() => {
-    const fetchCompanyStats = async () => {
+    const fetchEmployeeStats = async () => {
       try {
         if (!session?.user?.id) return;
-        
+
         setLoading(true);
-        // In a real implementation, this would fetch from an API
-        // For now, we'll use mock data but with a loading state
-        setTimeout(() => {
+
+        // Fetch employee reports data
+        const response = await fetch(
+          `/api/employee/reports?employeeId=${session.user.id}&days=30&months=12`
+        );
+        const data = await response.json();
+
+        if (data.data) {
+          const { attendance, leave, loans } = data.data;
+
           const updatedStats = [
             {
-              title: "Total Departments",
-              value: "12",
-              icon: Building,
-              change: "+2 from last month",
-            },
-            {
-              title: "Total Employees",
-              value: "142",
-              icon: Users,
-              change: "+5 from last month",
-            },
-            {
-              title: "Present Today",
-              value: "128",
+              title: "Attendance Rate",
+              value: `${attendance.attendanceRate || 0}%`,
               icon: UserCheck,
-              change: "90% attendance rate",
+              change: `${attendance.presentDays || 0} days present`,
             },
             {
-              title: "Absent Today",
-              value: "14",
-              icon: UserX,
-              change: "10% absence rate",
+              title: "Leave Balance",
+              value: `${leave.approved || 0}`,
+              icon: CalendarDays,
+              change: `${leave.pending || 0} pending requests`,
+            },
+            {
+              title: "Active Loans",
+              value: `${loans.approved || 0}`,
+              icon: CreditCard,
+              change: `${loans.approved || 0} approved, ${
+                loans.pending || 0
+              } pending`,
+            },
+            {
+              title: "Total Loans Amount",
+              value: `$${loans.totalAmount || 0}`,
+              icon: Wallet,
+              change: "Total borrowed",
             },
           ];
-          setCompanyStats(updatedStats);
-          setLoading(false);
-        }, 500);
+
+          setEmployeeStats(updatedStats);
+        }
+
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching company stats:", error);
+        console.error("Error fetching employee stats:", error);
         toast({
           title: "Error",
-          description: "Failed to fetch company statistics",
+          description: "Failed to fetch your statistics",
           variant: "destructive",
         });
         setLoading(false);
       }
     };
 
-    fetchCompanyStats();
+    fetchEmployeeStats();
   }, [session]);
 
   const managementSections = [
@@ -135,21 +149,21 @@ export default function CompanyManagement() {
   const recentActivities = [
     {
       id: 1,
-      action: "New policy update",
-      description: "Updated remote work policy effective next month",
-      time: "2 hours ago",
+      action: "Your attendance marked",
+      description: "Today's attendance has been recorded",
+      time: "Today",
     },
     {
       id: 2,
-      action: "Team meeting scheduled",
-      description: "Monthly all-hands meeting this Friday",
-      time: "1 day ago",
+      action: "Leave request submitted",
+      description: "Your leave request is pending approval",
+      time: "2 days ago",
     },
     {
       id: 3,
-      action: "Performance reviews",
-      description: "Q3 performance reviews starting next week",
-      time: "2 days ago",
+      action: "Loan application",
+      description: "Your loan application status updated",
+      time: "1 week ago",
     },
   ];
 
@@ -158,7 +172,7 @@ export default function CompanyManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-          <p className="text-gray-600">Loading company data...</p>
+          <p className="text-gray-600">Loading your data...</p>
         </div>
       </div>
     );
@@ -167,14 +181,14 @@ export default function CompanyManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Company Management</h1>
+        <h1 className="text-3xl font-bold">My Dashboard</h1>
         <p className="text-gray-600">
-          Access company information and manage your employment details
+          View your personal statistics and manage your employment details
         </p>
       </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {companyStats.map((stat, index) => {
+        {employeeStats.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
             <Card key={index} className="bg-white shadow-sm border-0">
@@ -219,8 +233,8 @@ export default function CompanyManagement() {
       {/* Recent Activities */}
       <Card className="bg-white shadow-sm border-0">
         <CardHeader>
-          <CardTitle>Recent Company Updates</CardTitle>
-          <CardDescription>Latest announcements and activities</CardDescription>
+          <CardTitle>Your Recent Activities</CardTitle>
+          <CardDescription>Latest updates related to you</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {recentActivities.map((activity) => (

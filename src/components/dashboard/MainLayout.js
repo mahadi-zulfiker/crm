@@ -68,7 +68,7 @@ import EmployeeLeaveManagementCompany from "./Employee/CompanyManagement/LeaveMa
 import EmployeeAttendanceCompany from "./Employee/CompanyManagement/Attendance";
 import EmployeeReportsAnalyticsCompany from "./Employee/CompanyManagement/ReportsAnalytics";
 import EmployeeLeaveManagement from "./Employee/LeaveManagement";
-import EmployeeLoanManagement from "./Employee/LoanManagement";
+import EmployeeLoanManagement from "./Employee/CompanyManagement/LoanManagement";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

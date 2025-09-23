@@ -45,6 +45,7 @@ export default function LeaveManagement() {
 
   // State for leave requests from database
   const [leaveData, setLeaveData] = useState([]);
+  const [employees, setEmployees] = useState({});
 
   // Fetch leave requests from the database
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function LeaveManagement() {
           // Transform the data to match the existing structure
           const transformedData = data.data.map((request) => ({
             id: request._id,
+            employeeId: request.employeeId,
             employee: request.employeeName || "Unknown Employee",
             department: request.department || "Not assigned",
             type: request.type || "Leave",
@@ -69,6 +71,7 @@ export default function LeaveManagement() {
               : "Pending",
             reason: request.reason || "",
             appliedDate: request.appliedDate || "",
+            rejectionReason: request.rejectionReason || "",
             balance: {
               annual: 15,
               sick: 10,
@@ -76,6 +79,9 @@ export default function LeaveManagement() {
             },
           }));
           setLeaveData(transformedData);
+
+          // Fetch employee details for each leave request
+          fetchEmployeeDetails(transformedData);
         } else {
           toast({
             title: "Error",
@@ -92,6 +98,34 @@ export default function LeaveManagement() {
         });
       } finally {
         setLoading(false);
+      }
+    };
+
+    const fetchEmployeeDetails = async (leaveRequests) => {
+      try {
+        // Get unique employee IDs
+        const employeeIds = [
+          ...new Set(
+            leaveRequests.map((req) => req.employeeId).filter(Boolean)
+          ),
+        ];
+
+        if (employeeIds.length > 0) {
+          // Fetch employee details
+          const response = await fetch("/api/employeeManagement");
+          const employeesData = await response.json();
+
+          if (response.ok) {
+            // Create a map of employee ID to employee details
+            const employeeMap = {};
+            employeesData.forEach((emp) => {
+              employeeMap[emp._id] = emp;
+            });
+            setEmployees(employeeMap);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching employee details:", error);
       }
     };
 
@@ -140,7 +174,12 @@ export default function LeaveManagement() {
     }
   };
 
-  const handleReject = async (id, rejectionReason = "") => {
+  const handleReject = async (id) => {
+    // Show a prompt for rejection reason
+    const rejectionReason = prompt("Please provide a reason for rejection:");
+
+    if (rejectionReason === null) return; // User cancelled
+
     try {
       const response = await fetch("/api/admin/leaveManagement", {
         method: "PUT",
@@ -150,6 +189,7 @@ export default function LeaveManagement() {
         body: JSON.stringify({
           id: id,
           status: "rejected",
+          rejectionReason: rejectionReason,
         }),
       });
 
@@ -158,7 +198,9 @@ export default function LeaveManagement() {
       if (response.ok) {
         setLeaveData(
           leaveData.map((leave) =>
-            leave.id === id ? { ...leave, status: "Rejected" } : leave
+            leave.id === id
+              ? { ...leave, status: "Rejected", rejectionReason }
+              : leave
           )
         );
         toast({
@@ -243,6 +285,17 @@ export default function LeaveManagement() {
     (total, leave) => total + leave.days,
     0
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <p className="text-gray-600">Loading leave data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
