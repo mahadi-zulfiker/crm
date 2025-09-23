@@ -22,6 +22,8 @@ import {
   UserCheck,
   UserX,
   Clock,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "next-auth/react";
@@ -36,13 +38,43 @@ export default function Attendance() {
   );
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [todayStatus, setTodayStatus] = useState(null);
+  const [marking, setMarking] = useState(false);
 
-  // Fetch attendance data from the database
+  // Fetch today's attendance status
+  useEffect(() => {
+    const fetchTodayAttendance = async () => {
+      try {
+        if (!session?.user?.id) return;
+
+        const today = new Date().toISOString().split("T")[0];
+        const response = await fetch(
+          `/api/attendance?employeeId=${session.user.id}&date=${today}`
+        );
+        const data = await response.json();
+
+        if (response.ok && data.data.length > 0) {
+          setTodayStatus(data.data[0].status);
+        }
+      } catch (error) {
+        console.error("Error fetching today's attendance:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch today's attendance status",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchTodayAttendance();
+  }, [session]);
+
+  // Fetch attendance history data from the database
   useEffect(() => {
     const fetchAttendanceData = async () => {
       try {
         if (!session?.user?.id) return;
-        
+
         setLoading(true);
         const response = await fetch(
           `/api/employee/attendance?employeeId=${session.user.id}`
@@ -80,6 +112,64 @@ export default function Attendance() {
 
     fetchAttendanceData();
   }, [session]);
+
+  const markAttendance = async (status) => {
+    try {
+      setMarking(true);
+      const response = await fetch("/api/attendance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: session?.user?.id,
+          status: status,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setTodayStatus(status);
+        toast({
+          title: "Success",
+          description: `Attendance marked as ${status} successfully!`,
+        });
+
+        // Refresh attendance data after marking
+        const response2 = await fetch(
+          `/api/employee/attendance?employeeId=${session.user.id}`
+        );
+        const data2 = await response2.json();
+
+        if (response2.ok) {
+          const transformedData = data2.data.map((record) => ({
+            date: record.date,
+            status: record.status || "present",
+            checkIn: record.checkIn || "-",
+            checkOut: record.checkOut || "-",
+            hours: record.hours || "-",
+          }));
+          setAttendanceData(transformedData);
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to mark attendance",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error marking attendance:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark attendance",
+        variant: "destructive",
+      });
+    } finally {
+      setMarking(false);
+    }
+  };
 
   const handleExport = () => {
     toast({
@@ -144,7 +234,9 @@ export default function Attendance() {
     (record) => record.status !== "weekend"
   ).length;
   const attendanceRate =
-    totalDays > 0 ? Math.round(((presentDays + leaveDays) / totalDays) * 100) : 0;
+    totalDays > 0
+      ? Math.round(((presentDays + leaveDays) / totalDays) * 100)
+      : 0;
 
   if (loading) {
     return (
@@ -204,6 +296,97 @@ export default function Attendance() {
         </div>
       </div>
 
+      {/* Daily Attendance Marking */}
+      <Card className="bg-white shadow-sm border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="w-5 h-5" />
+            Today's Attendance
+          </CardTitle>
+          <CardDescription>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {todayStatus ? (
+            <div className="text-center py-4">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                {todayStatus === "present" && (
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                )}
+                {todayStatus === "absent" && (
+                  <XCircle className="w-6 h-6 text-red-600" />
+                )}
+                {todayStatus === "leave" && (
+                  <Clock className="w-6 h-6 text-yellow-600" />
+                )}
+              </div>
+              <h3 className="text-lg font-semibold mb-1">Attendance Marked</h3>
+              <p className="text-gray-600 capitalize">
+                You have marked yourself as{" "}
+                <span className="font-semibold">{todayStatus}</span> today.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-1">
+                  Mark Your Attendance
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Please select your attendance status for today
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Button
+                  onClick={() => markAttendance("present")}
+                  disabled={marking}
+                  className="flex flex-col items-center justify-center h-20 bg-green-500 hover:bg-green-600 text-white"
+                >
+                  <CheckCircle className="w-6 h-6 mb-1" />
+                  <span>Present</span>
+                </Button>
+
+                <Button
+                  onClick={() => markAttendance("absent")}
+                  disabled={marking}
+                  variant="outline"
+                  className="flex flex-col items-center justify-center h-20 border-red-200 hover:bg-red-50"
+                >
+                  <XCircle className="w-6 h-6 mb-1 text-red-600" />
+                  <span className="text-red-600">Absent</span>
+                </Button>
+
+                <Button
+                  onClick={() => markAttendance("leave")}
+                  disabled={marking}
+                  variant="outline"
+                  className="flex flex-col items-center justify-center h-20 border-yellow-200 hover:bg-yellow-50"
+                >
+                  <Clock className="w-6 h-6 mb-1 text-yellow-600" />
+                  <span className="text-yellow-600">On Leave</span>
+                </Button>
+              </div>
+
+              {marking && (
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+                    <span>Marking attendance...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="bg-white shadow-sm border-0">
@@ -257,9 +440,7 @@ export default function Attendance() {
       <Card className="bg-white shadow-sm border-0">
         <CardHeader>
           <CardTitle>Attendance Records</CardTitle>
-          <CardDescription>
-            Your attendance history and records
-          </CardDescription>
+          <CardDescription>Your attendance history and records</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -294,7 +475,10 @@ export default function Attendance() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="py-3 px-4 text-center text-gray-500">
+                    <td
+                      colSpan="5"
+                      className="py-3 px-4 text-center text-gray-500"
+                    >
                       No attendance records found
                     </td>
                   </tr>

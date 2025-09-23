@@ -53,7 +53,7 @@ export default function LeaveManagement() {
     const fetchLeaveData = async () => {
       try {
         if (!session?.user?.id) return;
-        
+
         setLoading(true);
         const response = await fetch(
           `/api/employee/leave?employeeId=${session.user.id}`
@@ -95,9 +95,13 @@ export default function LeaveManagement() {
       maternity: 0,
     };
 
-    leaveRequests.forEach(request => {
+    leaveRequests.forEach((request) => {
       if (request.status === "approved") {
-        const days = Math.ceil((new Date(request.endDate) - new Date(request.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+        const days =
+          Math.ceil(
+            (new Date(request.endDate) - new Date(request.startDate)) /
+              (1000 * 60 * 60 * 24)
+          ) + 1;
         switch (request.type.toLowerCase()) {
           case "annual":
             usedLeave.annual += days;
@@ -117,25 +121,25 @@ export default function LeaveManagement() {
 
     // Update leave balance state
     setLeaveBalance({
-      annual: { 
-        total: 20, 
-        used: usedLeave.annual, 
-        remaining: Math.max(0, 20 - usedLeave.annual) 
+      annual: {
+        total: 20,
+        used: usedLeave.annual,
+        remaining: Math.max(0, 20 - usedLeave.annual),
       },
-      sick: { 
-        total: 10, 
-        used: usedLeave.sick, 
-        remaining: Math.max(0, 10 - usedLeave.sick) 
+      sick: {
+        total: 10,
+        used: usedLeave.sick,
+        remaining: Math.max(0, 10 - usedLeave.sick),
       },
-      casual: { 
-        total: 5, 
-        used: usedLeave.casual, 
-        remaining: Math.max(0, 5 - usedLeave.casual) 
+      casual: {
+        total: 5,
+        used: usedLeave.casual,
+        remaining: Math.max(0, 5 - usedLeave.casual),
       },
-      maternity: { 
-        total: 90, 
-        used: usedLeave.maternity, 
-        remaining: Math.max(0, 90 - usedLeave.maternity) 
+      maternity: {
+        total: 90,
+        used: usedLeave.maternity,
+        remaining: Math.max(0, 90 - usedLeave.maternity),
       },
     });
   };
@@ -164,9 +168,9 @@ export default function LeaveManagement() {
   };
 
   const handleInputChange = (field, value) => {
-    setNewLeaveRequest(prev => ({
+    setNewLeaveRequest((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -181,6 +185,27 @@ export default function LeaveManagement() {
         return;
       }
 
+      // Validate dates
+      if (!newLeaveRequest.startDate || !newLeaveRequest.endDate) {
+        toast({
+          title: "Error",
+          description: "Please select both start and end dates",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (
+        new Date(newLeaveRequest.startDate) > new Date(newLeaveRequest.endDate)
+      ) {
+        toast({
+          title: "Error",
+          description: "End date must be after start date",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const response = await fetch("/api/employee/leave", {
         method: "POST",
         headers: {
@@ -188,7 +213,7 @@ export default function LeaveManagement() {
         },
         body: JSON.stringify({
           employeeId: session.user.id,
-          ...newLeaveRequest
+          ...newLeaveRequest,
         }),
       });
 
@@ -199,13 +224,13 @@ export default function LeaveManagement() {
           title: "Success",
           description: "Leave request submitted successfully",
         });
-        
+
         // Add new request to the list
-        setLeaveData(prev => [...prev, data.data]);
-        
+        setLeaveData((prev) => [...prev, data.data]);
+
         // Recalculate leave balance
         calculateLeaveBalance([...leaveData, data.data]);
-        
+
         handleCloseModal();
       } else {
         toast({
@@ -394,10 +419,15 @@ export default function LeaveManagement() {
                     // Calculate number of days
                     const startDate = new Date(record.startDate);
                     const endDate = new Date(record.endDate);
-                    const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-                    
+                    const days =
+                      Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) +
+                      1;
+
                     return (
-                      <tr key={record._id} className="border-b hover:bg-gray-50">
+                      <tr
+                        key={record._id}
+                        className="border-b hover:bg-gray-50"
+                      >
                         <td className="py-3 px-4">{record.type}</td>
                         <td className="py-3 px-4">
                           {startDate.toLocaleDateString("en-US")}
@@ -416,13 +446,22 @@ export default function LeaveManagement() {
                             {record.status.charAt(0).toUpperCase() +
                               record.status.slice(1)}
                           </span>
+                          {record.status === "rejected" &&
+                            record.rejectionReason && (
+                              <div className="text-xs text-red-600 mt-1">
+                                Reason: {record.rejectionReason}
+                              </div>
+                            )}
                         </td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan="6" className="py-3 px-4 text-center text-gray-500">
+                    <td
+                      colSpan="6"
+                      className="py-3 px-4 text-center text-gray-500"
+                    >
                       No leave records found
                     </td>
                   </tr>
@@ -443,8 +482,8 @@ export default function LeaveManagement() {
                 <label className="block text-sm font-medium mb-1">
                   Leave Type
                 </label>
-                <Select 
-                  value={newLeaveRequest.type} 
+                <Select
+                  value={newLeaveRequest.type}
                   onValueChange={(value) => handleInputChange("type", value)}
                 >
                   <SelectTrigger>
@@ -462,26 +501,28 @@ export default function LeaveManagement() {
                 <label className="block text-sm font-medium mb-1">
                   Start Date
                 </label>
-                <Input 
-                  type="date" 
+                <Input
+                  type="date"
                   value={newLeaveRequest.startDate}
-                  onChange={(e) => handleInputChange("startDate", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("startDate", e.target.value)
+                  }
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">
                   End Date
                 </label>
-                <Input 
-                  type="date" 
+                <Input
+                  type="date"
                   value={newLeaveRequest.endDate}
                   onChange={(e) => handleInputChange("endDate", e.target.value)}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Reason</label>
-                <Input 
-                  type="text" 
+                <Input
+                  type="text"
                   placeholder="Reason for leave"
                   value={newLeaveRequest.reason}
                   onChange={(e) => handleInputChange("reason", e.target.value)}
