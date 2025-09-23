@@ -44,7 +44,18 @@ export default function EmployeeManagement() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [newEmployee, setNewEmployee] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    department: "Not assigned",
+    position: "Not assigned",
+    salary: "",
+    manager: "Not assigned",
+    joinDate: new Date().toISOString().split("T")[0],
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -97,10 +108,18 @@ export default function EmployeeManagement() {
   }, []);
 
   const handleAddEmployee = () => {
-    toast({
-      title: "Add Employee",
-      description: "Opening employee registration form.",
+    // Reset the new employee form
+    setNewEmployee({
+      name: "",
+      email: "",
+      phone: "",
+      department: "Not assigned",
+      position: "Not assigned",
+      salary: "",
+      manager: "Not assigned",
+      joinDate: new Date().toISOString().split("T")[0],
     });
+    setIsAddModalOpen(true);
   };
 
   const handleExport = () => {
@@ -195,8 +214,87 @@ export default function EmployeeManagement() {
     }
   };
 
+  const handleAddNewEmployee = async () => {
+    try {
+      // Validate required fields
+      if (!newEmployee.name || !newEmployee.email) {
+        toast({
+          title: "Validation Error",
+          description: "Name and email are required fields.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Format salary as number if provided
+      const salaryValue = newEmployee.salary
+        ? parseFloat(newEmployee.salary.toString().replace(/[^0-9.-]+/g, ""))
+        : 0;
+
+      const employeeData = {
+        ...newEmployee,
+        salary: salaryValue,
+      };
+
+      const response = await fetch("/api/employeeManagement", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(employeeData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Transform the new employee to match the existing structure
+        const transformedEmployee = {
+          id: data._id,
+          name: data.name,
+          department: data.department || "Not assigned",
+          position: data.position || "Not assigned",
+          email: data.email,
+          phone: data.phone || "Not provided",
+          status: data.status || "Active",
+          joinDate: data.joinDate || new Date().toISOString().split("T")[0],
+          salary: data.salary
+            ? `$${data.salary.toLocaleString()}`
+            : "Not provided",
+          manager: data.manager || "Not assigned",
+        };
+
+        setEmployees([...employees, transformedEmployee]);
+        setIsAddModalOpen(false);
+        toast({
+          title: "Employee Added",
+          description: "New employee has been added successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to add employee",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding employee:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add employee",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleEditInputChange = (field, value) => {
     setEditingEmployee((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleAddInputChange = (field, value) => {
+    setNewEmployee((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -474,6 +572,130 @@ export default function EmployeeManagement() {
         </CardContent>
       </Card>
 
+      {/* Add Employee Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add New Employee</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new employee
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="add-name">Full Name *</Label>
+                <Input
+                  id="add-name"
+                  value={newEmployee.name}
+                  onChange={(e) => handleAddInputChange("name", e.target.value)}
+                  placeholder="Enter full name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="add-email">Email Address *</Label>
+                <Input
+                  id="add-email"
+                  type="email"
+                  value={newEmployee.email}
+                  onChange={(e) =>
+                    handleAddInputChange("email", e.target.value)
+                  }
+                  placeholder="Enter email address"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="add-phone">Phone Number</Label>
+                <Input
+                  id="add-phone"
+                  value={newEmployee.phone}
+                  onChange={(e) =>
+                    handleAddInputChange("phone", e.target.value)
+                  }
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="add-manager">Manager</Label>
+                <Input
+                  id="add-manager"
+                  value={newEmployee.manager}
+                  onChange={(e) =>
+                    handleAddInputChange("manager", e.target.value)
+                  }
+                  placeholder="Enter manager name"
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="add-department">Department</Label>
+                <Select
+                  value={newEmployee.department}
+                  onValueChange={(value) =>
+                    handleAddInputChange("department", value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Not assigned">Not assigned</SelectItem>
+                    <SelectItem value="Engineering">Engineering</SelectItem>
+                    <SelectItem value="Marketing">Marketing</SelectItem>
+                    <SelectItem value="Sales">Sales</SelectItem>
+                    <SelectItem value="HR">HR</SelectItem>
+                    <SelectItem value="Finance">Finance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="add-position">Position</Label>
+                <Input
+                  id="add-position"
+                  value={newEmployee.position}
+                  onChange={(e) =>
+                    handleAddInputChange("position", e.target.value)
+                  }
+                  placeholder="Enter position"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="add-salary">Salary</Label>
+                <Input
+                  id="add-salary"
+                  value={newEmployee.salary}
+                  onChange={(e) =>
+                    handleAddInputChange("salary", e.target.value)
+                  }
+                  placeholder="Enter salary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="add-joinDate">Join Date</Label>
+                <Input
+                  id="add-joinDate"
+                  type="date"
+                  value={newEmployee.joinDate}
+                  onChange={(e) =>
+                    handleAddInputChange("joinDate", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 md:col-span-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsAddModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleAddNewEmployee}>Add Employee</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* View Employee Modal */}
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
         <DialogContent className="max-w-2xl">
@@ -626,6 +848,7 @@ export default function EmployeeManagement() {
                           {dept}
                         </SelectItem>
                       ))}
+                      <SelectItem value="Not assigned">Not assigned</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

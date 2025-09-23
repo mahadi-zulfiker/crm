@@ -1,12 +1,12 @@
 "use client";
 
-import EmployeeLoanManagement from "@/components/dashboard/Employee/LoanManagement";
+import LoanManagement from "@/components/dashboard/Employee/CompanyManagement/LoanManagement";
 import MainLayout from "@/components/dashboard/MainLayout";
 
 export default function LoanManagementPage() {
   return (
     <MainLayout>
-      <EmployeeLoanManagement />
+      <LoanManagement />
     </MainLayout>
   );
 }

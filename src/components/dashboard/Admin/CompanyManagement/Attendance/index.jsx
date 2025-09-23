@@ -26,6 +26,9 @@ import {
   Search,
   BarChart3,
   PieChart,
+  CheckCircle,
+  XCircle,
+  Clock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -35,29 +38,278 @@ export default function AttendanceManagement() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [activeTab, setActiveTab] = useState("daily");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [markingAttendance, setMarkingAttendance] = useState(false);
 
   // State for attendance data from database
   const [attendanceData, setAttendanceData] = useState([]);
   const [weeklyReportData, setWeeklyReportData] = useState([]);
   const [monthlyReportData, setMonthlyReportData] = useState([]);
+  const [employees, setEmployees] = useState([]);
 
   // Fetch attendance data from the database
   useEffect(() => {
-    const fetchAttendanceData = async () => {
+    if (activeTab === "daily") {
+      const fetchAttendanceData = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch(
+            `/api/admin/attendance?date=${selectedDate}`
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            // Transform the data to match the existing structure
+            const transformedData = data.data.map((record) => ({
+              id: record._id,
+              name: record.employeeName || "Unknown Employee",
+              department: record.employeeDepartment || "Not assigned",
+              status: record.status || "present",
+              date: record.date || selectedDate,
+              checkIn: record.checkIn || "09:00 AM",
+              checkOut: record.checkOut || "06:00 PM",
+            }));
+            setAttendanceData(transformedData);
+          } else {
+            toast({
+              title: "Error",
+              description: data.error || "Failed to fetch attendance data",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching attendance data:", error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch attendance data",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchAttendanceData();
+    }
+  }, [selectedDate, activeTab]);
+
+  // Fetch weekly report data
+  useEffect(() => {
+    if (activeTab === "weekly") {
+      const fetchWeeklyReportData = async () => {
+        try {
+          setLoading(true);
+          // Calculate start and end dates for the week
+          const currentDate = new Date(selectedDate);
+          const dayOfWeek = currentDate.getDay();
+          const startDate = new Date(currentDate);
+          startDate.setDate(currentDate.getDate() - dayOfWeek);
+          const endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 6);
+
+          const response = await fetch(
+            `/api/admin/attendance?startDate=${
+              startDate.toISOString().split("T")[0]
+            }&endDate=${endDate.toISOString().split("T")[0]}`
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            // Process data to group by day
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const dailyStats = Array(7)
+              .fill()
+              .map((_, i) => ({
+                day: days[i],
+                present: 0,
+                absent: 0,
+                leave: 0,
+              }));
+
+            data.data.forEach((record) => {
+              const recordDate = new Date(record.date);
+              const dayIndex = recordDate.getDay();
+              if (dailyStats[dayIndex]) {
+                switch (record.status) {
+                  case "present":
+                    dailyStats[dayIndex].present++;
+                    break;
+                  case "absent":
+                    dailyStats[dayIndex].absent++;
+                    break;
+                  case "leave":
+                    dailyStats[dayIndex].leave++;
+                    break;
+                }
+              }
+            });
+
+            setWeeklyReportData(dailyStats);
+          } else {
+            toast({
+              title: "Error",
+              description: data.error || "Failed to fetch weekly report data",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching weekly report data:", error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch weekly report data",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchWeeklyReportData();
+    }
+  }, [selectedDate, activeTab]);
+
+  // Fetch monthly report data
+  useEffect(() => {
+    if (activeTab === "monthly") {
+      const fetchMonthlyReportData = async () => {
+        try {
+          setLoading(true);
+          // Calculate start and end dates for the month
+          const currentDate = new Date(selectedDate);
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth();
+          const startDate = new Date(year, month, 1);
+          const endDate = new Date(year, month + 1, 0);
+
+          const response = await fetch(
+            `/api/admin/attendance?startDate=${
+              startDate.toISOString().split("T")[0]
+            }&endDate=${endDate.toISOString().split("T")[0]}`
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            // Process data to group by week
+            const weeks = [];
+            const weekCount = Math.ceil(
+              (endDate.getDate() - startDate.getDate() + 1) / 7
+            );
+
+            for (let i = 0; i < weekCount; i++) {
+              weeks.push({
+                week: `Week ${i + 1}`,
+                present: 0,
+                absent: 0,
+                leave: 0,
+              });
+            }
+
+            data.data.forEach((record) => {
+              const recordDate = new Date(record.date);
+              const weekIndex = Math.floor((recordDate.getDate() - 1) / 7);
+              if (weeks[weekIndex]) {
+                switch (record.status) {
+                  case "present":
+                    weeks[weekIndex].present++;
+                    break;
+                  case "absent":
+                    weeks[weekIndex].absent++;
+                    break;
+                  case "leave":
+                    weeks[weekIndex].leave++;
+                    break;
+                }
+              }
+            });
+
+            setMonthlyReportData(weeks);
+          } else {
+            toast({
+              title: "Error",
+              description: data.error || "Failed to fetch monthly report data",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching monthly report data:", error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch monthly report data",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchMonthlyReportData();
+    }
+  }, [selectedDate, activeTab]);
+
+  // Fetch all employees for attendance marking
+  useEffect(() => {
+    const fetchEmployees = async () => {
       try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/admin/attendance?date=${selectedDate}`
-        );
+        const response = await fetch("/api/employeeManagement");
         const data = await response.json();
 
         if (response.ok) {
-          // Transform the data to match the existing structure
-          const transformedData = data.data.map((record) => ({
+          setEmployees(data);
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to fetch employees",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch employees",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+  const markAttendanceForEmployee = async (employeeId, status) => {
+    try {
+      setMarkingAttendance(true);
+      const response = await fetch("/api/attendance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: employeeId,
+          status: status,
+          date: selectedDate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: `Attendance marked for employee as ${status}`,
+        });
+
+        // Refresh attendance data
+        const response2 = await fetch(
+          `/api/admin/attendance?date=${selectedDate}`
+        );
+        const data2 = await response2.json();
+
+        if (response2.ok) {
+          const transformedData = data2.data.map((record) => ({
             id: record._id,
             name: record.employeeName || "Unknown Employee",
             department: record.employeeDepartment || "Not assigned",
@@ -67,27 +319,25 @@ export default function AttendanceManagement() {
             checkOut: record.checkOut || "06:00 PM",
           }));
           setAttendanceData(transformedData);
-        } else {
-          toast({
-            title: "Error",
-            description: data.error || "Failed to fetch attendance data",
-            variant: "destructive",
-          });
         }
-      } catch (error) {
-        console.error("Error fetching attendance data:", error);
+      } else {
         toast({
           title: "Error",
-          description: "Failed to fetch attendance data",
+          description: data.error || "Failed to mark attendance",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchAttendanceData();
-  }, [selectedDate]);
+    } catch (error) {
+      console.error("Error marking attendance:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark attendance",
+        variant: "destructive",
+      });
+    } finally {
+      setMarkingAttendance(false);
+    }
+  };
 
   const handleExport = (reportType) => {
     toast({
@@ -157,6 +407,43 @@ export default function AttendanceManagement() {
     return colors[department] || "bg-gray-100 text-gray-800";
   };
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  // Get week range for weekly report
+  const getWeekRange = (dateString) => {
+    const currentDate = new Date(dateString);
+    const dayOfWeek = currentDate.getDay();
+    const startDate = new Date(currentDate);
+    startDate.setDate(currentDate.getDate() - dayOfWeek);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+
+    return `${startDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    })} - ${endDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })}`;
+  };
+
+  // Get month name for monthly report
+  const getMonthName = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -166,7 +453,11 @@ export default function AttendanceManagement() {
         </div>
       </div>
 
-      <Tabs defaultValue="daily" className="w-full">
+      <Tabs
+        defaultValue="daily"
+        className="w-full"
+        onValueChange={setActiveTab}
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="daily">Daily Overview</TabsTrigger>
           <TabsTrigger value="weekly">Weekly Report</TabsTrigger>
@@ -244,7 +535,7 @@ export default function AttendanceManagement() {
               <CardContent>
                 <div className="text-2xl font-bold">{dailyStats.total}</div>
                 <p className="text-xs text-gray-500">
-                  On {new Date(selectedDate).toLocaleDateString("en-US")}
+                  On {formatDate(selectedDate)}
                 </p>
               </CardContent>
             </Card>
@@ -302,18 +593,100 @@ export default function AttendanceManagement() {
             </Card>
           </div>
 
+          {/* Mark Attendance Section */}
+          <Card className="bg-white shadow-sm border-0 mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                Mark Employee Attendance
+              </CardTitle>
+              <CardDescription>
+                Manually mark attendance for employees for{" "}
+                {formatDate(selectedDate)}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="md:col-span-2">
+                  <Label htmlFor="employee-select">Select Employee</Label>
+                  <Select>
+                    <SelectTrigger id="employee-select">
+                      <SelectValue placeholder="Select an employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employees.map((employee) => (
+                        <SelectItem key={employee._id} value={employee._id}>
+                          {employee.name} -{" "}
+                          {employee.department || "Not assigned"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end gap-2">
+                  <Button
+                    className="flex-1 bg-green-500 hover:bg-green-600"
+                    onClick={() => {
+                      const selectElement =
+                        document.getElementById("employee-select");
+                      const employeeId = selectElement.value;
+                      if (employeeId)
+                        markAttendanceForEmployee(employeeId, "present");
+                    }}
+                    disabled={markingAttendance}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Present
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-red-200 hover:bg-red-50"
+                    onClick={() => {
+                      const selectElement =
+                        document.getElementById("employee-select");
+                      const employeeId = selectElement.value;
+                      if (employeeId)
+                        markAttendanceForEmployee(employeeId, "absent");
+                    }}
+                    disabled={markingAttendance}
+                  >
+                    <XCircle className="w-4 h-4 mr-2 text-red-600" />
+                    <span className="text-red-600">Absent</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-yellow-200 hover:bg-yellow-50"
+                    onClick={() => {
+                      const selectElement =
+                        document.getElementById("employee-select");
+                      const employeeId = selectElement.value;
+                      if (employeeId)
+                        markAttendanceForEmployee(employeeId, "leave");
+                    }}
+                    disabled={markingAttendance}
+                  >
+                    <Clock className="w-4 h-4 mr-2 text-yellow-600" />
+                    <span className="text-yellow-600">Leave</span>
+                  </Button>
+                </div>
+              </div>
+              {markingAttendance && (
+                <div className="mt-3 text-center">
+                  <div className="inline-flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+                    <span>Marking attendance...</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Daily Attendance Table */}
           <Card className="bg-white shadow-sm border-0">
             <CardHeader>
               <CardTitle>Daily Attendance</CardTitle>
               <CardDescription>
-                View attendance records for{" "}
-                {new Date(selectedDate).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                View attendance records for {formatDate(selectedDate)}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -372,7 +745,9 @@ export default function AttendanceManagement() {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-2xl font-bold">Weekly Absence Report</h2>
-              <p className="text-gray-600">Week of June 12-16, 2023</p>
+              <p className="text-gray-600">
+                Week of {getWeekRange(selectedDate)}
+              </p>
             </div>
             <Button
               onClick={() => handleExport("Weekly Absence")}
@@ -393,7 +768,17 @@ export default function AttendanceManagement() {
                 <UserCheck className="w-4 h-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">126</div>
+                <div className="text-2xl font-bold">
+                  {weeklyReportData.reduce((sum, day) => sum + day.present, 0) >
+                  0
+                    ? Math.round(
+                        weeklyReportData.reduce(
+                          (sum, day) => sum + day.present,
+                          0
+                        ) / 7
+                      )
+                    : 0}
+                </div>
                 <p className="text-xs text-gray-500">
                   Average attendance this week
                 </p>
@@ -408,7 +793,9 @@ export default function AttendanceManagement() {
                 <UserX className="w-4 h-4 text-red-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">37</div>
+                <div className="text-2xl font-bold">
+                  {weeklyReportData.reduce((sum, day) => sum + day.absent, 0)}
+                </div>
                 <p className="text-xs text-gray-500">Across all departments</p>
               </CardContent>
             </Card>
@@ -421,7 +808,9 @@ export default function AttendanceManagement() {
                 <UserMinus className="w-4 h-4 text-yellow-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">18</div>
+                <div className="text-2xl font-bold">
+                  {weeklyReportData.reduce((sum, day) => sum + day.leave, 0)}
+                </div>
                 <p className="text-xs text-gray-500">This week</p>
               </CardContent>
             </Card>
@@ -449,17 +838,35 @@ export default function AttendanceManagement() {
                     <div className="flex flex-col items-center w-full gap-1">
                       <div
                         className="w-full bg-green-500 rounded-t"
-                        style={{ height: `${(day.present / 150) * 100}%` }}
+                        style={{
+                          height: `${
+                            (day.present /
+                              (day.present + day.absent + day.leave + 1)) *
+                            100
+                          }%`,
+                        }}
                         title={`${day.present} present`}
                       ></div>
                       <div
                         className="w-full bg-red-500"
-                        style={{ height: `${(day.absent / 150) * 100}%` }}
+                        style={{
+                          height: `${
+                            (day.absent /
+                              (day.present + day.absent + day.leave + 1)) *
+                            100
+                          }%`,
+                        }}
                         title={`${day.absent} absent`}
                       ></div>
                       <div
                         className="w-full bg-yellow-500 rounded-b"
-                        style={{ height: `${(day.leave / 150) * 100}%` }}
+                        style={{
+                          height: `${
+                            (day.leave /
+                              (day.present + day.absent + day.leave + 1)) *
+                            100
+                          }%`,
+                        }}
                         title={`${day.leave} on leave`}
                       ></div>
                     </div>
@@ -544,7 +951,7 @@ export default function AttendanceManagement() {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-2xl font-bold">Monthly Attendance Report</h2>
-              <p className="text-gray-600">June 2023</p>
+              <p className="text-gray-600">{getMonthName(selectedDate)}</p>
             </div>
             <Button
               onClick={() => handleExport("Monthly Attendance")}
@@ -565,8 +972,12 @@ export default function AttendanceManagement() {
                 <Calendar className="w-4 h-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">22</div>
-                <p className="text-xs text-gray-500">June 2023</p>
+                <div className="text-2xl font-bold">
+                  {new Date(selectedDate).getDate()}
+                </div>
+                <p className="text-xs text-gray-500">
+                  {getMonthName(selectedDate)}
+                </p>
               </CardContent>
             </Card>
 
@@ -578,7 +989,27 @@ export default function AttendanceManagement() {
                 <UserCheck className="w-4 h-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">92%</div>
+                <div className="text-2xl font-bold">
+                  {monthlyReportData.reduce(
+                    (sum, week) =>
+                      sum + week.present + week.absent + week.leave,
+                    0
+                  ) > 0
+                    ? Math.round(
+                        (monthlyReportData.reduce(
+                          (sum, week) => sum + week.present,
+                          0
+                        ) /
+                          monthlyReportData.reduce(
+                            (sum, week) =>
+                              sum + week.present + week.absent + week.leave,
+                            0
+                          )) *
+                          100
+                      )
+                    : 0}
+                  %
+                </div>
                 <p className="text-xs text-gray-500">Across all employees</p>
               </CardContent>
             </Card>
@@ -591,7 +1022,12 @@ export default function AttendanceManagement() {
                 <UserX className="w-4 h-4 text-red-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">130</div>
+                <div className="text-2xl font-bold">
+                  {monthlyReportData.reduce(
+                    (sum, week) => sum + week.absent,
+                    0
+                  )}
+                </div>
                 <p className="text-xs text-gray-500">This month</p>
               </CardContent>
             </Card>
@@ -604,7 +1040,9 @@ export default function AttendanceManagement() {
                 <UserMinus className="w-4 h-4 text-yellow-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">93</div>
+                <div className="text-2xl font-bold">
+                  {monthlyReportData.reduce((sum, week) => sum + week.leave, 0)}
+                </div>
                 <p className="text-xs text-gray-500">This month</p>
               </CardContent>
             </Card>
@@ -634,17 +1072,35 @@ export default function AttendanceManagement() {
                     <div className="flex flex-col items-center w-full gap-1">
                       <div
                         className="w-full bg-green-500 rounded-t"
-                        style={{ height: `${(week.present / 700) * 100}%` }}
+                        style={{
+                          height: `${
+                            (week.present /
+                              (week.present + week.absent + week.leave + 1)) *
+                            100
+                          }%`,
+                        }}
                         title={`${week.present} present`}
                       ></div>
                       <div
                         className="w-full bg-red-500"
-                        style={{ height: `${(week.absent / 700) * 100}%` }}
+                        style={{
+                          height: `${
+                            (week.absent /
+                              (week.present + week.absent + week.leave + 1)) *
+                            100
+                          }%`,
+                        }}
                         title={`${week.absent} absent`}
                       ></div>
                       <div
                         className="w-full bg-yellow-500 rounded-b"
-                        style={{ height: `${(week.leave / 700) * 100}%` }}
+                        style={{
+                          height: `${
+                            (week.leave /
+                              (week.present + week.absent + week.leave + 1)) *
+                            100
+                          }%`,
+                        }}
                         title={`${week.leave} on leave`}
                       ></div>
                     </div>

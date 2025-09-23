@@ -19,6 +19,77 @@ export async function GET() {
   }
 }
 
+// ✅ POST: Add a new company employee
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const {
+      name,
+      email,
+      phone,
+      department,
+      position,
+      salary,
+      manager,
+      joinDate,
+    } = body;
+
+    // Validate required fields
+    if (!name || !email) {
+      return NextResponse.json(
+        { error: "Name and email are required" },
+        { status: 400 }
+      );
+    }
+
+    const db = await connectMongoDB();
+    const companyEmployeesCollection = db.collection("CompanyEmployees");
+
+    // Check if employee with this email already exists
+    const existingEmployee = await companyEmployeesCollection.findOne({
+      email,
+    });
+    if (existingEmployee) {
+      return NextResponse.json(
+        { error: "Employee with this email already exists" },
+        { status: 400 }
+      );
+    }
+
+    // Create new employee object
+    const newEmployee = {
+      name,
+      email,
+      phone: phone || "",
+      department: department || "Not assigned",
+      position: position || "Not assigned",
+      salary: salary || 0,
+      manager: manager || "Not assigned",
+      joinDate: joinDate || new Date().toISOString().split("T")[0],
+      status: "Active",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Insert the new employee
+    const result = await companyEmployeesCollection.insertOne(newEmployee);
+
+    // Return the created employee with its ID
+    const createdEmployee = {
+      ...newEmployee,
+      _id: result.insertedId,
+    };
+
+    return NextResponse.json(createdEmployee, { status: 201 });
+  } catch (error) {
+    console.error("Error adding employee:", error);
+    return NextResponse.json(
+      { error: "Failed to add employee" },
+      { status: 500 }
+    );
+  }
+}
+
 // ✅ PUT: Update company employee performance or role
 export async function PUT(req) {
   try {
