@@ -39,7 +39,7 @@ export async function GET(req) {
 export async function PUT(req) {
   try {
     const body = await req.json();
-    const { id, status } = body;
+    const { id, status, rejectionReason } = body;
 
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -58,13 +58,21 @@ export async function PUT(req) {
     const db = await connectMongoDB();
     const leaveCollection = db.collection("leaveRequests");
 
+    // Prepare update object
+    const updateData = {
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Add rejection reason if status is rejected
+    if (status === "rejected" && rejectionReason) {
+      updateData.rejectionReason = rejectionReason;
+    }
+
     const result = await leaveCollection.updateOne(
       { _id: new ObjectId(id) },
       {
-        $set: {
-          status,
-          updatedAt: new Date().toISOString(),
-        },
+        $set: updateData,
       }
     );
 
