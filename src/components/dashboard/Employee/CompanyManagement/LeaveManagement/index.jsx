@@ -24,11 +24,10 @@ import {
   UserX,
   Clock,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { useSession } from "next-auth/react";
 
 export default function LeaveManagement() {
-  const { toast } = useToast();
   const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -65,18 +64,20 @@ export default function LeaveManagement() {
           // Calculate leave balance based on fetched data
           calculateLeaveBalance(data.data);
         } else {
-          toast({
+          Swal.fire({
             title: "Error",
-            description: data.error || "Failed to fetch leave data",
-            variant: "destructive",
+            text: data.error || "Failed to fetch leave data",
+            icon: "error",
+            confirmButtonText: "OK",
           });
         }
       } catch (error) {
         console.error("Error fetching leave data:", error);
-        toast({
+        Swal.fire({
           title: "Error",
-          description: "Failed to fetch leave data",
-          variant: "destructive",
+          text: "Failed to fetch leave data",
+          icon: "error",
+          confirmButtonText: "OK",
         });
       } finally {
         setLoading(false);
@@ -145,10 +146,11 @@ export default function LeaveManagement() {
   };
 
   const handleExport = () => {
-    toast({
+    Swal.fire({
       title: "Leave Export Started",
-      description:
-        "Your leave report export has started. You'll receive a notification when it's ready.",
+      text: "Your leave report export has started. You'll receive a notification when it's ready.",
+      icon: "info",
+      confirmButtonText: "OK",
     });
   };
 
@@ -177,20 +179,22 @@ export default function LeaveManagement() {
   const handleSubmitLeaveRequest = async () => {
     try {
       if (!session?.user?.id) {
-        toast({
+        Swal.fire({
           title: "Error",
-          description: "User not authenticated",
-          variant: "destructive",
+          text: "User not authenticated",
+          icon: "error",
+          confirmButtonText: "OK",
         });
         return;
       }
 
       // Validate dates
       if (!newLeaveRequest.startDate || !newLeaveRequest.endDate) {
-        toast({
+        Swal.fire({
           title: "Error",
-          description: "Please select both start and end dates",
-          variant: "destructive",
+          text: "Please select both start and end dates",
+          icon: "error",
+          confirmButtonText: "OK",
         });
         return;
       }
@@ -198,10 +202,11 @@ export default function LeaveManagement() {
       if (
         new Date(newLeaveRequest.startDate) > new Date(newLeaveRequest.endDate)
       ) {
-        toast({
+        Swal.fire({
           title: "Error",
-          description: "End date must be after start date",
-          variant: "destructive",
+          text: "End date must be after start date",
+          icon: "error",
+          confirmButtonText: "OK",
         });
         return;
       }
@@ -213,6 +218,8 @@ export default function LeaveManagement() {
         },
         body: JSON.stringify({
           employeeId: session.user.id,
+          employeeName: session.user.name,
+          employeeEmail: session.user.email,
           ...newLeaveRequest,
         }),
       });
@@ -220,9 +227,11 @@ export default function LeaveManagement() {
       const data = await response.json();
 
       if (response.ok) {
-        toast({
+        Swal.fire({
           title: "Success",
-          description: "Leave request submitted successfully",
+          text: "Leave request submitted successfully",
+          icon: "success",
+          confirmButtonText: "OK",
         });
 
         // Add new request to the list
@@ -233,18 +242,20 @@ export default function LeaveManagement() {
 
         handleCloseModal();
       } else {
-        toast({
+        Swal.fire({
           title: "Error",
-          description: data.error || "Failed to submit leave request",
-          variant: "destructive",
+          text: data.error || "Failed to submit leave request",
+          icon: "error",
+          confirmButtonText: "OK",
         });
       }
     } catch (error) {
       console.error("Error submitting leave request:", error);
-      toast({
+      Swal.fire({
         title: "Error",
-        description: "Failed to submit leave request",
-        variant: "destructive",
+        text: "Failed to submit leave request",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
   };

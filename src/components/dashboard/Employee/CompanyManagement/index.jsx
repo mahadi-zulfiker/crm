@@ -223,7 +223,9 @@ export default function CompanyManagement() {
               </CardHeader>
               <CardContent>
                 <Link href={section.href}>
-                  <Button className="w-full">Access {section.title}</Button>
+                  <Button variant="teal" className="w-full">
+                    Access {section.title}
+                  </Button>
                 </Link>
               </CardContent>
             </Card>

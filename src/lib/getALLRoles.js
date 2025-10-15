@@ -207,10 +207,12 @@ export default function getALLRoles() {
       {
         title: "Clients",
         icon: Building2,
+        href: "/dashboard/vendor/clients",
       },
       {
         title: "Revenue",
         icon: DollarSign,
+        href: "/dashboard/vendor/revenue",
       },
       {
         title: "Home",
@@ -220,6 +222,7 @@ export default function getALLRoles() {
       {
         title: "Settings",
         icon: Settings,
+        href: "/dashboard/vendor/settings",
       },
     ],
     admin: [
