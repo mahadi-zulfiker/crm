@@ -44,7 +44,16 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { employeeId, type, startDate, endDate, reason } = body;
+    const {
+      employeeId,
+      type,
+      startDate,
+      endDate,
+      reason,
+      employeeName,
+      employeeEmail,
+    } = body;
+    console.log(employeeName, employeeEmail);
 
     if (!employeeId || !type || !startDate || !endDate || !reason) {
       return NextResponse.json(
@@ -54,10 +63,25 @@ export async function POST(req) {
     }
 
     const db = await connectMongoDB();
+
+    // Get employee name from CompanyEmployees or users collection
+    let employee = await db
+      .collection("CompanyEmployees")
+      .findOne({ _id: new ObjectId(employeeId) });
+
+    // If not found, try in users collection (for backward compatibility)
+    if (!employee) {
+      employee = await db
+        .collection("users")
+        .findOne({ _id: new ObjectId(employeeId) });
+    }
+
     const leaveCollection = db.collection("leaveRequests");
 
     const newLeaveRequest = {
       employeeId,
+      employeeName, // Store employee name for easier display
+      employeeEmail, // Store employee email for reference
       type,
       startDate,
       endDate,

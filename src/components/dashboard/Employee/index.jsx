@@ -45,15 +45,17 @@ import { useEffect, useState } from "react";
 
 function UserDashboard() {
   const { data: session } = useSession();
-  const [stats, setStats] = useState({
-    applicationsSent: 0,
-    profileViews: 0,
-    savedJobs: 0,
-    interviewInvites: 0,
+  const [dashboardData, setDashboardData] = useState({
+    stats: {
+      applicationsSent: 0,
+      profileViews: 0,
+      savedJobs: 0,
+      interviewInvites: 0,
+    },
+    recentJobs: [],
+    skillsData: [],
+    applicationTimelineData: [],
   });
-  const [recentJobs, setRecentJobs] = useState([]);
-  const [skillsData, setSkillsData] = useState([]);
-  const [applicationTimelineData, setApplicationTimelineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -63,46 +65,19 @@ function UserDashboard() {
 
       try {
         setLoading(true);
+        setError(null);
 
-        // Fetch employee profile to get skills and other data
-        const profileRes = await fetch(
-          `/api/employeeProfile?email=${session.user.email}`
+        // Fetch all dashboard data in a single request
+        const response = await fetch(
+          `/api/employee/dashboard?email=${session.user.email}`
         );
-        const profileData = await profileRes.json();
-
-        // Fetch applications data
-        const applicationsRes = await fetch(
-          `/api/employeeApplications?email=${session.user.email}`
-        );
-        const applicationsData = await applicationsRes.json();
-
-        // Fetch jobs data
-        const jobsRes = await fetch("/api/jobs");
-        const jobsData = await jobsRes.json();
-
-        // Process stats
-        const applicationsSent = applicationsData.allApplications?.length || 0;
-        const savedJobs =
-          jobsData.filter((job) => job.savedBy?.includes(session.user.email))
-            .length || 0;
-
-        // Updated to include interview-scheduled applications
-        setStats({
-          applicationsSent,
-          profileViews: profileData.profileViews || 0,
-          savedJobs,
-          interviewInvites:
-            applicationsData.interviewScheduled?.length ||
-            applicationsData.allApplications?.filter(
-              (app) => app.status === "interview-scheduled"
-            ).length ||
-            0,
-        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || "Failed to fetch dashboard data");
+        }
 
         // Process recent jobs
-        const recentApplications =
-          applicationsData.allApplications?.slice(0, 3) || [];
-        const processedJobs = recentApplications.map((app) => ({
+        const processedJobs = result.data.recentJobs.map((app) => ({
           id: app.jobId || app._id, // Use jobId if available, otherwise use _id
           title: app.position || "Unknown Position",
           company: app.company || "Unknown Company",
@@ -114,11 +89,9 @@ function UserDashboard() {
           avatar: "/placeholder.svg?height=40&width=40",
           interviewSchedule: app.interviewSchedule || null, // Add interview schedule data
         }));
-        setRecentJobs(processedJobs);
 
         // Process skills data
-        const skills = profileData.skills?.slice(0, 4) || [];
-        const processedSkills = skills.map((skill, index) => ({
+        const processedSkills = result.data.skills.map((skill, index) => ({
           name: skill.name || skill.skillName || `Skill ${index + 1}`,
           percentage: skill.level || skill.proficiency || 50,
           color: [
@@ -128,16 +101,17 @@ function UserDashboard() {
             "bg-purple-500",
           ][index % 4],
         }));
-        setSkillsData(processedSkills);
 
-        // Process application timeline data based on actual applications
-        const timelineData = processTimelineData(
-          applicationsData.allApplications || []
-        );
-        setApplicationTimelineData(timelineData);
+        // Update all dashboard data at once
+        setDashboardData({
+          stats: result.data.stats,
+          recentJobs: processedJobs,
+          skillsData: processedSkills,
+          applicationTimelineData: result.data.timelineData,
+        });
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
-        setError("Failed to load dashboard data");
+        setError(err.message || "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
@@ -224,28 +198,28 @@ function UserDashboard() {
   const statsData = [
     {
       title: "Applications Sent",
-      value: stats.applicationsSent,
+      value: dashboardData.stats.applicationsSent,
       icon: FileText,
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600",
     },
     {
       title: "Profile Views",
-      value: stats.profileViews,
+      value: dashboardData.stats.profileViews,
       icon: Eye,
       iconBg: "bg-green-100",
       iconColor: "text-green-600",
     },
     {
       title: "Saved Jobs",
-      value: stats.savedJobs,
+      value: dashboardData.stats.savedJobs,
       icon: Heart,
       iconBg: "bg-purple-100",
       iconColor: "text-purple-600",
     },
     {
       title: "Interview Invites",
-      value: stats.interviewInvites,
+      value: dashboardData.stats.interviewInvites,
       icon: Briefcase,
       iconBg: "bg-red-100",
       iconColor: "text-red-600",
@@ -294,8 +268,8 @@ function UserDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentJobs.length > 0 ? (
-                  recentJobs.map((job, index) => (
+                {dashboardData.recentJobs.length > 0 ? (
+                  dashboardData.recentJobs.map((job, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
@@ -423,8 +397,8 @@ function UserDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {skillsData.length > 0 ? (
-                  skillsData.map((skill, index) => (
+                {dashboardData.skillsData.length > 0 ? (
+                  dashboardData.skillsData.map((skill, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="font-medium text-gray-700">
@@ -434,11 +408,17 @@ function UserDashboard() {
                           {skill.percentage}%
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-200 rounded-full h-3">
                         <div
-                          className={`h-2 rounded-full ${skill.color}`}
+                          className={`h-3 rounded-full ${skill.color} flex items-center justify-end pr-2`}
                           style={{ width: `${skill.percentage}%` }}
-                        ></div>
+                        >
+                          {skill.percentage > 20 && (
+                            <span className="text-xs text-white font-bold">
+                              {skill.percentage}%
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))
@@ -447,6 +427,39 @@ function UserDashboard() {
                     No skills data available
                   </div>
                 )}
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-gray-600">Overall Progress</span>
+                  <span className="font-medium">
+                    {dashboardData.skillsData.length > 0
+                      ? Math.round(
+                          dashboardData.skillsData.reduce(
+                            (sum, skill) => sum + skill.percentage,
+                            0
+                          ) / dashboardData.skillsData.length
+                        )
+                      : 0}
+                    %
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
+                    style={{
+                      width: `${
+                        dashboardData.skillsData.length > 0
+                          ? Math.round(
+                              dashboardData.skillsData.reduce(
+                                (sum, skill) => sum + skill.percentage,
+                                0
+                              ) / dashboardData.skillsData.length
+                            )
+                          : 0
+                      }%`,
+                    }}
+                  ></div>
+                </div>
               </div>
               <Button
                 variant="link"
@@ -481,11 +494,33 @@ function UserDashboard() {
               </div>
             </CardHeader>
             <CardContent>
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex gap-4">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>
+                    <span className="text-sm">Applications</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
+                    <span className="text-sm">Interviews</span>
+                  </div>
+                </div>
+                <Select defaultValue="monthly">
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <ChartContainer
                 config={{
                   applications: {
                     label: "Applications",
-                    color: "hsl(var(--chart-1))",
+                    color: "hsl(var(--chart-1)",
                   },
                   interviews: {
                     label: "Interviews",
@@ -495,7 +530,7 @@ function UserDashboard() {
                 className="h-[250px] w-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={applicationTimelineData}>
+                  <LineChart data={dashboardData.applicationTimelineData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -506,16 +541,25 @@ function UserDashboard() {
                       dataKey="applications"
                       stroke="var(--color-applications)"
                       name="Applications"
+                      strokeWidth={2}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
                     />
                     <Line
                       type="monotone"
                       dataKey="interviews"
                       stroke="var(--color-interviews)"
                       name="Interviews"
+                      strokeWidth={2}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              <div className="mt-4 text-center text-sm text-gray-500">
+                Track your application and interview progress over time
+              </div>
             </CardContent>
           </Card>
         </div>

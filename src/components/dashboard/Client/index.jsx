@@ -53,116 +53,44 @@ export default function ClientDashboard() {
       setLoading(true);
       setError("");
 
-      // Stream posted jobs
-      const postedJobsStream = await fetch(
-        `/api/postedJobs?email=${session.user.email}`
+      // Fetch all dashboard data in a single request
+      const response = await fetch(
+        `/api/client/dashboard?email=${session.user.email}`
       );
-      const postedJobs = await postedJobsStream.json();
-      const jobsArray = Array.isArray(postedJobs) ? postedJobs : [];
-
-      // Update stats progressively
-      const activeJobs = jobsArray.filter(
-        (job) => job.status === "Active"
-      ).length;
-
-      const candidatesArray = jobsArray;
-      const totalApplications = candidatesArray.length;
-      const hiredCandidates = candidatesArray.filter(
-        (candidate) => candidate.status === "hired"
-      );
-      const shortlistedCandidates = candidatesArray.filter(
-        (candidate) =>
-          candidate.status === "shortlisted" || candidate.status === "hired"
-      );
-      const completedCandidates = candidatesArray.filter(
-        (candidate) =>
-          candidate.taskStatus === "completed" ||
-          candidate.taskStatus === "Completed"
-      );
-      setLoading(false);
-
-      // Stream payment history
-      const paymentHistoryStream = await fetch(`/api/paymentHistoryClient`);
-      const paymentHistoryData = await paymentHistoryStream.json();
-      const payments = Array.isArray(paymentHistoryData)
-        ? paymentHistoryData
-        : [];
-      const totalSpent = payments.reduce(
-        (sum, payment) => sum + (payment.payment || payment.amount || 0),
-        0
-      );
-
-      const averageRating =
-        hiredCandidates.length > 0
-          ? (
-              hiredCandidates.reduce(
-                (sum, candidate) => sum + (candidate.rating || 4.5),
-                0
-              ) / hiredCandidates.length
-            ).toFixed(1)
-          : 0;
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to fetch dashboard data");
+      }
 
       // Update stats
       setStreamedData((prev) => ({
         ...prev,
-        stats: {
-          activeJobs,
-          totalApplications,
-          shortlistedCandidates: shortlistedCandidates.length,
-          totalSpent,
-          completedJobs: completedCandidates.length,
-          hiredCandidates: hiredCandidates.length,
-          averageRating: Number.parseFloat(averageRating),
-        },
+        stats: result.data.stats,
       }));
 
       // Update recent jobs
-      const recentJobs = jobsArray.slice(0, 5).map((job) => ({
-        id: job._id,
-        title: job.title || "Untitled Job",
-        location: job.location || "Remote",
-        type: job.jobType || "Full-time",
-        applications: candidatesArray.filter(
-          (candidate) => candidate.jobId === job._id
-        ).length,
-        status: job.status || "Draft",
-        postedDate: job.createdAt || job.postedDate,
-        salary: job.salary || "Not specified",
+      setStreamedData((prev) => ({
+        ...prev,
+        recentJobs: result.data.recentJobs,
       }));
-      setStreamedData((prev) => ({ ...prev, recentJobs }));
 
       // Update recent applications
-      const recentApplications = candidatesArray
-        .slice(0, 5)
-        .map((candidate) => ({
-          id: candidate._id,
-          candidateName: candidate.fullName || "Unknown Candidate",
-          jobTitle: candidate.position || "Unknown Position",
-          appliedDate: candidate.appliedAt,
-          status: candidate.status || "applied",
-          experience: candidate.experience || "N/A",
-          avatar:
-            candidate.profileImage || "/placeholder.svg?height=40&width=40",
-        }));
-      setStreamedData((prev) => ({ ...prev, recentApplications }));
+      setStreamedData((prev) => ({
+        ...prev,
+        recentApplications: result.data.recentApplications,
+      }));
 
       // Final data update
       setDashboardData({
-        stats: {
-          activeJobs,
-          totalApplications,
-          shortlistedCandidates: shortlistedCandidates.length,
-          totalSpent,
-          completedJobs: completedCandidates.length,
-          hiredCandidates: hiredCandidates.length,
-          averageRating: Number.parseFloat(averageRating),
-        },
-        recentJobs,
-        recentApplications,
+        stats: result.data.stats,
+        recentJobs: result.data.recentJobs,
+        recentApplications: result.data.recentApplications,
       });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
-      setError("Failed to load dashboard data. Please try again.");
+      setError(
+        error.message || "Failed to load dashboard data. Please try again."
+      );
     } finally {
       setLoading(false);
     }

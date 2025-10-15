@@ -12,21 +12,26 @@ function Admin() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEmployeeStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const response = await fetch("/api/employeeStats");
-        const data = await response.json();
+        const response = await fetch("/api/admin/dashboard");
+        const result = await response.json();
         if (response.ok) {
-          setStats(data);
+          setStats(result.data);
+        } else {
+          console.error(
+            "Error fetching dashboard data:",
+            result.error || "Unknown error"
+          );
         }
       } catch (error) {
-        console.error("Error fetching employee stats:", error);
+        console.error("Network error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEmployeeStats();
+    fetchDashboardData();
   }, []);
 
   const statCards = [
@@ -77,11 +82,19 @@ function Admin() {
                       {stat.title}
                     </p>
                     <p className="text-3xl font-bold text-gray-900">
-                      {loading ? "..." : stat.value}
+                      {loading ? (
+                        <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+                      ) : (
+                        stat.value
+                      )}
                     </p>
                   </div>
                   <div className={`p-3 rounded-full ${stat.iconBg}`}>
-                    <IconComponent className={`w-6 h-6 ${stat.iconColor}`} />
+                    {loading ? (
+                      <div className="w-6 h-6 bg-gray-200 rounded-full animate-pulse"></div>
+                    ) : (
+                      <IconComponent className={`w-6 h-6 ${stat.iconColor}`} />
+                    )}
                   </div>
                 </div>
               </CardContent>

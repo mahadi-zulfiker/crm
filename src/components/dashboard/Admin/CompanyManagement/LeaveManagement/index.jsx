@@ -25,7 +25,7 @@ import {
   Download,
   Search,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import {
   Dialog,
   DialogContent,
@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/dialog";
 
 export default function LeaveManagement() {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -61,6 +60,7 @@ export default function LeaveManagement() {
             id: request._id,
             employeeId: request.employeeId,
             employee: request.employeeName || "Unknown Employee",
+            employeeEmail: request.employeeEmail || "Unknown Email",
             department: request.department || "Not assigned",
             type: request.type || "Leave",
             startDate: request.startDate || "",
@@ -83,18 +83,20 @@ export default function LeaveManagement() {
           // Fetch employee details for each leave request
           fetchEmployeeDetails(transformedData);
         } else {
-          toast({
+          Swal.fire({
             title: "Error",
-            description: data.error || "Failed to fetch leave requests",
-            variant: "destructive",
+            text: data.error || "Failed to fetch leave requests",
+            icon: "error",
+            confirmButtonText: "OK",
           });
         }
       } catch (error) {
         console.error("Error fetching leave requests:", error);
-        toast({
+        Swal.fire({
           title: "Error",
-          description: "Failed to fetch leave requests",
-          variant: "destructive",
+          text: "Failed to fetch leave requests",
+          icon: "error",
+          confirmButtonText: "OK",
         });
       } finally {
         setLoading(false);
@@ -122,6 +124,34 @@ export default function LeaveManagement() {
               employeeMap[emp._id] = emp;
             });
             setEmployees(employeeMap);
+
+            // Update leave data with actual employee names (fallback for older requests)
+            setLeaveData((prevData) =>
+              prevData.map((leave) => {
+                // If employeeName wasn't stored in the request, get it from employee data
+                if (
+                  (leave.employee === "Unknown Employee" || !leave.employee) &&
+                  leave.employeeId
+                ) {
+                  const employee = employeeMap[leave.employeeId];
+                  if (employee) {
+                    return {
+                      ...leave,
+                      employee:
+                        employee.name ||
+                        `${employee.firstName} ${employee.lastName}` ||
+                        "Unknown Employee",
+                      employeeEmail:
+                        employee.email ||
+                        leave.employeeEmail ||
+                        "Unknown Email",
+                      department: employee.department || leave.department,
+                    };
+                  }
+                }
+                return leave;
+              })
+            );
           }
         }
       } catch (error) {
@@ -153,32 +183,49 @@ export default function LeaveManagement() {
             leave.id === id ? { ...leave, status: "Approved" } : leave
           )
         );
-        toast({
+        Swal.fire({
           title: "Leave Approved",
-          description: "Leave request has been approved successfully.",
+          text: "Leave request has been approved successfully.",
+          icon: "success",
+          confirmButtonText: "OK",
         });
       } else {
-        toast({
+        Swal.fire({
           title: "Error",
-          description: data.error || "Failed to approve leave request",
-          variant: "destructive",
+          text: data.error || "Failed to approve leave request",
+          icon: "error",
+          confirmButtonText: "OK",
         });
       }
     } catch (error) {
       console.error("Error approving leave request:", error);
-      toast({
+      Swal.fire({
         title: "Error",
-        description: "Failed to approve leave request",
-        variant: "destructive",
+        text: "Failed to approve leave request",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
   };
 
   const handleReject = async (id) => {
     // Show a prompt for rejection reason
-    const rejectionReason = prompt("Please provide a reason for rejection:");
+    const { value: rejectionReason } = await Swal.fire({
+      title: "Reject Leave Request",
+      text: "Please provide a reason for rejection:",
+      input: "text",
+      inputPlaceholder: "Enter rejection reason",
+      showCancelButton: true,
+      confirmButtonText: "Reject",
+      cancelButtonText: "Cancel",
+      inputValidator: (value) => {
+        if (!value) {
+          return "You need to provide a reason for rejection!";
+        }
+      },
+    });
 
-    if (rejectionReason === null) return; // User cancelled
+    if (rejectionReason === undefined) return; // User cancelled
 
     try {
       const response = await fetch("/api/admin/leaveManagement", {
@@ -203,31 +250,37 @@ export default function LeaveManagement() {
               : leave
           )
         );
-        toast({
+        Swal.fire({
           title: "Leave Rejected",
-          description: "Leave request has been rejected.",
+          text: "Leave request has been rejected.",
+          icon: "success",
+          confirmButtonText: "OK",
         });
       } else {
-        toast({
+        Swal.fire({
           title: "Error",
-          description: data.error || "Failed to reject leave request",
-          variant: "destructive",
+          text: data.error || "Failed to reject leave request",
+          icon: "error",
+          confirmButtonText: "OK",
         });
       }
     } catch (error) {
       console.error("Error rejecting leave request:", error);
-      toast({
+      Swal.fire({
         title: "Error",
-        description: "Failed to reject leave request",
-        variant: "destructive",
+        text: "Failed to reject leave request",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
   };
 
   const handleExport = () => {
-    toast({
+    Swal.fire({
       title: "Export Started",
-      description: "Leave management report export has started.",
+      text: "Leave management report export has started.",
+      icon: "info",
+      confirmButtonText: "OK",
     });
   };
 
@@ -243,6 +296,7 @@ export default function LeaveManagement() {
   const filteredLeaveData = leaveData.filter((leave) => {
     const matchesSearch =
       leave.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      leave.employeeEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
       leave.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
       leave.type.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -413,6 +467,7 @@ export default function LeaveManagement() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4">Employee</th>
+                  <th className="text-left py-3 px-4">Email</th>
                   <th className="text-left py-3 px-4">Department</th>
                   <th className="text-left py-3 px-4">Leave Type</th>
                   <th className="text-left py-3 px-4">Dates</th>
@@ -427,6 +482,7 @@ export default function LeaveManagement() {
                     <td className="py-3 px-4 font-medium">
                       {request.employee}
                     </td>
+                    <td className="py-3 px-4">{request.employeeEmail}</td>
                     <td className="py-3 px-4">{request.department}</td>
                     <td className="py-3 px-4">{request.type}</td>
                     <td className="py-3 px-4">
@@ -496,6 +552,10 @@ export default function LeaveManagement() {
                       Employee
                     </h3>
                     <p className="font-medium">{selectedLeave.employee}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">Email</h3>
+                    <p className="font-medium">{selectedLeave.employeeEmail}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">
