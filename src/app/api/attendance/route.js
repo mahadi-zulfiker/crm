@@ -72,6 +72,7 @@ export async function GET(req) {
 
     const db = await connectMongoDB();
     const attendanceCollection = db.collection("attendance");
+    const leaveCollection = db.collection("leaveRequests");
 
     let query = {};
 
@@ -87,10 +88,50 @@ export async function GET(req) {
 
     const attendanceRecords = await attendanceCollection.find(query).toArray();
 
+    // Enrich with leave information
+    let enrichedRecords = attendanceRecords;
+    if (employeeId) {
+      // Get approved leave requests for this employee
+      let leaveQuery = { employeeId, status: "approved" };
+
+      // If we have a date range, filter leaves by that range
+      if (date) {
+        leaveQuery.startDate = { $lte: date };
+        leaveQuery.endDate = { $gte: date };
+      } else if (startDate && endDate) {
+        leaveQuery.$or = [
+          { startDate: { $lte: endDate }, endDate: { $gte: startDate } },
+          { startDate: { $gte: startDate, $lte: endDate } },
+          { endDate: { $gte: startDate, $lte: endDate } },
+        ];
+      }
+
+      const leaveRequests = await leaveCollection.find(leaveQuery).toArray();
+
+      // Add leave information to attendance records
+      enrichedRecords = attendanceRecords.map((record) => {
+        // Check if this date falls within any approved leave period
+        const isOnLeave = leaveRequests.some((leave) => {
+          return record.date >= leave.startDate && record.date <= leave.endDate;
+        });
+
+        return {
+          ...record,
+          isOnLeave: isOnLeave,
+          leaveDetails: isOnLeave
+            ? leaveRequests.find(
+                (leave) =>
+                  record.date >= leave.startDate && record.date <= leave.endDate
+              )
+            : null,
+        };
+      });
+    }
+
     return NextResponse.json(
       {
         message: "Attendance records fetched successfully",
-        data: attendanceRecords,
+        data: enrichedRecords,
       },
       { status: 200 }
     );

@@ -1,45 +1,83 @@
-import React, { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Calendar,
-  Download,
-  Search,
-  UserCheck,
-  UserX,
-  Clock,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useSession } from "next-auth/react";
+"use client"
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, CheckCircle, XCircle, Clock, Calendar, User, Clock4 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { useSession } from "next-auth/react"
 
 export default function Attendance() {
-  const { toast } = useToast();
-  const { data: session } = useSession();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterMonth, setFilterMonth] = useState("all");
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [todayStatus, setTodayStatus] = useState(null);
-  const [marking, setMarking] = useState(false);
+  const { toast } = useToast()
+  const { data: session } = useSession()
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
+  const [attendanceData, setAttendanceData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [todayStatus, setTodayStatus] = useState(null)
+  const [marking, setMarking] = useState(false)
+  const [employeeData, setEmployeeData] = useState({
+    name: "",
+    joinDate: "",
+    confirmationDate: "",
+    workStartTime: "08:00 AM",
+    workEndTime: "05:00 PM"
+  })
+
+  // Fetch employee profile data
+  useEffect(() => {
+    const fetchEmployeeProfile = async () => {
+      try {
+        if (!session?.user?.email) return;
+
+        const response = await fetch(`/api/employee/profile?email=${session.user.email}`);
+        const data = await response.json();
+
+        if (response.ok && data.data) {
+          setEmployeeData({
+            name: data.data.name,
+            joinDate: data.data.joinDate,
+            confirmationDate: data.data.confirmationDate,
+            workStartTime: data.data.workStartTime,
+            workEndTime: data.data.workEndTime
+          });
+        } else {
+          console.error("Error fetching employee profile:", data.error);
+          // Set default values if fetch fails
+          setEmployeeData({
+            name: session.user.name,
+            joinDate: "2025-10-05",
+            confirmationDate: "2026-01-05",
+            workStartTime: "08:00 AM",
+            workEndTime: "05:00 PM"
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching employee profile:", error);
+        // Set default values if fetch fails
+        setEmployeeData({
+          name: session.user.name,
+          joinDate: "2025-10-05",
+          confirmationDate: "2026-01-05",
+          workStartTime: "08:00 AM",
+          workEndTime: "05:00 PM"
+        });
+      }
+    };
+
+    fetchEmployeeProfile();
+  }, [session]);
+
+  // Calculate length of service
+  const calculateLengthOfService = (joiningDate) => {
+    if (!joiningDate) return 0;
+    const joinDate = new Date(joiningDate);
+    const today = new Date();
+    const diffTime = Math.abs(today - joinDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  }
 
   // Fetch today's attendance status
   useEffect(() => {
@@ -77,7 +115,7 @@ export default function Attendance() {
 
         setLoading(true);
         const response = await fetch(
-          `/api/employee/attendance?employeeId=${session.user.id}`
+          `/api/employee/attendance?employeeId=${session.user.id}&month=${currentMonth + 1}&year=${currentYear}`
         );
         const data = await response.json();
 
@@ -89,6 +127,8 @@ export default function Attendance() {
             checkIn: record.checkIn || "-",
             checkOut: record.checkOut || "-",
             hours: record.hours || "-",
+            isOnLeave: record.isOnLeave || false,
+            leaveDetails: record.leaveDetails || null
           }));
           setAttendanceData(transformedData);
         } else {
@@ -111,7 +151,7 @@ export default function Attendance() {
     };
 
     fetchAttendanceData();
-  }, [session]);
+  }, [session, currentMonth, currentYear]);
 
   const markAttendance = async (status) => {
     try {
@@ -138,7 +178,7 @@ export default function Attendance() {
 
         // Refresh attendance data after marking
         const response2 = await fetch(
-          `/api/employee/attendance?employeeId=${session.user.id}`
+          `/api/employee/attendance?employeeId=${session.user.id}&month=${currentMonth + 1}&year=${currentYear}`
         );
         const data2 = await response2.json();
 
@@ -149,6 +189,8 @@ export default function Attendance() {
             checkIn: record.checkIn || "-",
             checkOut: record.checkOut || "-",
             hours: record.hours || "-",
+            isOnLeave: record.isOnLeave || false,
+            leaveDetails: record.leaveDetails || null
           }));
           setAttendanceData(transformedData);
         }
@@ -171,72 +213,83 @@ export default function Attendance() {
     }
   };
 
-  const handleExport = () => {
-    toast({
-      title: "Attendance Export Started",
-      description:
-        "Your attendance report export has started. You'll receive a notification when it's ready.",
-    });
-  };
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate()
+  }
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "present":
-        return "bg-green-100 text-green-800";
-      case "absent":
-        return "bg-red-100 text-red-800";
-      case "weekend":
-        return "bg-gray-100 text-gray-800";
-      case "holiday":
-        return "bg-blue-100 text-blue-800";
-      case "leave":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const getFirstDayOfMonth = (month, year) => {
+    return new Date(year, month, 1).getDay()
+  }
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ]
+
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+  const daysInMonth = getDaysInMonth(currentMonth, currentYear)
+  const firstDay = getFirstDayOfMonth(currentMonth, currentYear)
+
+  const handlePreviousMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11)
+      setCurrentYear(currentYear - 1)
+    } else {
+      setCurrentMonth(currentMonth - 1)
     }
-  };
+  }
 
-  const getStatusText = (status) => {
-    switch (status) {
-      case "present":
-        return "Present";
-      case "absent":
-        return "Absent";
-      case "weekend":
-        return "Weekend";
-      case "holiday":
-        return "Holiday";
-      case "leave":
-        return "On Leave";
-      default:
-        return status;
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0)
+      setCurrentYear(currentYear + 1)
+    } else {
+      setCurrentMonth(currentMonth + 1)
     }
-  };
+  }
 
-  const filteredAttendance = attendanceData.filter((record) => {
-    const matchesSearch = record.date.includes(searchTerm);
-    const matchesMonth =
-      filterMonth === "all" || record.date.startsWith(filterMonth);
-    return matchesSearch && matchesMonth;
-  });
+  const getAttendanceForDay = (day) => {
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    return attendanceData.find((record) => record.date === dateStr)
+  }
 
-  // Calculate summary stats
-  const presentDays = attendanceData.filter(
-    (record) => record.status === "present"
-  ).length;
-  const absentDays = attendanceData.filter(
-    (record) => record.status === "absent"
-  ).length;
-  const leaveDays = attendanceData.filter(
-    (record) => record.status === "leave"
-  ).length;
-  const totalDays = attendanceData.filter(
-    (record) => record.status !== "weekend"
-  ).length;
-  const attendanceRate =
-    totalDays > 0
-      ? Math.round(((presentDays + leaveDays) / totalDays) * 100)
-      : 0;
+  const currentMonthData = attendanceData.filter((record) => {
+    const recordDate = new Date(record.date)
+    return recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear
+  })
+
+  const presentDays = currentMonthData.filter((record) => record.status === "present").length
+  const absentDays = currentMonthData.filter((record) => record.status === "absent").length
+  const leaveDays = currentMonthData.filter((record) => record.status === "leave" || record.isOnLeave).length
+  const lateDays = currentMonthData.filter((record) => record.status === "late").length
+  const movementDays = currentMonthData.filter((record) => record.status === "movement").length
+  const payableDays = currentMonthData.filter(
+    (record) => record.status !== "weekend" && record.status !== "holiday",
+  ).length
+
+  const recentRecords = [...attendanceData]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5)
+    .map((record) => ({
+      date: new Date(record.date).toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
+      checkIn: record.checkIn || "-",
+      checkOut: record.checkOut || "-",
+    }))
 
   if (loading) {
     return (
@@ -246,248 +299,369 @@ export default function Attendance() {
           <p className="text-gray-600">Loading attendance data...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">My Attendance</h1>
-          <p className="text-gray-600">
-            View and manage your attendance records
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Search by date..."
-              className="pl-10 w-64"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Select value={filterMonth} onValueChange={setFilterMonth}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by month" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Months</SelectItem>
-              <SelectItem value="2023-01">January 2023</SelectItem>
-              <SelectItem value="2023-02">February 2023</SelectItem>
-              <SelectItem value="2023-03">March 2023</SelectItem>
-              <SelectItem value="2023-04">April 2023</SelectItem>
-              <SelectItem value="2023-05">May 2023</SelectItem>
-              <SelectItem value="2023-06">June 2023</SelectItem>
-              <SelectItem value="2023-07">July 2023</SelectItem>
-              <SelectItem value="2023-08">August 2023</SelectItem>
-              <SelectItem value="2023-09">September 2023</SelectItem>
-              <SelectItem value="2023-10">October 2023</SelectItem>
-              <SelectItem value="2023-11">November 2023</SelectItem>
-              <SelectItem value="2023-12">December 2023</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button onClick={handleExport} className="flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Export
-          </Button>
-        </div>
-      </div>
-
-      {/* Daily Attendance Marking */}
-      <Card className="bg-white shadow-sm border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Today's Attendance
-          </CardTitle>
-          <CardDescription>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {todayStatus ? (
-            <div className="text-center py-4">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
-                {todayStatus === "present" && (
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                )}
-                {todayStatus === "absent" && (
-                  <XCircle className="w-6 h-6 text-red-600" />
-                )}
-                {todayStatus === "leave" && (
-                  <Clock className="w-6 h-6 text-yellow-600" />
-                )}
-              </div>
-              <h3 className="text-lg font-semibold mb-1">Attendance Marked</h3>
-              <p className="text-gray-600 capitalize">
-                You have marked yourself as{" "}
-                <span className="font-semibold">{todayStatus}</span> today.
-              </p>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Employee Information Section */}
+        <Card className="bg-white shadow-sm border-0 mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <User className="w-5 h-5" />
+              Employee Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-gray-800">{employeeData.name}</h2>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-1">
-                  Mark Your Attendance
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Please select your attendance status for today
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="border-l-4 border-l-blue-500 bg-white p-4 rounded-r-lg shadow-sm">
+                <div className="text-sm text-gray-600">Joining Date</div>
+                <div className="text-lg font-semibold text-gray-800">
+                  {employeeData.joinDate ? new Date(employeeData.joinDate).toLocaleDateString("en-US", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  }) : "N/A"}
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-l-green-500 bg-white p-4 rounded-r-lg shadow-sm">
+                <div className="text-sm text-gray-600">Confirmation Date</div>
+                <div className="text-lg font-semibold text-gray-800">
+                  {employeeData.confirmationDate ? new Date(employeeData.confirmationDate).toLocaleDateString("en-US", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  }) : "N/A"}
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-l-purple-500 bg-white p-4 rounded-r-lg shadow-sm">
+                <div className="text-sm text-gray-600">Length of Service</div>
+                <div className="text-lg font-semibold text-gray-800">
+                  {calculateLengthOfService(employeeData.joinDate)} days
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-l-orange-500 bg-white p-4 rounded-r-lg shadow-sm">
+                <div className="text-sm text-gray-600">Working Hours</div>
+                <div className="text-lg font-semibold text-gray-800">
+                  {employeeData.workStartTime} - {employeeData.workEndTime}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Today's Attendance Card */}
+        <Card className="bg-white shadow-sm border-0 mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Calendar className="w-5 h-5" />
+              Today's Attendance
+            </CardTitle>
+            <CardDescription>
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {todayStatus ? (
+              <div className="text-center py-4">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                  {todayStatus === "present" && <CheckCircle className="w-6 h-6 text-green-600" />}
+                  {todayStatus === "absent" && <XCircle className="w-6 h-6 text-red-600" />}
+                  {todayStatus === "leave" && <Clock className="w-6 h-6 text-yellow-600" />}
+                </div>
+                <h3 className="text-lg font-semibold mb-1">Attendance Marked</h3>
+                <p className="text-gray-600 capitalize">
+                  You have marked yourself as <span className="font-semibold">{todayStatus}</span> today.
                 </p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Button
-                  onClick={() => markAttendance("present")}
-                  disabled={marking}
-                  className="flex flex-col items-center justify-center h-20 bg-green-500 hover:bg-green-600 text-white"
-                >
-                  <CheckCircle className="w-6 h-6 mb-1" />
-                  <span>Present</span>
-                </Button>
-
-                <Button
-                  onClick={() => markAttendance("absent")}
-                  disabled={marking}
-                  variant="outline"
-                  className="flex flex-col items-center justify-center h-20 border-red-200 hover:bg-red-50"
-                >
-                  <XCircle className="w-6 h-6 mb-1 text-red-600" />
-                  <span className="text-red-600">Absent</span>
-                </Button>
-
-                <Button
-                  onClick={() => markAttendance("leave")}
-                  disabled={marking}
-                  variant="outline"
-                  className="flex flex-col items-center justify-center h-20 border-yellow-200 hover:bg-yellow-50"
-                >
-                  <Clock className="w-6 h-6 mb-1 text-yellow-600" />
-                  <span className="text-yellow-600">On Leave</span>
-                </Button>
-              </div>
-
-              {marking && (
+            ) : (
+              <div className="space-y-4">
                 <div className="text-center">
-                  <div className="inline-flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-                    <span>Marking attendance...</span>
+                  <h3 className="text-lg font-semibold mb-1">Mark Your Attendance</h3>
+                  <p className="text-gray-600 text-sm flex items-center justify-center gap-2">
+                    <Clock4 className="w-4 h-4" />
+                    {employeeData.workStartTime} to {employeeData.workEndTime}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Button
+                    onClick={() => markAttendance("present")}
+                    disabled={marking}
+                    className="flex flex-col items-center justify-center h-20 bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    <CheckCircle className="w-6 h-6 mb-1" />
+                    <span>Present</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => markAttendance("absent")}
+                    disabled={marking}
+                    variant="outline"
+                    className="flex flex-col items-center justify-center h-20 border-red-200 hover:bg-red-50"
+                  >
+                    <XCircle className="w-6 h-6 mb-1 text-red-600" />
+                    <span className="text-red-600">Absent</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => markAttendance("leave")}
+                    disabled={marking}
+                    variant="outline"
+                    className="flex flex-col items-center justify-center h-20 border-yellow-200 hover:bg-yellow-50"
+                  >
+                    <Clock className="w-6 h-6 mb-1 text-yellow-600" />
+                    <span className="text-yellow-600">On Leave</span>
+                  </Button>
+                </div>
+
+                {marking && (
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+                      <span>Marking attendance...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendar Section */}
+          <div className="lg:col-span-2">
+            <Card className="shadow-sm border border-gray-200">
+              <CardContent className="p-4 md:p-6">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                  <h2 className="text-lg font-semibold text-gray-700">Attendance Calendar</h2>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handlePreviousMonth}
+                      className="h-8 w-8 bg-transparent"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Select
+                      value={`${currentMonth}-${currentYear}`}
+                      onValueChange={(value) => {
+                        const [month, year] = value.split("-")
+                        setCurrentMonth(parseInt(month))
+                        setCurrentYear(parseInt(year))
+                      }}
+                    >
+                      <SelectTrigger className="w-[160px] h-8">
+                        <SelectValue>
+                          {monthNames[currentMonth]} {currentYear}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {monthNames.map((month, idx) => (
+                          <SelectItem key={idx} value={`${idx}-${currentYear}`}>
+                            {month} {currentYear}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button variant="outline" size="icon" onClick={handleNextMonth} className="h-8 w-8 bg-transparent">
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-white shadow-sm border-0">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Present Days</CardTitle>
-            <UserCheck className="w-4 h-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{presentDays}</div>
-            <p className="text-xs text-gray-500">Days you were present</p>
-          </CardContent>
-        </Card>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                  <div className="border-l-4 border-l-gray-400 bg-white p-3 rounded-r-lg shadow-sm">
+                    <div className="text-2xl font-bold text-gray-800">{payableDays}</div>
+                    <div className="text-xs text-gray-600 mt-1">Payable Days</div>
+                  </div>
+                  <div className="border-l-4 border-l-green-500 bg-white p-3 rounded-r-lg shadow-sm">
+                    <div className="text-2xl font-bold text-gray-800">{presentDays}</div>
+                    <div className="text-xs text-gray-600 mt-1">Present</div>
+                  </div>
+                  <div className="border-l-4 border-l-orange-500 bg-white p-3 rounded-r-lg shadow-sm">
+                    <div className="text-2xl font-bold text-gray-800">{lateDays}</div>
+                    <div className="text-xs text-gray-600 mt-1">Late</div>
+                  </div>
+                  <div className="border-l-4 border-l-purple-500 bg-white p-3 rounded-r-lg shadow-sm">
+                    <div className="text-2xl font-bold text-gray-800">{movementDays}</div>
+                    <div className="text-xs text-gray-600 mt-1">Movement</div>
+                  </div>
+                  <div className="border-l-4 border-l-blue-500 bg-white p-3 rounded-r-lg shadow-sm">
+                    <div className="text-2xl font-bold text-gray-800">{leaveDays}</div>
+                    <div className="text-xs text-gray-600 mt-1">Leave</div>
+                  </div>
+                  <div className="border-l-4 border-l-red-500 bg-white p-3 rounded-r-lg shadow-sm">
+                    <div className="text-2xl font-bold text-gray-800">{absentDays}</div>
+                    <div className="text-xs text-gray-600 mt-1">Absent</div>
+                  </div>
+                </div>
 
-        <Card className="bg-white shadow-sm border-0">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Absent Days</CardTitle>
-            <UserX className="w-4 h-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{absentDays}</div>
-            <p className="text-xs text-gray-500">Days you were absent</p>
-          </CardContent>
-        </Card>
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  {/* Day Headers */}
+                  <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+                    {dayNames.map((day) => (
+                      <div
+                        key={day}
+                        className="text-center py-3 text-sm font-medium text-gray-600 border-r border-gray-200 last:border-r-0"
+                      >
+                        <span className="hidden sm:inline">{day}</span>
+                        <span className="sm:hidden">{day.slice(0, 3)}</span>
+                      </div>
+                    ))}
+                  </div>
 
-        <Card className="bg-white shadow-sm border-0">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Leave Days</CardTitle>
-            <Clock className="w-4 h-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{leaveDays}</div>
-            <p className="text-xs text-gray-500">Days on leave</p>
-          </CardContent>
-        </Card>
+                  {/* Calendar Days */}
+                  <div className="grid grid-cols-7">
+                    {/* Empty cells for days before month starts */}
+                    {Array.from({ length: firstDay }).map((_, idx) => (
+                      <div
+                        key={`empty-${idx}`}
+                        className="aspect-square border-r border-b border-gray-200 bg-gray-50"
+                      />
+                    ))}
 
-        <Card className="bg-white shadow-sm border-0">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Attendance Rate
-            </CardTitle>
-            <Calendar className="w-4 h-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{attendanceRate}%</div>
-            <p className="text-xs text-gray-500">Overall attendance rate</p>
-          </CardContent>
-        </Card>
-      </div>
+                    {/* Actual days */}
+                    {Array.from({ length: daysInMonth }).map((_, idx) => {
+                      const day = idx + 1
+                      const attendance = getAttendanceForDay(day)
+                      const status = attendance?.status
+                      const isOnLeave = attendance?.isOnLeave
+                      const leaveDetails = attendance?.leaveDetails
 
-      {/* Attendance Records */}
-      <Card className="bg-white shadow-sm border-0">
-        <CardHeader>
-          <CardTitle>Attendance Records</CardTitle>
-          <CardDescription>Your attendance history and records</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4">Date</th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-left py-3 px-4">Check In</th>
-                  <th className="text-left py-3 px-4">Check Out</th>
-                  <th className="text-left py-3 px-4">Hours</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAttendance.length > 0 ? (
-                  filteredAttendance.map((record, index) => (
-                    <tr key={index} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4">{record.date}</td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                            record.status
-                          )}`}
+                      // Determine if this date is before the employee's start date or after today
+                      const currentDate = new Date(currentYear, currentMonth, day);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0); // Reset time part for comparison
+                      const isBeforeStartDate = employeeData.joinDate && currentDate < new Date(employeeData.joinDate);
+                      const isAfterToday = currentDate > today;
+
+                      // Determine background color based on status
+                      let bgColor = "bg-white hover:bg-gray-50"
+                      let statusLabel = ""
+                      let statusColor = ""
+
+                      // Check if it's a weekend
+                      const date = new Date(currentYear, currentMonth, day)
+                      const isWeekend = date.getDay() === 0 || date.getDay() === 6
+
+                      if (isBeforeStartDate || isAfterToday) {
+                        // Days before start date or after today remain blank
+                        bgColor = "bg-white"
+                      } else if (isWeekend) {
+                        bgColor = "bg-gray-100"
+                        statusLabel = "Weekend"
+                      } else if (isOnLeave && leaveDetails) {
+                        // On approved leave - check this BEFORE checking for missing attendance
+                        bgColor = "bg-blue-50"
+                        statusLabel = `${leaveDetails.type} Leave`
+                        statusColor = "text-blue-600 bg-blue-100"
+                      } else if (!attendance) {
+                        // No attendance record and not on leave
+                        bgColor = "bg-red-50"
+                        statusLabel = "Missing"
+                        statusColor = "text-red-600 bg-red-100"
+                      } else if (status === "absent") {
+                        bgColor = "bg-red-50"
+                        statusLabel = "Absent"
+                        statusColor = "text-red-600 bg-red-100"
+                      } else if (status === "present") {
+                        bgColor = "bg-green-50"
+                        statusLabel = "Present"
+                        statusColor = "text-green-600 bg-green-100"
+                      } else if (status === "leave") {
+                        bgColor = "bg-blue-50"
+                        statusLabel = "On Leave"
+                        statusColor = "text-blue-600 bg-blue-100"
+                      } else if (status === "late") {
+                        bgColor = "bg-orange-50"
+                        statusLabel = "Late"
+                        statusColor = "text-orange-600 bg-orange-100"
+                      } else if (status === "movement") {
+                        bgColor = "bg-purple-50"
+                        statusLabel = "Movement"
+                        statusColor = "text-purple-600 bg-purple-100"
+                      } else if (status === "holiday") {
+                        bgColor = "bg-blue-100"
+                        statusLabel = "Holiday"
+                      }
+
+                      return (
+                        <div
+                          key={day}
+                          className={`aspect-square border-r border-b border-gray-200 p-2 relative ${bgColor} transition-colors`}
                         >
-                          {getStatusText(record.status)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">{record.checkIn}</td>
-                      <td className="py-3 px-4">{record.checkOut}</td>
-                      <td className="py-3 px-4">{record.hours}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="py-3 px-4 text-center text-gray-500"
-                    >
-                      No attendance records found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                          <div className="text-sm font-medium text-gray-800">{day}</div>
+                          {statusLabel && (
+                            <div className="absolute inset-x-2 bottom-2">
+                              <div className={`text-xs font-medium ${statusColor} px-2 py-1 rounded text-center truncate`}>
+                                {statusLabel}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="lg:col-span-1">
+            <Card className="shadow-sm border border-gray-200 h-full">
+              <CardContent className="p-4 md:p-6">
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">Recent Activity</h3>
+                <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                  {recentRecords.length > 0 ? (
+                    recentRecords.map((record, idx) => (
+                      <div key={idx} className="border-l-4 border-l-green-500 bg-white p-4 rounded-r-lg shadow-sm">
+                        <div className="text-sm font-medium text-gray-600 mb-3">{record.date}</div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-blue-100 p-1.5 rounded">
+                                <ArrowUp className="h-4 w-4 text-blue-600" />
+                              </div>
+                              <span className="text-sm font-medium text-blue-600">Check In</span>
+                            </div>
+                            <span className="text-sm text-gray-700">{record.checkIn}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-orange-100 p-1.5 rounded">
+                                <ArrowDown className="h-4 w-4 text-orange-600" />
+                              </div>
+                              <span className="text-sm font-medium text-orange-600">Check Out</span>
+                            </div>
+                            <span className="text-sm text-gray-700">{record.checkOut}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">No recent activity</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
