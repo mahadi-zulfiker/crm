@@ -8,6 +8,7 @@ export async function GET(request) {
 
     const db = await connectMongoDB();
     const attendanceCollection = db.collection("attendance");
+    const leaveCollection = db.collection("leaveRequests");
 
     let query = {};
     if (employeeId) {
@@ -16,8 +17,39 @@ export async function GET(request) {
 
     const attendanceRecords = await attendanceCollection.find(query).toArray();
 
+    // Enrich with leave information
+    let enrichedRecords = attendanceRecords;
+    if (employeeId) {
+      // Get all approved leave requests for this employee
+      const leaveRequests = await leaveCollection
+        .find({
+          employeeId,
+          status: "approved",
+        })
+        .toArray();
+
+      // Add leave information to attendance records
+      enrichedRecords = attendanceRecords.map((record) => {
+        // Check if this date falls within any approved leave period
+        const isOnLeave = leaveRequests.some((leave) => {
+          return record.date >= leave.startDate && record.date <= leave.endDate;
+        });
+
+        return {
+          ...record,
+          isOnLeave: isOnLeave,
+          leaveDetails: isOnLeave
+            ? leaveRequests.find(
+                (leave) =>
+                  record.date >= leave.startDate && record.date <= leave.endDate
+              )
+            : null,
+        };
+      });
+    }
+
     // Sort by date descending
-    const sortedRecords = attendanceRecords.sort(
+    const sortedRecords = enrichedRecords.sort(
       (a, b) => new Date(b.date) - new Date(a.date)
     );
 
