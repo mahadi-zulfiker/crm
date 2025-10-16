@@ -44,6 +44,7 @@ export default function AttendanceManagement() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [loading, setLoading] = useState(true);
   const [markingAttendance, setMarkingAttendance] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(""); // Added state for selected employee
 
   // State for attendance data from database
   const [attendanceData, setAttendanceData] = useState([]);
@@ -609,7 +610,10 @@ export default function AttendanceManagement() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="md:col-span-2">
                   <Label htmlFor="employee-select">Select Employee</Label>
-                  <Select>
+                  <Select
+                    value={selectedEmployee}
+                    onValueChange={setSelectedEmployee}
+                  >
                     <SelectTrigger id="employee-select">
                       <SelectValue placeholder="Select an employee" />
                     </SelectTrigger>
@@ -627,13 +631,10 @@ export default function AttendanceManagement() {
                   <Button
                     className="flex-1 bg-green-500 hover:bg-green-600"
                     onClick={() => {
-                      const selectElement =
-                        document.getElementById("employee-select");
-                      const employeeId = selectElement.value;
-                      if (employeeId)
-                        markAttendanceForEmployee(employeeId, "present");
+                      if (selectedEmployee)
+                        markAttendanceForEmployee(selectedEmployee, "present");
                     }}
-                    disabled={markingAttendance}
+                    disabled={markingAttendance || !selectedEmployee}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Present
@@ -642,13 +643,10 @@ export default function AttendanceManagement() {
                     variant="outline"
                     className="flex-1 border-red-200 hover:bg-red-50"
                     onClick={() => {
-                      const selectElement =
-                        document.getElementById("employee-select");
-                      const employeeId = selectElement.value;
-                      if (employeeId)
-                        markAttendanceForEmployee(employeeId, "absent");
+                      if (selectedEmployee)
+                        markAttendanceForEmployee(selectedEmployee, "absent");
                     }}
-                    disabled={markingAttendance}
+                    disabled={markingAttendance || !selectedEmployee}
                   >
                     <XCircle className="w-4 h-4 mr-2 text-red-600" />
                     <span className="text-red-600">Absent</span>
@@ -657,13 +655,10 @@ export default function AttendanceManagement() {
                     variant="outline"
                     className="flex-1 border-yellow-200 hover:bg-yellow-50"
                     onClick={() => {
-                      const selectElement =
-                        document.getElementById("employee-select");
-                      const employeeId = selectElement.value;
-                      if (employeeId)
-                        markAttendanceForEmployee(employeeId, "leave");
+                      if (selectedEmployee)
+                        markAttendanceForEmployee(selectedEmployee, "leave");
                     }}
-                    disabled={markingAttendance}
+                    disabled={markingAttendance || !selectedEmployee}
                   >
                     <Clock className="w-4 h-4 mr-2 text-yellow-600" />
                     <span className="text-yellow-600">Leave</span>
