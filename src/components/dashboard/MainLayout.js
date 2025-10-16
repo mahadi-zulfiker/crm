@@ -69,6 +69,7 @@ import EmployeeAttendanceCompany from "./Employee/CompanyManagement/Attendance";
 import EmployeeReportsAnalyticsCompany from "./Employee/CompanyManagement/ReportsAnalytics";
 import EmployeeLeaveManagement from "./Employee/LeaveManagement";
 import EmployeeLoanManagement from "./Employee/CompanyManagement/LoanManagement";
+import SearchUsers from "./Employee/CompanyManagement/SearchUsers/SearchUser";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -211,6 +212,9 @@ const MainLayout = () => {
             "/dashboard/admin/companyManagement/employeeManagement" && (
             <CompanyEmployeeManagement />
           )}
+          {pathname === "/dashboard/admin/companyManagement/searchUsers" && (
+            <SearchUsers />
+          )}
           {pathname ===
             "/dashboard/admin/companyManagement/reportsAnalytics" && (
             <ReportsAnalytics />
@@ -253,6 +257,9 @@ const MainLayout = () => {
           {pathname ===
             "/dashboard/employee/companyManagement/loanManagement" && (
             <EmployeeLoanManagement />
+          )}
+          {pathname === "/dashboard/employee/companyManagement/searchUsers" && (
+            <SearchUsers />
           )}
           {pathname ===
             "/dashboard/employee/companyManagement/reportsAnalytics" && (

@@ -225,13 +225,7 @@ export default function ReportsAnalytics() {
               <SelectItem value="yearly">Yearly</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            onClick={() => handleExport("All Reports")}
-            className="flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Export All
-          </Button>
+          
         </div>
       </div>
 
@@ -321,14 +315,7 @@ export default function ReportsAnalytics() {
                       Attendance pattern over the last 7 days
                     </CardDescription>
                   </div>
-                  <Button
-                    onClick={() => handleExport("Daily Attendance")}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    Export
-                  </Button>
+                 
                 </div>
               </CardHeader>
               <CardContent>
@@ -414,14 +401,7 @@ export default function ReportsAnalytics() {
                       Attendance distribution by department
                     </CardDescription>
                   </div>
-                  <Button
-                    onClick={() => handleExport("Department Attendance")}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    Export
-                  </Button>
+                
                 </div>
               </CardHeader>
               <CardContent>
@@ -468,14 +448,7 @@ export default function ReportsAnalytics() {
                     Detailed attendance records by department
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={() => handleExport("Attendance Details")}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export
-                </Button>
+               
               </div>
             </CardHeader>
             <CardContent>
@@ -590,14 +563,7 @@ export default function ReportsAnalytics() {
                     Employee count by department
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={() => handleExport("Employee Distribution")}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export
-                </Button>
+               
               </div>
             </CardHeader>
             <CardContent>
@@ -714,14 +680,7 @@ export default function ReportsAnalytics() {
                     Distribution of leave requests by type
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={() => handleExport("Leave Distribution")}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export
-                </Button>
+               
               </div>
             </CardHeader>
             <CardContent>
@@ -830,14 +789,7 @@ export default function ReportsAnalytics() {
                     Loan types and their distribution
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={() => handleExport("Loan Distribution")}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export
-                </Button>
+             
               </div>
             </CardHeader>
             <CardContent>

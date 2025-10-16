@@ -26,19 +26,22 @@ import {
   Edit,
   Trash2,
   X,
+  PlusCircle,
+  UserSearch,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 export default function EmployeeManagement() {
   const { toast } = useToast();
+  const router = useRouter();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -122,11 +125,9 @@ export default function EmployeeManagement() {
     setIsAddModalOpen(true);
   };
 
-  const handleExport = () => {
-    toast({
-      title: "Export Started",
-      description: "Employee data export has started.",
-    });
+  const handleSearchUsers = () => {
+    // Navigate to the new search users page
+    router.push("/dashboard/admin/companyManagement/searchUsers");
   };
 
   const handleViewEmployee = (employee) => {
@@ -418,9 +419,13 @@ export default function EmployeeManagement() {
               <SelectItem value="Inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleExport} className="flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Export
+
+          <Button
+            onClick={handleSearchUsers}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+          >
+            <UserSearch className="w-4 h-4" />
+            Search Users
           </Button>
           <Button
             onClick={handleAddEmployee}

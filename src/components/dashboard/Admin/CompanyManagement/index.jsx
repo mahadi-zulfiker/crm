@@ -7,7 +7,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Building, Users, UserCheck, UserX, Calendar } from "lucide-react";
+import {
+  Building,
+  Users,
+  UserCheck,
+  UserX,
+  Calendar,
+  UserSearch,
+} from "lucide-react"; // Added UserSearch icon
+import Link from "next/link"; // Added Link import
 
 export default function CompanyManagement() {
   const companyStats = [
@@ -169,6 +177,12 @@ export default function CompanyManagement() {
           <Calendar className="w-4 h-4 mr-2" />
           Attendance Reports
         </Button>
+        <Link href="/dashboard/admin/companyManagement/searchUsers">
+          <Button variant="outline">
+            <UserSearch className="w-4 h-4 mr-2" />
+            Search and Add Users
+          </Button>
+        </Link>
       </div>
     </div>
   );
