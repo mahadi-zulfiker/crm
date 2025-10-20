@@ -32,6 +32,8 @@ export async function POST(req) {
       salary,
       manager,
       joinDate,
+      workStartTime, // Add work start time
+      workEndTime, // Add work end time
     } = body;
 
     // Validate required fields
@@ -66,6 +68,8 @@ export async function POST(req) {
       salary: salary || 0,
       manager: manager || "Not assigned",
       joinDate: joinDate || new Date().toISOString().split("T")[0],
+      workStartTime: workStartTime || "09:00", // Default work start time
+      workEndTime: workEndTime || "17:00", // Default work end time
       status: "Active",
       createdAt: new Date(),
       updatedAt: new Date(),

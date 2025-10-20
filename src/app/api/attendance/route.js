@@ -2,10 +2,34 @@ import { NextResponse } from "next/server";
 import { connectMongoDB } from "../../../lib/mongodb";
 import { ObjectId } from "mongodb";
 
+// Helper function to determine attendance status based on check-in time
+function determineAttendanceStatus(checkInTime, workStartTime = "09:00") {
+  if (!checkInTime) return "absent";
+
+  // Convert times to minutes for comparison
+  const [checkInHours, checkInMinutes] = checkInTime.split(":").map(Number);
+  const [workStartHours, workStartMinutes] = workStartTime
+    .split(":")
+    .map(Number);
+
+  const checkInTotalMinutes = checkInHours * 60 + checkInMinutes;
+  const workStartTotalMinutes = workStartHours * 60 + workStartMinutes;
+
+  // If check-in time is before or equal to work start time, mark as present
+  if (checkInTotalMinutes <= workStartTotalMinutes) {
+    return "present";
+  }
+  // If check-in time is after work start time, mark as late
+  else {
+    return "late";
+  }
+}
+
 // POST: Mark employee attendance for the day
 export async function POST(req) {
   try {
-    const { employeeId, status, date } = await req.json();
+    const { employeeId, status, date, action, employeeName, workStartTime } =
+      await req.json();
 
     if (!employeeId || !status) {
       return NextResponse.json(
@@ -27,15 +51,84 @@ export async function POST(req) {
     });
 
     if (existingAttendance) {
-      // Update existing attendance record
-      const result = await attendanceCollection.updateOne(
-        { _id: existingAttendance._id },
-        { $set: { status, updatedAt: new Date().toISOString() } }
-      );
-      return NextResponse.json(
-        { message: "Attendance updated successfully", data: result },
-        { status: 200 }
-      );
+      // Handle check-in/check-out actions
+      if (action === "checkin") {
+        const checkInTime = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+
+        // Determine status based on check-in time
+        const determinedStatus = determineAttendanceStatus(
+          checkInTime,
+          workStartTime
+        );
+
+        // Update existing attendance record with check-in time and status
+        const updateFields = {
+          status: determinedStatus,
+          checkIn: checkInTime,
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Add employee name if provided and not already set
+        if (employeeName && !existingAttendance.employeeName) {
+          updateFields.employeeName = employeeName;
+        }
+
+        const result = await attendanceCollection.updateOne(
+          { _id: existingAttendance._id },
+          { $set: updateFields }
+        );
+        return NextResponse.json(
+          {
+            message: `Check-in recorded successfully as ${determinedStatus}`,
+            data: result,
+            status: determinedStatus,
+          },
+          { status: 200 }
+        );
+      } else if (action === "checkout") {
+        // Update existing attendance record with check-out time
+        const result = await attendanceCollection.updateOne(
+          { _id: existingAttendance._id },
+          {
+            $set: {
+              checkOut: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              }),
+              updatedAt: new Date().toISOString(),
+            },
+          }
+        );
+        return NextResponse.json(
+          { message: "Check-out recorded successfully", data: result },
+          { status: 200 }
+        );
+      } else {
+        // Update existing attendance record (for status changes)
+        const updateFields = {
+          status,
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Add employee name if provided and not already set
+        if (employeeName && !existingAttendance.employeeName) {
+          updateFields.employeeName = employeeName;
+        }
+
+        const result = await attendanceCollection.updateOne(
+          { _id: existingAttendance._id },
+          { $set: updateFields }
+        );
+        return NextResponse.json(
+          { message: "Attendance updated successfully", data: result },
+          { status: 200 }
+        );
+      }
     } else {
       // Create new attendance record
       const newAttendance = {
@@ -46,9 +139,35 @@ export async function POST(req) {
         updatedAt: new Date().toISOString(),
       };
 
+      // Add employee name if provided
+      if (employeeName) {
+        newAttendance.employeeName = employeeName;
+      }
+
+      // Add check-in time if this is a check-in action
+      if (action === "checkin") {
+        const checkInTime = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+
+        // Determine status based on check-in time
+        const determinedStatus = determineAttendanceStatus(
+          checkInTime,
+          workStartTime
+        );
+        newAttendance.status = determinedStatus;
+        newAttendance.checkIn = checkInTime;
+      }
+
       const result = await attendanceCollection.insertOne(newAttendance);
       return NextResponse.json(
-        { message: "Attendance marked successfully", data: result },
+        {
+          message: `Attendance marked successfully as ${newAttendance.status}`,
+          data: result,
+          status: newAttendance.status,
+        },
         { status: 201 }
       );
     }
@@ -73,6 +192,7 @@ export async function GET(req) {
     const db = await connectMongoDB();
     const attendanceCollection = db.collection("attendance");
     const leaveCollection = db.collection("leaveRequests");
+    const companyEmployeesCollection = db.collection("CompanyEmployees");
 
     let query = {};
 
@@ -88,8 +208,29 @@ export async function GET(req) {
 
     const attendanceRecords = await attendanceCollection.find(query).toArray();
 
+    // Enrich records with employee names if not already present
+    const enrichedWithNames = await Promise.all(
+      attendanceRecords.map(async (record) => {
+        // If employeeName is not already set, fetch it from CompanyEmployees collection
+        if (!record.employeeName && record.employeeId) {
+          try {
+            const employee = await companyEmployeesCollection.findOne(
+              { _id: record.employeeId },
+              { projection: { name: 1 } }
+            );
+            if (employee && employee.name) {
+              return { ...record, employeeName: employee.name };
+            }
+          } catch (error) {
+            console.error("Error fetching employee name:", error);
+          }
+        }
+        return record;
+      })
+    );
+
     // Enrich with leave information
-    let enrichedRecords = attendanceRecords;
+    let enrichedRecords = enrichedWithNames;
     if (employeeId) {
       // Get approved leave requests for this employee
       let leaveQuery = { employeeId, status: "approved" };
@@ -109,7 +250,7 @@ export async function GET(req) {
       const leaveRequests = await leaveCollection.find(leaveQuery).toArray();
 
       // Add leave information to attendance records
-      enrichedRecords = attendanceRecords.map((record) => {
+      enrichedRecords = enrichedWithNames.map((record) => {
         // Check if this date falls within any approved leave period
         const isOnLeave = leaveRequests.some((leave) => {
           return record.date >= leave.startDate && record.date <= leave.endDate;
