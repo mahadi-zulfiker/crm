@@ -28,6 +28,8 @@ async function migrateCompanyEmployees() {
         joinDate: employee.joinDate || new Date().toISOString().split("T")[0],
         salary: employee.salary || 0,
         manager: employee.manager || "Not assigned",
+        workStartTime: employee.workStartTime || "09:00", // Default work start time
+        workEndTime: employee.workEndTime || "17:00", // Default work end time
       }));
 
       // Insert the transformed employees

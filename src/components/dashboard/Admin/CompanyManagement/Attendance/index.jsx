@@ -29,6 +29,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Clock4,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -67,12 +68,12 @@ export default function AttendanceManagement() {
             // Transform the data to match the existing structure
             const transformedData = data.data.map((record) => ({
               id: record._id,
-              name: record.employeeName || "Unknown Employee",
+              name: record.name || "Unknown Employee",
               department: record.employeeDepartment || "Not assigned",
               status: record.status || "present",
               date: record.date || selectedDate,
-              checkIn: record.checkIn || "09:00 AM",
-              checkOut: record.checkOut || "06:00 PM",
+              checkIn: record.checkIn || "-",
+              checkOut: record.checkOut || "-",
             }));
             setAttendanceData(transformedData);
           } else {
@@ -280,19 +281,38 @@ export default function AttendanceManagement() {
     fetchEmployees();
   }, []);
 
-  const markAttendanceForEmployee = async (employeeId, status) => {
+  const markAttendanceForEmployee = async (
+    employeeId,
+    status,
+    action = null
+  ) => {
     try {
       setMarkingAttendance(true);
+
+      // Find the employee name and work start time from the employees list
+      const employee = employees.find((emp) => emp._id === employeeId);
+      const employeeName = employee ? employee.name : "";
+      const workStartTime = employee?.workStartTime || "09:00"; // Default to 9:00 AM
+
+      const requestBody = {
+        employeeId: employeeId,
+        status: status,
+        date: selectedDate,
+        employeeName: employeeName,
+        workStartTime: workStartTime, // Pass work start time
+      };
+
+      // Add action if provided (checkin/checkout)
+      if (action) {
+        requestBody.action = action;
+      }
+
       const response = await fetch("/api/attendance", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          employeeId: employeeId,
-          status: status,
-          date: selectedDate,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -300,7 +320,8 @@ export default function AttendanceManagement() {
       if (response.ok) {
         toast({
           title: "Success",
-          description: `Attendance marked for employee as ${status}`,
+          description:
+            data.message || `Attendance action recorded for employee`,
         });
 
         // Refresh attendance data
@@ -312,12 +333,12 @@ export default function AttendanceManagement() {
         if (response2.ok) {
           const transformedData = data2.data.map((record) => ({
             id: record._id,
-            name: record.employeeName || "Unknown Employee",
+            name: record.employeeName || record.name || "Unknown Employee",
             department: record.employeeDepartment || "Not assigned",
             status: record.status || "present",
             date: record.date || selectedDate,
-            checkIn: record.checkIn || "09:00 AM",
-            checkOut: record.checkOut || "06:00 PM",
+            checkIn: record.checkIn || "-",
+            checkOut: record.checkOut || "-",
           }));
           setAttendanceData(transformedData);
         }
@@ -384,6 +405,7 @@ export default function AttendanceManagement() {
       .length,
   };
 
+  // Update the status color function to handle the new "late" status
   const getStatusColor = (status) => {
     switch (status) {
       case "present":
@@ -392,6 +414,8 @@ export default function AttendanceManagement() {
         return "bg-red-100 text-red-800";
       case "leave":
         return "bg-yellow-100 text-yellow-800";
+      case "late":
+        return "bg-orange-100 text-orange-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -523,8 +547,7 @@ export default function AttendanceManagement() {
               Export Report
             </Button>
           </div>
-
-          {/* Daily Stats Cards */}
+          {/* Daily Stats Cards */};
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <Card className="bg-white shadow-sm border-0">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -593,7 +616,6 @@ export default function AttendanceManagement() {
               </CardContent>
             </Card>
           </div>
-
           {/* Mark Attendance Section */}
           <Card className="bg-white shadow-sm border-0 mb-6">
             <CardHeader>
@@ -632,12 +654,32 @@ export default function AttendanceManagement() {
                     className="flex-1 bg-green-500 hover:bg-green-600"
                     onClick={() => {
                       if (selectedEmployee)
-                        markAttendanceForEmployee(selectedEmployee, "present");
+                        markAttendanceForEmployee(
+                          selectedEmployee,
+                          "present",
+                          "checkin"
+                        );
                     }}
                     disabled={markingAttendance || !selectedEmployee}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Present
+                    Check In
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-blue-200 hover:bg-blue-50"
+                    onClick={() => {
+                      if (selectedEmployee)
+                        markAttendanceForEmployee(
+                          selectedEmployee,
+                          "present",
+                          "checkout"
+                        );
+                    }}
+                    disabled={markingAttendance || !selectedEmployee}
+                  >
+                    <Clock4 className="w-4 h-4 mr-2 text-blue-600" />
+                    <span className="text-blue-600">Check Out</span>
                   </Button>
                   <Button
                     variant="outline"
@@ -669,13 +711,12 @@ export default function AttendanceManagement() {
                 <div className="mt-3 text-center">
                   <div className="inline-flex items-center justify-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-                    <span>Marking attendance...</span>
+                    <span>Processing attendance...</span>
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
-
           {/* Daily Attendance Table */}
           <Card className="bg-white shadow-sm border-0">
             <CardHeader>
@@ -723,9 +764,36 @@ export default function AttendanceManagement() {
                         <td className="py-3 px-4">{record.checkIn || "-"}</td>
                         <td className="py-3 px-4">{record.checkOut || "-"}</td>
                         <td className="py-3 px-4">
-                          <Button variant="outline" size="sm">
-                            Edit
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                markAttendanceForEmployee(
+                                  record.id,
+                                  "present",
+                                  "checkin"
+                                )
+                              }
+                              disabled={markingAttendance}
+                            >
+                              Check In
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                markAttendanceForEmployee(
+                                  record.id,
+                                  "present",
+                                  "checkout"
+                                )
+                              }
+                              disabled={markingAttendance}
+                            >
+                              Check Out
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
