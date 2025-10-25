@@ -39,6 +39,7 @@ export default function SearchUsers() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [employeeData, setEmployeeData] = useState({
     name: "",
+    email: "",
     department: "Not assigned",
     position: "Not assigned",
   });
@@ -67,7 +68,7 @@ export default function SearchUsers() {
       console.error("Error fetching users:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch users",
+        description: "Failed to fetch users. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -83,7 +84,8 @@ export default function SearchUsers() {
     setSelectedUser(user);
     // Pre-fill employee data with user information
     setEmployeeData({
-      name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+      name: user.username || "",
+      email: user.email || "",
       department: "Not assigned",
       position: "Not assigned",
     });
@@ -91,6 +93,24 @@ export default function SearchUsers() {
   };
 
   const handleSaveEmployee = async () => {
+    if (!employeeData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a name for the employee.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!employeeData.email.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter an email for the employee.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const response = await fetch("/api/companyEmployeeUserManagement", {
         method: "POST",
@@ -100,6 +120,7 @@ export default function SearchUsers() {
         body: JSON.stringify({
           userId: selectedUser._id,
           name: employeeData.name,
+          email: employeeData.email,
           department: employeeData.department,
           position: employeeData.position,
         }),
@@ -113,7 +134,7 @@ export default function SearchUsers() {
         setIsAddModalOpen(false);
 
         toast({
-          title: "Employee Added",
+          title: "Success",
           description: "User has been added as an employee successfully.",
         });
       } else {
@@ -127,7 +148,7 @@ export default function SearchUsers() {
       console.error("Error adding user as employee:", error);
       toast({
         title: "Error",
-        description: "Failed to add user as employee",
+        description: "Failed to add user as employee. Please try again.",
         variant: "destructive",
       });
     }
@@ -215,9 +236,7 @@ export default function SearchUsers() {
                   {users.map((user) => (
                     <tr key={user._id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4">
-                        <div className="font-medium">
-                          {user.firstName} {user.lastName}
-                        </div>
+                        <div className="font-medium">{user.username}</div>
                       </td>
                       <td className="py-3 px-4 text-blue-600">{user.email}</td>
                       <td className="py-3 px-4">
@@ -269,6 +288,15 @@ export default function SearchUsers() {
                   value={employeeData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   placeholder="Enter full name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="employee-email">Email</Label>
+                <Input
+                  id="employee-email"
+                  value={employeeData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  placeholder="Enter email"
                 />
               </div>
               <div className="space-y-2">

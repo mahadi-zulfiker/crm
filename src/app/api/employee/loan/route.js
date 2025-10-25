@@ -47,7 +47,8 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { employeeId, type, amount, purpose, repaymentMonths } = body;
+    const { employeeId, name, email, type, amount, purpose, repaymentMonths } =
+      body;
 
     if (!employeeId || !type || !amount || !purpose || !repaymentMonths) {
       return NextResponse.json(
@@ -61,6 +62,8 @@ export async function POST(req) {
 
     const newLoanRequest = {
       employeeId,
+      name: name || "", // Add name field
+      email: email || "", // Add email field
       type,
       amount: parseFloat(amount),
       purpose,
