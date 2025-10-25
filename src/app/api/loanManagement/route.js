@@ -44,7 +44,8 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { employeeId, type, amount, purpose, repaymentMonths } = body;
+    const { employeeId, name, email, type, amount, purpose, repaymentMonths } =
+      body;
 
     if (!employeeId || !type || !amount || !purpose || !repaymentMonths) {
       return NextResponse.json(
@@ -58,6 +59,8 @@ export async function POST(req) {
 
     const newLoanRequest = {
       employeeId,
+      name: name || "", // Add name field
+      email: email || "", // Add email field
       type,
       amount: parseFloat(amount),
       purpose,
@@ -109,7 +112,9 @@ export async function PUT(req) {
 
     if (!["approved", "rejected", "completed"].includes(status)) {
       return NextResponse.json(
-        { error: "Status must be either 'approved', 'rejected', or 'completed'" },
+        {
+          error: "Status must be either 'approved', 'rejected', or 'completed'",
+        },
         { status: 400 }
       );
     }
@@ -117,9 +122,9 @@ export async function PUT(req) {
     const db = await connectMongoDB();
     const loanCollection = db.collection("loanRequests");
 
-    const updateData = { 
+    const updateData = {
       status,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     if (status === "approved" && approvalDate) {

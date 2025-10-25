@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectMongoDB } from "../../../../lib/mongodb";
+import { ObjectId } from "mongodb";
 
 // GET: Fetch attendance records for admin dashboard
 export async function GET(req) {
@@ -33,8 +34,13 @@ export async function GET(req) {
     // Enrich attendance records with employee details
     const enrichedRecords = await Promise.all(
       attendanceRecords.map(async (record) => {
+        // Ensure employeeId is properly formatted as ObjectId
+        const employeeId = ObjectId.isValid(record.employeeId) 
+          ? new ObjectId(record.employeeId) 
+          : record.employeeId;
+          
         const employee = await companyEmployeesCollection.findOne(
-          { _id: record.employeeId },
+          { _id: employeeId },
           { projection: { name: 1, department: 1, email: 1 } }
         );
 
@@ -65,7 +71,7 @@ export async function GET(req) {
   } catch (error) {
     console.error("Error fetching attendance records:", error);
     return NextResponse.json(
-      { error: "Failed to fetch attendance records" },
+      { error: "Failed to fetch attendance records: " + error.message },
       { status: 500 }
     );
   }
