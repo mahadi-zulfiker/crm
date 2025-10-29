@@ -15,7 +15,7 @@ export default function MissingAttendance() {
   const [employees, setEmployees] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [daysToCheck, setDaysToCheck] = useState(5); // Default to checking last 5 days
+  const [daysToCheck, setDaysToCheck] = useState(5); 
 
   // Fetch employees and attendance data
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function MissingAttendance() {
       try {
         setLoading(true);
 
-        // Fetch all employees
+        
         const employeesResponse = await fetch("/api/employeeManagement");
         const employeesData = await employeesResponse.json();
 

@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import axios from "axios"; // Import axios for fetching vendor data
 
 // Initialize socket connection
-const socket = io("https://crm-lemon-eight.vercel.app");
+// const socket = io("https://crm-lemon-eight.vercel.app");
 
 export default function UserMessagesPage() {
   const [vendors, setVendors] = useState([]);
@@ -24,7 +24,7 @@ export default function UserMessagesPage() {
   const [message, setMessage] = useState("");
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [hasVendorResponded, setHasVendorResponded] = useState(false);
-  const messagesEndRef = useRef(null); // Ref for scrolling to the latest message
+  const messagesEndRef = useRef(null); 
 
   // Fetch vendor data from API
   useEffect(() => {
@@ -40,44 +40,44 @@ export default function UserMessagesPage() {
   }, []);
 
   // Socket.IO message handling
-  useEffect(() => {
-    socket.on("receiveMessage", (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
+  // useEffect(() => {
+  //   socket.on("receiveMessage", (data) => {
+  //     setMessages((prev) => [...prev, data]);
+  //   });
 
-    return () => socket.off("receiveMessage");
-  }, []);
+  //   return () => socket.off("receiveMessage");
+  // }, []);
 
   // Scroll to bottom of messages when new message arrives
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = () => {
-    if (message.trim() && selectedVendor) {
-      const newMessage = {
-        sender: "Client",
-        text: message,
-        vendorId: selectedVendor.id,
-      };
-      socket.emit("sendMessage", newMessage);
-      setMessages((prev) => [...prev, newMessage]);
-      setMessage("");
+  // const sendMessage = () => {
+  //   if (message.trim() && selectedVendor) {
+  //     const newMessage = {
+  //       sender: "Client",
+  //       text: message,
+  //       vendorId: selectedVendor.id,
+  //     };
+  //     socket.emit("sendMessage", newMessage);
+  //     setMessages((prev) => [...prev, newMessage]);
+  //     setMessage("");
 
-      // Automated vendor response only if not responded before
-      if (!hasVendorResponded) {
-        setTimeout(() => {
-          const vendorResponse = {
-            sender: selectedVendor.name,
-            text: "Thank you for reaching out! How can I assist you?",
-            vendorId: selectedVendor.id,
-          };
-          setMessages((prev) => [...prev, vendorResponse]);
-          setHasVendorResponded(true);
-        }, 1000);
-      }
-    }
-  };
+  //     // Automated vendor response only if not responded before
+  //     if (!hasVendorResponded) {
+  //       setTimeout(() => {
+  //         const vendorResponse = {
+  //           sender: selectedVendor.name,
+  //           text: "Thank you for reaching out! How can I assist you?",
+  //           vendorId: selectedVendor.id,
+  //         };
+  //         setMessages((prev) => [...prev, vendorResponse]);
+  //         setHasVendorResponded(true);
+  //       }, 1000);
+  //     }
+  //   }
+  // };
 
   return (
     <div className="space-y-6">

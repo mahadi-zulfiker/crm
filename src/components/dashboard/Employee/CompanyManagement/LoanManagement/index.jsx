@@ -46,7 +46,7 @@ export default function LoanManagement() {
     const fetchLoanData = async () => {
       try {
         if (!session?.user?.id) return;
-        
+
         setLoading(true);
         const response = await fetch(
           `/api/employee/loan?employeeId=${session.user.id}`
@@ -101,9 +101,9 @@ export default function LoanManagement() {
   };
 
   const handleInputChange = (field, value) => {
-    setNewLoanRequest(prev => ({
+    setNewLoanRequest((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -125,7 +125,9 @@ export default function LoanManagement() {
         },
         body: JSON.stringify({
           employeeId: session.user.id,
-          ...newLoanRequest
+          name: session.user.name,
+          email: session.user.email,
+          ...newLoanRequest,
         }),
       });
 
@@ -136,10 +138,10 @@ export default function LoanManagement() {
           title: "Success",
           description: "Loan request submitted successfully",
         });
-        
+
         // Add new request to the list
-        setLoanData(prev => [...prev, data.data]);
-        
+        setLoanData((prev) => [...prev, data.data]);
+
         handleCloseModal();
       } else {
         toast({
@@ -223,16 +225,10 @@ export default function LoanManagement() {
               <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleExport} className="flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Export
-          </Button>
-          <Button
-            onClick={handleApplyLoan}
-            className="flex items-center gap-2"
-          >
+
+          <Button onClick={handleApplyLoan} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            Apply Loan
+            Apply Loan-
           </Button>
         </div>
       </div>
@@ -266,10 +262,14 @@ export default function LoanManagement() {
                   filteredLoans.map((record) => (
                     <tr key={record._id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4">{record.type}</td>
-                      <td className="py-3 px-4">${record.amount?.toLocaleString()}</td>
+                      <td className="py-3 px-4">
+                        ${record.amount?.toLocaleString()}
+                      </td>
                       <td className="py-3 px-4">{record.purpose}</td>
                       <td className="py-3 px-4">{record.repaymentMonths}</td>
-                      <td className="py-3 px-4">${record.monthlyInstallment?.toLocaleString()}</td>
+                      <td className="py-3 px-4">
+                        ${record.monthlyInstallment?.toLocaleString()}
+                      </td>
                       <td className="py-3 px-4">
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
@@ -281,13 +281,18 @@ export default function LoanManagement() {
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        {new Date(record.appliedDate).toLocaleDateString("en-US")}
+                        {new Date(record.appliedDate).toLocaleDateString(
+                          "en-US"
+                        )}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="py-3 px-4 text-center text-gray-500">
+                    <td
+                      colSpan="7"
+                      className="py-3 px-4 text-center text-gray-500"
+                    >
                       No loan records found
                     </td>
                   </tr>
@@ -308,8 +313,8 @@ export default function LoanManagement() {
                 <label className="block text-sm font-medium mb-1">
                   Loan Type
                 </label>
-                <Select 
-                  value={newLoanRequest.type} 
+                <Select
+                  value={newLoanRequest.type}
                   onValueChange={(value) => handleInputChange("type", value)}
                 >
                   <SelectTrigger>
@@ -327,8 +332,8 @@ export default function LoanManagement() {
                 <label className="block text-sm font-medium mb-1">
                   Amount ($)
                 </label>
-                <Input 
-                  type="number" 
+                <Input
+                  type="number"
                   placeholder="Loan amount"
                   value={newLoanRequest.amount}
                   onChange={(e) => handleInputChange("amount", e.target.value)}
@@ -338,8 +343,8 @@ export default function LoanManagement() {
                 <label className="block text-sm font-medium mb-1">
                   Purpose
                 </label>
-                <Input 
-                  type="text" 
+                <Input
+                  type="text"
                   placeholder="Purpose of loan"
                   value={newLoanRequest.purpose}
                   onChange={(e) => handleInputChange("purpose", e.target.value)}
@@ -349,11 +354,13 @@ export default function LoanManagement() {
                 <label className="block text-sm font-medium mb-1">
                   Repayment Months
                 </label>
-                <Input 
-                  type="number" 
+                <Input
+                  type="number"
                   placeholder="Repayment period in months"
                   value={newLoanRequest.repaymentMonths}
-                  onChange={(e) => handleInputChange("repaymentMonths", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("repaymentMonths", e.target.value)
+                  }
                 />
               </div>
             </div>

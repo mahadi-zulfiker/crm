@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,9 @@ import {
   XCircle,
   Clock,
   Eye,
+  PlusCircle,
+  UserSearch,
+  X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -42,7 +46,17 @@ export default function LoanList() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isAddLoanModalOpen, setIsAddLoanModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [newLoanData, setNewLoanData] = useState({
+    type: "",
+    amount: "",
+    purpose: "",
+    repaymentMonths: "",
+  });
   const [loading, setLoading] = useState(true);
+  const [employees, setEmployees] = useState([]);
+  const [searchingEmployees, setSearchingEmployees] = useState(false);
 
   // State for loan requests from database
   const [loanData, setLoanData] = useState([]);
@@ -59,7 +73,8 @@ export default function LoanList() {
           // Transform the data to match the existing structure
           const transformedData = data.data.map((loan) => ({
             id: loan._id,
-            employee: loan.employeeName || "Unknown Employee",
+            employee: loan.name || loan.employeeName || "Unknown Employee",
+            email: loan.email || "N/A",
             department: loan.department || "Not assigned",
             loanType: loan.type || "Loan",
             amount: loan.amount || 0,
@@ -104,6 +119,162 @@ export default function LoanList() {
       title: "Export Started",
       description: "Loan list export has started.",
     });
+  };
+
+  const handleAddLoan = () => {
+    // Reset form data
+    setNewLoanData({
+      type: "",
+      amount: "",
+      purpose: "",
+      repaymentMonths: "",
+    });
+    setIsAddLoanModalOpen(true);
+  };
+
+  const handleSearchEmployees = async (searchTerm) => {
+    if (!searchTerm) {
+      setEmployees([]);
+      return;
+    }
+
+    try {
+      setSearchingEmployees(true);
+      const response = await fetch(
+        `/api/companyEmployeeUserManagement?search=${encodeURIComponent(
+          searchTerm
+        )}`
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        setEmployees(data);
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to fetch employees",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error searching employees:", error);
+      toast({
+        title: "Error",
+        description: "Failed to search employees",
+        variant: "destructive",
+      });
+    } finally {
+      setSearchingEmployees(false);
+    }
+  };
+
+  const handleSelectEmployee = (employee) => {
+    setSelectedEmployee(employee);
+    setEmployees([]);
+  };
+
+  const handleInputChange = (field, value) => {
+    setNewLoanData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleCreateLoan = async () => {
+    if (!selectedEmployee) {
+      toast({
+        title: "Error",
+        description: "Please select an employee",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (
+      !newLoanData.type ||
+      !newLoanData.amount ||
+      !newLoanData.purpose ||
+      !newLoanData.repaymentMonths
+    ) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/loanManagement", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: selectedEmployee._id,
+          name: selectedEmployee.name,
+          email: selectedEmployee.email,
+          ...newLoanData,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Add new loan to the list
+        const transformedLoan = {
+          id: data.data._id,
+          employee: data.data.name || "Unknown Employee",
+          email: data.data.email || "N/A",
+          department: selectedEmployee.department || "Not assigned",
+          loanType: data.data.type || "Loan",
+          amount: data.data.amount || 0,
+          balance: data.data.balance || 0,
+          status: data.data.status
+            ? data.data.status.charAt(0).toUpperCase() +
+              data.data.status.slice(1)
+            : "Pending",
+          nextPayment: data.data.nextPayment || "-",
+          appliedDate: data.data.appliedDate || "",
+          approvalDate: data.data.approvalDate || "",
+          interestRate: data.data.interestRate || 0,
+          repaymentMonths: data.data.repaymentMonths || 0,
+          monthlyInstallment: data.data.monthlyInstallment || 0,
+          completedDate: data.data.completedDate || "",
+          installments: data.data.installments || [],
+        };
+
+        setLoanData((prev) => [transformedLoan, ...prev]);
+
+        toast({
+          title: "Success",
+          description: "Loan created successfully",
+        });
+
+        // Close modal and reset form
+        setIsAddLoanModalOpen(false);
+        setSelectedEmployee(null);
+        setNewLoanData({
+          type: "",
+          amount: "",
+          purpose: "",
+          repaymentMonths: "",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to create loan",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating loan:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create loan",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewLoan = (loan) => {
@@ -203,6 +374,7 @@ export default function LoanList() {
   const filteredLoanData = loanData.filter((loan) => {
     const matchesSearch =
       loan.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan.loanType.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -289,6 +461,10 @@ export default function LoanList() {
               <SelectItem value="Rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
+          <Button onClick={handleAddLoan} className="flex items-center gap-2">
+            <PlusCircle className="w-4 h-4" />
+            Add Loan
+          </Button>
           <Button onClick={handleExport} className="flex items-center gap-2">
             <Download className="w-4 h-4" />
             Export
@@ -359,6 +535,7 @@ export default function LoanList() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4">Employee</th>
+                  <th className="text-left py-3 px-4">Email</th>
                   <th className="text-left py-3 px-4">Department</th>
                   <th className="text-left py-3 px-4">Loan Type</th>
                   <th className="text-left py-3 px-4">Amount</th>
@@ -369,58 +546,70 @@ export default function LoanList() {
                 </tr>
               </thead>
               <tbody>
-                {filteredLoanData.map((loan) => (
-                  <tr key={loan.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{loan.employee}</td>
-                    <td className="py-3 px-4">{loan.department}</td>
-                    <td className="py-3 px-4">{loan.loanType}</td>
-                    <td className="py-3 px-4">
-                      ${loan.amount.toLocaleString()}
-                    </td>
-                    <td className="py-3 px-4">
-                      ${loan.balance.toLocaleString()}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                          loan.status
-                        )}`}
-                      >
-                        {loan.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">{loan.nextPayment}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewLoan(loan)}
+                {filteredLoanData.length > 0 ? (
+                  filteredLoanData.map((loan) => (
+                    <tr key={loan.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-medium">{loan.employee}</td>
+                      <td className="py-3 px-4">{loan.email}</td>
+                      <td className="py-3 px-4">{loan.department}</td>
+                      <td className="py-3 px-4">{loan.loanType}</td>
+                      <td className="py-3 px-4">
+                        ${loan.amount.toLocaleString()}
+                      </td>
+                      <td className="py-3 px-4">
+                        ${loan.balance.toLocaleString()}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                            loan.status
+                          )}`}
                         >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        {loan.status === "Pending" && (
-                          <>
-                            <Button
-                              onClick={() => handleApproveLoan(loan.id)}
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              onClick={() => handleRejectLoan(loan.id)}
-                              variant="outline"
-                              size="sm"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                          {loan.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">{loan.nextPayment}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewLoan(loan)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          {loan.status === "Pending" && (
+                            <>
+                              <Button
+                                onClick={() => handleApproveLoan(loan.id)}
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={() => handleRejectLoan(loan.id)}
+                                variant="outline"
+                                size="sm"
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="9"
+                      className="py-3 px-4 text-center text-gray-500"
+                    >
+                      No loan records found
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -445,6 +634,10 @@ export default function LoanList() {
                       Employee
                     </h3>
                     <p className="font-medium">{selectedLoan.employee}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">Email</h3>
+                    <p className="font-medium">{selectedLoan.email}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">
@@ -574,6 +767,143 @@ export default function LoanList() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Loan Modal */}
+      <Dialog open={isAddLoanModalOpen} onOpenChange={setIsAddLoanModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add Loan for Employee</DialogTitle>
+            <DialogDescription>
+              Create a new loan request for an employee
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Employee Search */}
+            <div className="space-y-2">
+              <Label>Employee</Label>
+              {selectedEmployee ? (
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                  <div>
+                    <p className="font-medium">{selectedEmployee.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {selectedEmployee.email}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedEmployee(null)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="relative">
+                    <UserSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      type="text"
+                      placeholder="Search employees by name or email..."
+                      className="pl-10"
+                      onChange={(e) => handleSearchEmployees(e.target.value)}
+                    />
+                  </div>
+                  {searchingEmployees && (
+                    <div className="flex items-center justify-center py-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                    </div>
+                  )}
+                  {employees.length > 0 && (
+                    <div className="border rounded-lg max-h-40 overflow-y-auto">
+                      {employees.map((employee) => (
+                        <div
+                          key={employee._id}
+                          className="p-3 border-b last:border-b-0 hover:bg-gray-50 cursor-pointer"
+                          onClick={() => handleSelectEmployee(employee)}
+                        >
+                          <p className="font-medium">{employee.name}</p>
+                          <p className="text-sm text-gray-600">
+                            {employee.email}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Loan Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Loan Type</Label>
+                <Select
+                  value={newLoanData.type}
+                  onValueChange={(value) => handleInputChange("type", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select loan type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Personal">Personal Loan</SelectItem>
+                    <SelectItem value="Home">Home Loan</SelectItem>
+                    <SelectItem value="Car">Car Loan</SelectItem>
+                    <SelectItem value="Education">Education Loan</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Amount ($)</Label>
+                <Input
+                  type="number"
+                  placeholder="Loan amount"
+                  value={newLoanData.amount}
+                  onChange={(e) => handleInputChange("amount", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Purpose</Label>
+                <Input
+                  type="text"
+                  placeholder="Purpose of loan"
+                  value={newLoanData.purpose}
+                  onChange={(e) => handleInputChange("purpose", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Repayment Months</Label>
+                <Input
+                  type="number"
+                  placeholder="Repayment period in months"
+                  value={newLoanData.repaymentMonths}
+                  onChange={(e) =>
+                    handleInputChange("repaymentMonths", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAddLoanModalOpen(false);
+                  setSelectedEmployee(null);
+                  setNewLoanData({
+                    type: "",
+                    amount: "",
+                    purpose: "",
+                    repaymentMonths: "",
+                  });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleCreateLoan}>Create Loan</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
