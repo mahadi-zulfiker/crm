@@ -5,104 +5,162 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic"; // Ensures fresh data every time
 
 export async function POST(req) {
-    try {
-        const db = await connectMongoDB();
-        const jobsCollection = db.collection("jobs"); // ✅ Store jobs in "jobs" collection
+  try {
+    const db = await connectMongoDB();
+    const jobsCollection = db.collection("jobs"); // ✅ Store jobs in "jobs" collection
 
-        const { title, description, vendor, category, priority, location, salary } = await req.json();
+    const { title, description, vendor, category, priority, location, salary } =
+      await req.json();
 
-        if (!title || !description || !vendor || !category || !priority || !location || !salary) {
-            return NextResponse.json({ error: "All fields are required." }, { status: 400 });
-        }
-
-        const newJob = {
-            title,
-            description,
-            vendor,
-            employee: null,
-            createdAt: new Date(),
-            status: "Pending",
-            category,
-            priority,
-            location,
-            salary,
-        };
-
-        await jobsCollection.insertOne(newJob);
-        return NextResponse.json({ message: "Job created successfully", job: newJob }, { status: 201 });
-    } catch (error) {
-        console.error("Error creating job:", error);
-        return NextResponse.json({ error: "Failed to create job." }, { status: 500 });
+    if (
+      !title ||
+      !description ||
+      !vendor ||
+      !category ||
+      !priority ||
+      !location ||
+      !salary
+    ) {
+      return NextResponse.json(
+        { error: "All fields are required." },
+        { status: 400 }
+      );
     }
+
+    const newJob = {
+      title,
+      description,
+      vendor,
+      employee: null,
+      createdAt: new Date(),
+      status: "Pending",
+      category,
+      priority,
+      location,
+      salary,
+    };
+
+    await jobsCollection.insertOne(newJob);
+    return NextResponse.json(
+      { message: "Job created successfully", job: newJob },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error creating job:", error);
+    return NextResponse.json(
+      { error: "Failed to create job." },
+      { status: 500 }
+    );
+  }
 }
 
-export async function GET() {
-    try {
-        const db = await connectMongoDB();
-        const jobsCollection = db.collection("jobs"); // ✅ Fetch from "jobs" collection
+export async function GET(req) {
+  try {
+    const db = await connectMongoDB();
+    const jobsCollection = db.collection("jobs"); // ✅ Fetch from "jobs" collection
 
-        const jobs = await jobsCollection.find({}).toArray();
-        return NextResponse.json(jobs, { status: 200 });
-    } catch (error) {
-        console.error("Error fetching jobs:", error);
-        return NextResponse.json({ error: "Failed to fetch jobs." }, { status: 500 });
-    }
+    // Get vendor email from query parameters
+    const { searchParams } = new URL(req.url);
+    const vendorEmail = searchParams.get("vendorEmail");
+
+    // If vendorEmail is provided, filter jobs by vendor
+    // Otherwise, return all jobs (for admin view)
+    const query = vendorEmail
+      ? { vendor: await getVendorNameByEmail(db, vendorEmail) }
+      : {};
+
+    const jobs = await jobsCollection.find(query).toArray();
+    return NextResponse.json(jobs, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch jobs." },
+      { status: 500 }
+    );
+  }
+}
+
+// Helper function to get vendor name by email
+async function getVendorNameByEmail(db, email) {
+  const vendor = await db
+    .collection("users")
+    .findOne({ email, userType: "Vendor" });
+  return vendor ? vendor.username || vendor.name || vendor.email : null;
 }
 
 export async function PUT(req) {
-    try {
-        const db = await connectMongoDB();
-        const jobsCollection = db.collection("jobs");
+  try {
+    const db = await connectMongoDB();
+    const jobsCollection = db.collection("jobs");
 
-        const { id, employee, status, category, priority, location, salary } = await req.json();
+    const { id, employee, status, category, priority, location, salary } =
+      await req.json();
 
-        if (!id || !ObjectId.isValid(id)) {
-            return NextResponse.json({ error: "Valid Job ID is required." }, { status: 400 });
-        }
-
-        const updateFields = {};
-        if (employee !== undefined) updateFields.employee = employee;
-        if (status !== undefined) updateFields.status = status;
-        if (category !== undefined) updateFields.category = category;
-        if (priority !== undefined) updateFields.priority = priority;
-        if (location !== undefined) updateFields.location = location;
-        if (salary !== undefined) updateFields.salary = salary;
-
-        const result = await jobsCollection.updateOne(
-            { _id: new ObjectId(id) },
-            { $set: updateFields }
-        );
-
-        if (result.matchedCount === 0) {
-            return NextResponse.json({ error: "Job not found." }, { status: 404 });
-        }
-
-        return NextResponse.json({ message: "Job updated successfully." }, { status: 200 });
-    } catch (error) {
-        console.error("Error updating job:", error);
-        return NextResponse.json({ error: "Failed to update job." }, { status: 500 });
+    if (!id || !ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: "Valid Job ID is required." },
+        { status: 400 }
+      );
     }
+
+    const updateFields = {};
+    if (employee !== undefined) updateFields.employee = employee;
+    if (status !== undefined) updateFields.status = status;
+    if (category !== undefined) updateFields.category = category;
+    if (priority !== undefined) updateFields.priority = priority;
+    if (location !== undefined) updateFields.location = location;
+    if (salary !== undefined) updateFields.salary = salary;
+
+    const result = await jobsCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateFields }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json({ error: "Job not found." }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      { message: "Job updated successfully." },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating job:", error);
+    return NextResponse.json(
+      { error: "Failed to update job." },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(req) {
-    try {
-        const db = await connectMongoDB();
-        const jobsCollection = db.collection("jobs");
+  try {
+    const db = await connectMongoDB();
+    const jobsCollection = db.collection("jobs");
 
-        const { id } = await req.json();
-        if (!id || !ObjectId.isValid(id)) {
-            return NextResponse.json({ error: "Valid Job ID is required." }, { status: 400 });
-        }
-
-        const result = await jobsCollection.deleteOne({ _id: new ObjectId(id) });
-
-        if (result.deletedCount === 0) {
-            return NextResponse.json({ error: "Job not found." }, { status: 404 });
-        }
-
-        return NextResponse.json({ message: "Job deleted successfully." }, { status: 200 });
-    } catch (error) {
-        console.error("Error deleting job:", error);
-        return NextResponse.json({ error: "Failed to delete job." }, { status: 500 });
+    const { id } = await req.json();
+    if (!id || !ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: "Valid Job ID is required." },
+        { status: 400 }
+      );
     }
+
+    const result = await jobsCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "Job not found." }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      { message: "Job deleted successfully." },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting job:", error);
+    return NextResponse.json(
+      { error: "Failed to delete job." },
+      { status: 500 }
+    );
+  }
 }
