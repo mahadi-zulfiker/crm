@@ -1,9 +1,11 @@
-'use client';
+"use client";
 import MainLayout from "@/components/dashboard/MainLayout";
-export default function EmployeeManagement() {
-    return (
-        <MainLayout>
+import EmployeeManagement from "@/components/dashboard/Vendor/EmployeeManagement";
 
-        </MainLayout>
-    );
+export default function EmployeeManagementPage() {
+  return (
+    <MainLayout>
+      <EmployeeManagement />
+    </MainLayout>
+  );
 }

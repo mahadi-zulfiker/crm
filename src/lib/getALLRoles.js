@@ -70,11 +70,11 @@ export default function getALLRoles() {
         icon: HomeIcon,
         href: "/",
       },
-      {
-        title: "Settings",
-        icon: Settings,
-        href: "/dashboard/client/settings",
-      },
+      // {
+      //   title: "Settings",
+      //   icon: Settings,
+      //   href: "/dashboard/client/settings",
+      // },
     ],
     user: [
       {
@@ -106,7 +106,6 @@ export default function getALLRoles() {
           },
         ],
       },
-
       {
         title: "Company Management",
         icon: Building2,
@@ -160,11 +159,11 @@ export default function getALLRoles() {
         icon: HomeIcon,
         href: "/",
       },
-      {
-        title: "Settings",
-        icon: Settings,
-        href: "/dashboard/employee/settings",
-      },
+      // {
+      //   title: "Settings",
+      //   icon: Settings,
+      //   href: "/dashboard/employee/settings",
+      // },
     ],
     vendor: [
       {
@@ -219,11 +218,11 @@ export default function getALLRoles() {
         icon: HomeIcon,
         href: "/",
       },
-      {
-        title: "Settings",
-        icon: Settings,
-        href: "/dashboard/vendor/settings",
-      },
+      // {
+      //   title: "Settings",
+      //   icon: Settings,
+      //   href: "/dashboard/vendor/settings",
+      // },
     ],
     admin: [
       {
@@ -320,11 +319,11 @@ export default function getALLRoles() {
         icon: HomeIcon,
         href: "/",
       },
-      {
-        title: "Settings",
-        icon: Settings,
-        href: "/dashboard/admin/settings",
-      },
+      // {
+      //   title: "Settings",
+      //   icon: Settings,
+      //   href: "/dashboard/admin/settings",
+      // },
     ],
   };
   return roleMenus;

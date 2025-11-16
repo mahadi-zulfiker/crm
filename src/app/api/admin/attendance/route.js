@@ -35,15 +35,14 @@ export async function GET(req) {
     const enrichedRecords = await Promise.all(
       attendanceRecords.map(async (record) => {
         // Ensure employeeId is properly formatted as ObjectId
-        const employeeId = ObjectId.isValid(record.employeeId) 
-          ? new ObjectId(record.employeeId) 
+        const employeeId = ObjectId.isValid(record.employeeId)
+          ? new ObjectId(record.employeeId)
           : record.employeeId;
-          
+
         const employee = await companyEmployeesCollection.findOne(
           { _id: employeeId },
           { projection: { name: 1, department: 1, email: 1 } }
         );
-
         return {
           ...record,
           employeeName: employee?.name || "Unknown Employee",
