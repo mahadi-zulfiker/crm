@@ -1,9 +1,11 @@
-'use client';
+"use client";
 import MainLayout from "@/components/dashboard/MainLayout";
-export default function VendorDashboard() {
-    return (
-        <MainLayout>
+import Vendor from "@/components/dashboard/Vendor";
 
-        </MainLayout>
-    );
+export default function VendorDashboard() {
+  return (
+    <MainLayout>
+      <Vendor />
+    </MainLayout>
+  );
 }

@@ -70,6 +70,9 @@ import EmployeeReportsAnalyticsCompany from "./Employee/CompanyManagement/Report
 import EmployeeLeaveManagement from "./Employee/LeaveManagement";
 import EmployeeLoanManagement from "./Employee/CompanyManagement/LoanManagement";
 import SearchUsers from "./Employee/CompanyManagement/SearchUsers/SearchUser";
+import VendorServices from "./Vendor/Services";
+import VendorServicePackages from "./Vendor/Services/Packages";
+import VendorServicePricing from "./Vendor/Services/Pricing";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -154,6 +157,13 @@ const MainLayout = () => {
           )}
           {pathname === "/dashboard/vendor/vendorProfileManagement" && (
             <VendorProfileManagement />
+          )}
+          {pathname === "/dashboard/vendor/services" && <VendorServices />}
+          {pathname === "/dashboard/vendor/services/packages" && (
+            <VendorServicePackages />
+          )}
+          {pathname === "/dashboard/vendor/services/pricing" && (
+            <VendorServicePricing />
           )}
           {pathname === "/dashboard/vendor/noticeBoard" && <NoticeBoard />}
 
