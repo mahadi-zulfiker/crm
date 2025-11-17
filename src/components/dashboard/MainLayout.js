@@ -80,6 +80,7 @@ import VendorProjectTracking from "./Vendor/Projects/Tracking";
 import VendorFinancialReporting from "./Vendor/Projects/Financials";
 import AdminProjectManagement from "./Admin/ProjectManagement";
 import ClientProjectManagement from "./Client/ProjectManagement";
+import VendorClients from "./Vendor/Clients";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -189,6 +190,7 @@ const MainLayout = () => {
             <VendorFinancialReporting />
           )}
           {pathname === "/dashboard/vendor/noticeBoard" && <NoticeBoard />}
+          {pathname === "/dashboard/vendor/clients" && <VendorClients />}
 
           {pathname === "/dashboard/admin" && <Admin />}
           {pathname === "/dashboard/admin/userManagement" && <UserManagement />}
