@@ -50,6 +50,13 @@ export default function getALLRoles() {
         ],
       },
       {
+        title: "Project Management",
+        icon: Briefcase,
+        items: [
+          { name: "My Projects", href: "/dashboard/client/projectManagement" },
+        ],
+      },
+      {
         title: "Payment History",
         icon: WalletCards,
         href: "/dashboard/client/paymentHistory",
@@ -196,6 +203,14 @@ export default function getALLRoles() {
             name: "Client Feedback",
             href: "/dashboard/vendor/projects/feedback",
           },
+          {
+            name: "Project Tracking",
+            href: "/dashboard/vendor/projects/tracking",
+          },
+          {
+            name: "Financial Reporting",
+            href: "/dashboard/vendor/projects/financials",
+          },
         ],
       },
       {
@@ -234,6 +249,13 @@ export default function getALLRoles() {
         title: "User Management",
         icon: Users,
         href: "/dashboard/admin/userManagement",
+      },
+      {
+        title: "Project Management",
+        icon: Briefcase,
+        items: [
+          { name: "All Projects", href: "/dashboard/admin/projectManagement" },
+        ],
       },
       {
         title: "Company Management",
@@ -290,7 +312,7 @@ export default function getALLRoles() {
       //   title: "Reports & Analytics",
       //   icon: BarChart3,
       //   href: "/dashboard/admin/reportsAnalyticsAdmin",
-      // },
+      //   // },
       {
         title: "Content Management",
         icon: FileText,
@@ -314,6 +336,7 @@ export default function getALLRoles() {
         icon: User,
         href: "/dashboard/admin/adminProfileManagement",
       },
+
       {
         title: "Home",
         icon: HomeIcon,
