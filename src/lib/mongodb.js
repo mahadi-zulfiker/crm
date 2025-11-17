@@ -1,7 +1,7 @@
-import { MongoClient } from "mongodb";
+const { MongoClient } = require("mongodb");
 
 const uri = process.env.MONGODB_URI;
-if (!uri) throw new Error("MONGODB_URI is not defined in .env");
+if (!uri) throw new Error("MONGODB_URI is not defined in .env.local");
 
 let client;
 let clientPromise;
@@ -18,7 +18,7 @@ if (!global._mongoClientPromise) {
 
 clientPromise = global._mongoClientPromise;
 
-export async function connectMongoDB() {
+async function connectMongoDB() {
   try {
     const client = await clientPromise;
     const db = client.db("test");
@@ -28,3 +28,5 @@ export async function connectMongoDB() {
     throw new Error("Failed to connect to MongoDB");
   }
 }
+
+module.exports = { connectMongoDB };
