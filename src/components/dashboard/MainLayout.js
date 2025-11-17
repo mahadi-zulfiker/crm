@@ -73,6 +73,13 @@ import SearchUsers from "./Employee/CompanyManagement/SearchUsers/SearchUser";
 import VendorServices from "./Vendor/Services";
 import VendorServicePackages from "./Vendor/Services/Packages";
 import VendorServicePricing from "./Vendor/Services/Pricing";
+import VendorProjects from "./Vendor/Projects";
+import VendorProjectHistory from "./Vendor/Projects/History";
+import VendorProjectFeedback from "./Vendor/Projects/Feedback";
+import VendorProjectTracking from "./Vendor/Projects/Tracking";
+import VendorFinancialReporting from "./Vendor/Projects/Financials";
+import AdminProjectManagement from "./Admin/ProjectManagement";
+import ClientProjectManagement from "./Client/ProjectManagement";
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -118,6 +125,9 @@ const MainLayout = () => {
           )}
           {pathname === "/dashboard/client/clientProfileManagement" && (
             <ClientProfileManagement />
+          )}
+          {pathname === "/dashboard/client/projectManagement" && (
+            <ClientProjectManagement />
           )}
           {pathname === "/dashboard/client/createJobs" && <CreateJobs />}
           {pathname === "/dashboard/client/jobDetailsClient" && (
@@ -165,6 +175,19 @@ const MainLayout = () => {
           {pathname === "/dashboard/vendor/services/pricing" && (
             <VendorServicePricing />
           )}
+          {pathname === "/dashboard/vendor/projects" && <VendorProjects />}
+          {pathname === "/dashboard/vendor/projects/history" && (
+            <VendorProjectHistory />
+          )}
+          {pathname === "/dashboard/vendor/projects/feedback" && (
+            <VendorProjectFeedback />
+          )}
+          {pathname === "/dashboard/vendor/projects/tracking" && (
+            <VendorProjectTracking />
+          )}
+          {pathname === "/dashboard/vendor/projects/financials" && (
+            <VendorFinancialReporting />
+          )}
           {pathname === "/dashboard/vendor/noticeBoard" && <NoticeBoard />}
 
           {pathname === "/dashboard/admin" && <Admin />}
@@ -192,6 +215,9 @@ const MainLayout = () => {
           {pathname === "/dashboard/admin/timeSheetJob" && <TimeSheetJob />}
           {pathname === "/dashboard/admin/adminProfileManagement" && (
             <AdminProfileManagement />
+          )}
+          {pathname === "/dashboard/admin/projectManagement" && (
+            <AdminProjectManagement />
           )}
           {pathname === "/dashboard/admin/noticeManagement" && (
             <NoticeManagement />
