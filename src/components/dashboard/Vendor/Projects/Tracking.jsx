@@ -42,95 +42,42 @@ export default function ProjectTracking() {
           return;
         }
 
-        // In a real implementation, you would fetch from an API
-        // For now, we'll use mock data
-        const mockProjects = [
-          {
-            id: "1",
-            title: "Website Redesign for TechCorp",
-            client: "TechCorp Inc.",
-            budget: 15000,
-            spent: 9500,
-            status: "In Progress",
-            progress: 65,
-            deadline: "2024-04-15",
-            assignedEmployees: [
-              { name: "John Doe", role: "Developer" },
-              { name: "Jane Smith", role: "Designer" },
-            ],
-            timeEntries: [
-              {
-                id: "101",
-                employee: "John Doe",
-                date: "2024-03-10",
-                hours: 8,
-                task: "Frontend development",
-              },
-              {
-                id: "102",
-                employee: "Jane Smith",
-                date: "2024-03-10",
-                hours: 6,
-                task: "UI design",
-              },
-              {
-                id: "103",
-                employee: "John Doe",
-                date: "2024-03-11",
-                hours: 7,
-                task: "API integration",
-              },
-            ],
-          },
-          {
-            id: "2",
-            title: "Mobile App Development",
-            client: "StartupXYZ",
-            budget: 25000,
-            spent: 18000,
-            status: "In Progress",
-            progress: 72,
-            deadline: "2024-05-20",
-            assignedEmployees: [
-              { name: "Robert Johnson", role: "Full Stack Developer" },
-              { name: "Emily Davis", role: "QA Engineer" },
-            ],
-            timeEntries: [
-              {
-                id: "201",
-                employee: "Robert Johnson",
-                date: "2024-03-09",
-                hours: 8,
-                task: "Backend development",
-              },
-              {
-                id: "202",
-                employee: "Emily Davis",
-                date: "2024-03-09",
-                hours: 6,
-                task: "Testing",
-              },
-            ],
-          },
-          {
-            id: "3",
-            title: "E-commerce Platform",
-            client: "Retail Solutions Ltd.",
-            budget: 35000,
-            spent: 35000,
-            status: "Completed",
-            progress: 100,
-            deadline: "2024-02-28",
-            assignedEmployees: [
-              { name: "Michael Brown", role: "Project Manager" },
-              { name: "Sarah Wilson", role: "Developer" },
-            ],
-            timeEntries: [],
-          },
-        ];
+        // Fetch data from the API
+        try {
+          const response = await fetch(
+            `/api/vendor/projects/tracking?vendorEmail=${session?.user?.email}`
+          );
+          const result = await response.json();
 
-        setProjects(mockProjects);
-        setLoading(false);
+          if (!response.ok) {
+            throw new Error(
+              result.error || "Failed to fetch project tracking data"
+            );
+          }
+
+          // Transform the data to match the component's expected structure
+          const transformedProjects = result.projects.map((project) => ({
+            ...project,
+            progress:
+              project.progress ||
+              (project.budget > 0
+                ? Math.round((project.spent / project.budget) * 100)
+                : 0),
+            assignedEmployees: project.assignedEmployees || [],
+            timeEntries: project.timeEntries || [],
+          }));
+
+          setProjects(transformedProjects);
+          setLoading(false);
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+          toast({
+            title: "Error",
+            description: error.message || "Failed to fetch projects",
+            variant: "destructive",
+          });
+          setLoading(false);
+        }
       } catch (error) {
         console.error("Error fetching projects:", error);
         toast({

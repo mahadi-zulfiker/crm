@@ -71,50 +71,17 @@ export default function VendorProjectHistory() {
           return;
         }
 
-        // For now, we'll use mock data since there's no API endpoint
-        // In a real implementation, you would fetch from an API
-        const mockProjects = [
-          {
-            id: "1",
-            name: "E-commerce Platform Redesign",
-            description:
-              "Complete redesign of e-commerce platform with improved UX",
-            client: "Retail Solutions Ltd.",
-            year: "2023",
-            duration: "4 months",
-            technologies: ["React", "Node.js", "MongoDB"],
-          },
-          {
-            id: "2",
-            name: "Mobile Banking App",
-            description: "Development of secure mobile banking application",
-            client: "FinanceCorp",
-            year: "2023",
-            duration: "6 months",
-            technologies: ["React Native", "Firebase", "Express"],
-          },
-          {
-            id: "3",
-            name: "Corporate Website",
-            description: "Modern corporate website with CMS integration",
-            client: "TechCorp Inc.",
-            year: "2022",
-            duration: "3 months",
-            technologies: ["Next.js", "Tailwind CSS", "WordPress"],
-          },
-          {
-            id: "4",
-            name: "Inventory Management System",
-            description:
-              "Custom inventory management solution for warehouse operations",
-            client: "LogisticsPro",
-            year: "2022",
-            duration: "5 months",
-            technologies: ["Vue.js", "Laravel", "MySQL"],
-          },
-        ];
+        // Fetch project history data from the API
+        const response = await fetch(
+          `/api/vendor/projects/history?vendorEmail=${session?.user?.email}&year=${filterYear}&search=${searchTerm}`
+        );
 
-        setProjects(mockProjects);
+        if (!response.ok) {
+          throw new Error("Failed to fetch project history");
+        }
+
+        const data = await response.json();
+        setProjects(data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching project history:", error);
@@ -134,7 +101,7 @@ export default function VendorProjectHistory() {
       setLoading(false);
       setError("Please log in as a vendor to view project history");
     }
-  }, [session]);
+  }, [session, filterYear, searchTerm]);
 
   const handleAddProject = async () => {
     if (
@@ -152,13 +119,28 @@ export default function VendorProjectHistory() {
     }
 
     try {
-      // In a real implementation, you would save to an API
-      const projectToSave = {
-        ...newProject,
-        id: Date.now().toString(),
-      };
+      // Save to the API
+      const response = await fetch("/api/vendor/projects/history", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          vendorEmail: session?.user?.email,
+          title: newProject.name,
+          description: newProject.description,
+          clientEmail: newProject.client,
+          year: newProject.year,
+        }),
+      });
 
-      setProjects([...projects, projectToSave]);
+      if (!response.ok) {
+        throw new Error("Failed to add project to history");
+      }
+
+      const result = await response.json();
+
+      setProjects([...projects, result.project]);
       setNewProject({
         name: "",
         description: "",
@@ -197,7 +179,26 @@ export default function VendorProjectHistory() {
     }
 
     try {
-      // In a real implementation, you would update via an API
+      // Update via the API
+      const response = await fetch("/api/vendor/projects/history", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: editingProject.id,
+          vendorEmail: session?.user?.email,
+          title: editingProject.name,
+          description: editingProject.description,
+          clientEmail: editingProject.client,
+          year: editingProject.year,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update project");
+      }
+
       setProjects(
         projects.map((project) =>
           project.id === editingProject.id ? editingProject : project
@@ -221,7 +222,18 @@ export default function VendorProjectHistory() {
 
   const handleDeleteProject = async (id) => {
     try {
-      // In a real implementation, you would delete via an API
+      // Delete via the API
+      const response = await fetch(
+        `/api/vendor/projects/history?id=${id}&vendorEmail=${session?.user?.email}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to remove project from history");
+      }
+
       setProjects(projects.filter((project) => project.id !== id));
       toast({
         title: "Success",

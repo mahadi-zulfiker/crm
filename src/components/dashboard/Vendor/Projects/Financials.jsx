@@ -39,30 +39,17 @@ export default function FinancialReporting() {
           return;
         }
 
-        // In a real implementation, you would fetch from an API
-        // For now, we'll use mock data
-        const mockData = {
-          totalRevenue: 75000,
-          totalExpenses: 45000,
-          netProfit: 30000,
-          profitMargin: 40,
-          projectsCompleted: 12,
-          avgProjectValue: 6250,
-          monthlyData: [
-            { month: "Jan", revenue: 8000, expenses: 5000, profit: 3000 },
-            { month: "Feb", revenue: 12000, expenses: 7000, profit: 5000 },
-            { month: "Mar", revenue: 15000, expenses: 8000, profit: 7000 },
-            { month: "Apr", revenue: 18000, expenses: 9000, profit: 9000 },
-            { month: "May", revenue: 22000, expenses: 11000, profit: 11000 },
-          ],
-          projectBreakdown: [
-            { category: "Web Development", value: 35000, percentage: 47 },
-            { category: "Mobile Apps", value: 25000, percentage: 33 },
-            { category: "Consulting", value: 15000, percentage: 20 },
-          ],
-        };
+        // Fetch financial data from the API
+        const response = await fetch(
+          `/api/vendor/projects/financials?vendorEmail=${session?.user?.email}&timeRange=${timeRange}`
+        );
 
-        setFinancialData(mockData);
+        if (!response.ok) {
+          throw new Error("Failed to fetch financial data");
+        }
+
+        const data = await response.json();
+        setFinancialData(data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching financial data:", error);
