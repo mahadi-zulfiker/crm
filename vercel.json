@@ -1,0 +1,10 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "mainpage": false,
+      "dashboard": false,
+      "production": false,
+      "dashboard-redesign": false
+    }
+  }
+}
